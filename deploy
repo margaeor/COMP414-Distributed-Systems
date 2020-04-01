@@ -1,0 +1,14 @@
+#!/bin/bash
+
+input="$1"
+
+if [ "$input" == "auth" ] || [ -z "$input" ]; then
+	echo "Deploying AUTH";
+	git subtree push --prefix auth https://git.heroku.com/comp412-auth.git master
+fi
+
+if [ "$input" == "game" ] || [ -z "$input" ]; then
+	echo "Deploying GAME";
+	git subtree push --prefix game https://git.heroku.com/comp412-game.git master
+fi
+
