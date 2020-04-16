@@ -1,0 +1,54 @@
+version: '3.2'
+services:
+  auth:
+    build: 
+      context: './auth/'
+      dockerfile: Dockerfile.web
+    ports:
+      - "8080:8080"
+    container_name: auth
+    volumes:
+      - ./auth/src/:/var/www/html/:rw
+      
+  auth-db:
+    build:
+      context: './auth-db/'
+      dockerfile: Dockerfile.web
+      args:
+        MYSQL_VERSION: ${MYSQL_VERSION}
+    restart: always
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./auth-db/db_init:/docker-entrypoint-initdb.d
+      #- data:/var/lib/mysql
+    networks:
+      - backend
+    environment:
+      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
+      MYSQL_DATABASE: "${DB_NAME}"
+      MYSQL_USER: "${DB_USERNAME}"
+      MYSQL_PASSWORD: "${DB_PASSWORD}"
+      MYSQL_INITDB_SKIP_TZINFO: "yes"
+    container_name: auth-db
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest  
+    depends_on:
+      - auth-db
+    networks:
+      - frontend
+      - backend
+    ports:
+      - "8081:80"
+    container_name: phpmyadmin
+    environment:
+      PMA_HOST: auth-db
+      PMA_USER: root
+      PMA_PASSWORD: "${DB_ROOT_PASSWORD}"
+
+networks:
+  frontend:
+  backend:
+#volumes:
+#  data:
