@@ -281,3 +281,5 @@ TSWLatexianTemp*
 
 
 # End of https://www.gitignore.io/api/latex
+
+**/vendor/
