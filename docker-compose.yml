@@ -6,9 +6,15 @@ services:
       dockerfile: Dockerfile.web
     ports:
       - "8080:8080"
+    environment: 
+      DB_NAME: "${DB_NAME}"
+      DB_USERNAME: "${DB_USERNAME}"
+      DB_PASSWORD: "${DB_PASSWORD}"
     container_name: auth
     volumes:
       - ./auth/src/:/var/www/html/:rw
+    networks:
+      - backend
       
   auth-db:
     build:
