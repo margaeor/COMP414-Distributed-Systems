@@ -1,0 +1,122 @@
+api.boardgames.com/
+
+/me/scores?auth=#
+{
+	status: 200,
+	tournament: [
+		{id: #, name: 'Very Fun Time', position: 3, game: 'Chess', date: #},
+		...
+	];
+	practise: [
+		{id: #, opponent: 'Antheas', won: true, game: 'Chess', date: #},
+		...
+	];
+}
+
+/me/scores/tournament?auth=#&id=#
+{
+	status: 200,
+	tournament: {
+		id: #, 
+		name: 'Very Fun Time',
+		game: 'Chess',
+		date: #,
+		ranking: [
+			{name: 'Antheas', id: #},
+			{name: 'Margar', id: #},
+			...
+		]
+	};
+}
+
+/me/friends?auth=#
+{
+	status: 200,
+	friends: {
+		{name: 'Antheas', id: #, online: true},
+		{name: 'Margar', id: #, online: false},
+		...
+	};
+}
+
+/me/games?auth=#
+{
+	status: 200,
+	tournament: [
+		{id: #, name: 'Very Fun Time', game: 'Chess', date: #, canJoin: true},
+		...
+	];
+	practise: [
+		{id: #, opponent: 'Antheas', game: 'Chess', date: #, status: 'accept'},
+		...
+	];
+}
+
+
+/tournament/create?auth=#
+Post request:
+{
+	name: 'Very Fun Tournament!',
+	players: #,
+	game: #
+}
+
+/tournament/start?auth=#&id=#
+{
+	status: 200,
+}
+
+/tournament/register?auth=#&id=#
+{
+	status: 200
+}
+
+/tournament/join?auth=#&id=#
+{
+	status: 200,
+	id: #,
+	game: 'chess',
+	link: 'g3.bigdaddybiggame.com'
+}
+
+/tournament/forfeit?auth=#&id=#
+{
+	status: 200
+}
+
+/practice/create?auth=#&friend=#
+{
+	status: 200
+}
+
+/practice/accept?auth=#&id=#
+{
+	status: 200
+}
+
+/practice/deny?auth=#&id=#
+{
+	status: 200
+}
+
+/practice/join?auth=#&id=#
+{
+	status: 200,
+	link: 'g3.bigdaddybiggame.com'
+}
+
+/practice/forfeit?auth=#&id=#
+{
+	status: 200
+}
+
+/playserver/getinfo?id=#
+{
+	status: 200,
+	{id: #, opponents: [#, #], game: 'Chess'},
+}
+
+/playserver/results?id=#&winner=#
+{
+	status: 200
+}

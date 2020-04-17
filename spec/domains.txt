@@ -1,0 +1,19 @@
+παρέχει το index.html μέσω zookeeper
+boardgames.com/
+
+Περιέχει ένα από ακόλουθα domain
+s#.boardgames.com/
+
+Μεσω zookeeper ο χρήστης συνδέεται σε ένα απο τους ακολουθους
+g#.boardgames.com/
+
+1 Επιλογή (reverse proxy):
+s#.boardgames.com/auth
+reverse proxy στον auth.boardgames.com
+
+s#.boardgames.com/api
+reverse proxy στον api.boardgames.com
+
+2 Επιλογή (χωρίς):
+auth.boardgames.com
+api.boardgames.com
