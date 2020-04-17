@@ -1,0 +1,31 @@
+g#.boardgames.com/
+
+/chess/state?auth=#&id=#
+{
+	status: 200,
+	opponent: #,
+	board: #,
+	date: #,
+	roundTime: #
+}
+
+/chess/move?auth=#&id=#&move='asdfasdf'
+{
+	status: 200,
+	.../chess/state?auth=#&id=#,
+}
+
+/tic-tac-toe/state?auth=#&id=#
+{
+	status: 200,
+	opponent: #,
+	board: #,
+	date: #,
+	roundTime: #
+}
+
+/tic-tac-toe/move?auth=#&id=#&write=3
+{
+	status: 200,
+	.../tic-tac-toe/state?auth=#&id=#,
+}
