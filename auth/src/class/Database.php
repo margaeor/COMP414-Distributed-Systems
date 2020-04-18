@@ -16,6 +16,26 @@ class DB {
 		
 		return !$this->conn ? $this->conn : $this->conn->connect_error;
     }
+
+    function getUserFromToken($token) {
+        if(!$this->conn) return -1;
+
+        $query = "SELECT * FROM access_tokens as at
+        INNER JOIN users as u ON at.user_id=u.id
+        WHERE at.id = ?
+        LIMIT 1";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param("s", $token);
+
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows === 1 && $row = $result->fetch_assoc()) {
+            return $row;
+        }
+        else return array();
+    }
     
     function countUserTokens($user_id) {
         if(!$this->conn) return -1;

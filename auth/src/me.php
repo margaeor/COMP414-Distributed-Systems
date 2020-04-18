@@ -1,19 +1,18 @@
-
 <?php 
-
 
 require('./class/Auth.php');
 
 
-if(isset($_GET['username'],$_GET['password']) && !empty($_GET['username']) && !empty($_GET['password'])) {
+if(isset($_GET['auth']) && !empty($_GET['auth']) ) {
     $auth = new Auth();
     try {
-        $login_response = $auth->login($_GET['username'],$_GET['password']);
+        $info = $auth->getUserInfo($_GET['auth']);
         echo json_encode([
             'status' => 200,
-            'token' => $login_response['access_token']
+            'username' => $info['username'],
+            'email' => $info['email'],
+            'role' => $info['role']
         ]);
-
     } catch (Exception $e) {
         echo json_encode([
             'status' => 401,

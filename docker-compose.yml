@@ -10,12 +10,22 @@ services:
       DB_NAME: "${DB_NAME}"
       DB_USERNAME: "${DB_USERNAME}"
       DB_PASSWORD: "${DB_PASSWORD}"
-    container_name: auth
     volumes:
       - ./auth/src/:/var/www/html/:rw
     networks:
       - backend
-      
+    container_name: auth
+  
+  zookeeper:
+    image: 'bitnami/zookeeper:latest'
+    networks:
+      - backend
+    environment:
+      ALLOW_ANONYMOUS_LOGIN: "yes"
+    volumes:
+      - ./zookeeper/conf/zoo.cfg:/opt/bitnami/zookeeper/conf/zoo.cfg
+    container_name: zookeeper
+
   auth-db:
     build:
       context: './auth-db/'

@@ -16,10 +16,38 @@ class Auth {
 
     }
 
+    function hasExpired($token) {
+
+        if(isset($token['date_created'], $token['valid_until'])) {
+
+            if(is_null($token['valid_until'])) return True;
+
+            $today = new DateTime('');
+            $expireDate = new DateTime($token['valid_until']); //from database
+
+            return $today->format("Y-m-d H:i:s") > $expireDate->format("Y-m-d H:i:s");
+
+        }
+        return False;
+    }
+
+    function getUserInfo($access_token) {
+
+        if(!$this->db || !$this->db->conn) throw new Exception("Database connection not established!");
+
+        $info = $this->db->getUserFromToken($access_token);
+
+        if($info && !$this->hasExpired($info) ) {
+            
+            return $info;
+
+        } else throw new Exception("Access is denied.");
+    }
+
     function login($username, $password) {
         global $max_user_tokens;
 
-        if(!$this->db || !$this->db->conn) return -1;
+        if(!$this->db || !$this->db->conn) throw new Exception("Database connection not established!");
 
         $error = "";
 
