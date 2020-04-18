@@ -120,7 +120,7 @@ class Auth {
                 // Create and insert token
                 $token = bin2hex(openssl_random_pseudo_bytes(32));
                 
-                if($this->db->insertToken($token, $user_id) == 0) {
+                if($this->db->insertToken($token, $user_id) == 0 && $this->db->updateLastLoginTime($username) == 0) {
                     $response['access_token'] = $token;
                 } else {
                     throw new Exception("Access token generation error!");

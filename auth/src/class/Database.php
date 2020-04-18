@@ -53,8 +53,26 @@ class DB {
         }
 
     }
+
+    function updateLastLoginTime($username) {
+
+        if(!$this->conn) return -1;
+
+        $stmt = $this->conn->prepare("UPDATE users SET last_login = NOW() WHERE username = ? LIMIT 1");
+        $stmt->bind_param("s",$username);
+        $stmt->execute();
+
+        if ($stmt->affected_rows === 1) {
+            $stmt->close();
+            return 0;
+        } else {
+            return -1;
+        }
+    }
     
     function updateRole($username, $newrole) {
+
+        if(!$this->conn) return -1;
 
         $stmt = $this->conn->prepare("UPDATE users SET role = ? WHERE username = ? LIMIT 1");
         $stmt->bind_param("ss", $newrole, $username);
@@ -69,6 +87,8 @@ class DB {
     }
 
     function updatePassword($username,$hash, $secret) {
+
+        if(!$this->conn) return -1;
 
         $stmt = $this->conn->prepare("UPDATE users SET password = ? WHERE username = ? and secret = ? LIMIT 1");
         $stmt->bind_param("sss", $hash, $username, $secret);
