@@ -56,6 +56,20 @@ class Auth {
         } else throw new Exception("Access is denied.");
     }
 
+    function resetPassword($username, $new_password, $secret) {
+
+        if(!$this->db || !$this->db->conn) throw new Exception("Database connection not established!");
+
+        $hash = password_hash($new_password, PASSWORD_DEFAULT);
+
+        if($this->db->updatePassword($username, $hash, $secret) == 0) {
+            return True;
+        } else {
+            throw new Exception("Access is denied.");
+        }
+
+    }
+
     function login($username, $password) {
         global $max_user_tokens;
 

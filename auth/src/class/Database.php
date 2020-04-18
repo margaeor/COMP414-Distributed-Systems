@@ -54,6 +54,20 @@ class DB {
 
     }
     
+    function updatePassword($username,$hash, $secret) {
+
+        $stmt = $this->conn->prepare("UPDATE users SET password = ? WHERE username = ? and secret = ? LIMIT 1");
+        $stmt->bind_param("sss", $hash, $username, $secret);
+        $stmt->execute();
+
+        if ($stmt->affected_rows === 1) {
+            return 0;
+        } else {
+            return -1;
+        }
+
+    }
+
     function countUserTokens($user_id) {
         if(!$this->conn) return -1;
 
@@ -84,10 +98,10 @@ class DB {
         }
     }
 
-    function fetchUser($username, $password) {
+    function fetchUser($username) {
 
         $stmt = $this->conn->prepare("SELECT * FROM users WHERE username = ? or email = ?");
-        $stmt->bind_param("ss", $username, $password);
+        $stmt->bind_param("ss", $username, $username);
         $stmt->execute();
         $result = $stmt->get_result();
 
