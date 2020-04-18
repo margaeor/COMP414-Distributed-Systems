@@ -31,6 +31,18 @@ class Auth {
         return False;
     }
 
+    function createUser($username, $password, $email, $secret) {
+
+        $hash = password_hash($password, PASSWORD_DEFAULT);
+
+        if($this->db->insertUser($username, $hash, $email, 'player', $secret) != -1) {
+            return True;
+        } else {
+            throw new Exception("Error inserting user");
+        }
+
+    }
+
     function getUserInfo($access_token) {
 
         if(!$this->db || !$this->db->conn) throw new Exception("Database connection not established!");
@@ -38,7 +50,7 @@ class Auth {
         $info = $this->db->getUserFromToken($access_token);
 
         if($info && !$this->hasExpired($info) ) {
-            
+
             return $info;
 
         } else throw new Exception("Access is denied.");

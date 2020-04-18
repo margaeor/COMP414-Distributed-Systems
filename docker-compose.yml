@@ -23,7 +23,7 @@ services:
     environment:
       ALLOW_ANONYMOUS_LOGIN: "yes"
     volumes:
-      - ./zookeeper/conf/zoo.cfg:/opt/bitnami/zookeeper/conf/zoo.cfg
+      - ./zookeeper/config/zoo.cfg:/opt/bitnami/zookeeper/conf/zoo.cfg
     container_name: zookeeper
 
   auth-db:

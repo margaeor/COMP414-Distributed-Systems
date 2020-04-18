@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS `users` (
     `password` varchar(64) NOT NULL ,
     `email` varchar(64) NOT NULL UNIQUE,
     `role` varchar(16) NOT NULL,
+    `secret` varchar(40),
     `last_login` DATETIME,
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

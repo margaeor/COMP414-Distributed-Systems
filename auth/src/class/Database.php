@@ -9,10 +9,8 @@ class DB {
 	function connect() {
 		global $dbhost,$dbuser, $dbpass, $dbname;
 		
-		//echo "D".$dbhost;
 		$this->conn = new mysqli($dbhost, $dbuser, $dbpass, $dbname);
 		
-		//if(!$conn->connect_error) echo "SHIT ".$conn;
 		
 		return !$this->conn ? $this->conn : $this->conn->connect_error;
     }
@@ -35,6 +33,25 @@ class DB {
             return $row;
         }
         else return array();
+    }
+
+    function insertUser($username, $hash, $email, $role, $secret) {
+
+        if(!$this->conn) return -1;
+
+        $query = "INSERT INTO users (username,password,email,role,secret) 
+        VALUES (?,?,?,?,?)";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param("sssss", $username, $hash, $email, $role, $secret);
+
+        if($stmt->execute()) {
+            $stmt->close();
+            return 0;
+        } else {
+            return -1;
+        }
+
     }
     
     function countUserTokens($user_id) {
