@@ -1,6 +1,6 @@
 <?php
 
-$dbhost = 'auth-db';
+$dbhost = getenv('DB_HOST');
 $dbport = '';
 $dbname = getenv('DB_NAME');
 $dbuser = getenv('DB_USERNAME');

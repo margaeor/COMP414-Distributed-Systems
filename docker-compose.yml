@@ -7,6 +7,7 @@ services:
     ports:
       - "8080:8080"
     environment: 
+      DB_HOST: "auth-db"
       DB_NAME: "${DB_NAME}"
       DB_USERNAME: "${DB_USERNAME}"
       DB_PASSWORD: "${DB_PASSWORD}"
@@ -16,16 +17,6 @@ services:
       - backend
     container_name: auth
   
-  zookeeper:
-    image: 'bitnami/zookeeper:latest'
-    networks:
-      - backend
-    environment:
-      ALLOW_ANONYMOUS_LOGIN: "yes"
-    volumes:
-      - ./zookeeper/config/zoo.cfg:/opt/bitnami/zookeeper/conf/zoo.cfg
-    container_name: zookeeper
-
   auth-db:
     build:
       context: './auth-db/'
@@ -47,6 +38,16 @@ services:
       MYSQL_PASSWORD: "${DB_PASSWORD}"
       MYSQL_INITDB_SKIP_TZINFO: "yes"
     container_name: auth-db
+  
+  zookeeper:
+    image: 'bitnami/zookeeper:latest'
+    networks:
+      - backend
+    environment:
+      ALLOW_ANONYMOUS_LOGIN: "yes"
+    volumes:
+      - ./zookeeper/config/zoo.cfg:/opt/bitnami/zookeeper/conf/zoo.cfg
+    container_name: zookeeper
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest  
