@@ -54,6 +54,20 @@ class DB {
 
     }
     
+    function updateRole($username, $newrole) {
+
+        $stmt = $this->conn->prepare("UPDATE users SET role = ? WHERE username = ? LIMIT 1");
+        $stmt->bind_param("ss", $newrole, $username);
+        $stmt->execute();
+
+        if ($stmt->affected_rows === 1) {
+            $stmt->close();
+            return 0;
+        } else {
+            return -1;
+        }
+    }
+
     function updatePassword($username,$hash, $secret) {
 
         $stmt = $this->conn->prepare("UPDATE users SET password = ? WHERE username = ? and secret = ? LIMIT 1");
@@ -61,6 +75,7 @@ class DB {
         $stmt->execute();
 
         if ($stmt->affected_rows === 1) {
+            $stmt->close();
             return 0;
         } else {
             return -1;

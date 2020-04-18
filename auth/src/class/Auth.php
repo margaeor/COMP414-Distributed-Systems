@@ -70,6 +70,26 @@ class Auth {
 
     }
 
+    function changeRole($token, $username, $new_role) {
+        
+        global $user_roles;
+
+        if(!$this->db || !$this->db->conn) throw new Exception("Database connection not established!");
+
+        $user_info = $this->getUserInfo($token);
+
+        if($user_info['role'] === 'admin' && in_array($new_role,$user_roles)) {
+            if($this->db->updateRole($username, $new_role) === 0) {
+                return True;
+            } else {
+                throw new Exception("No such user exists");
+            }
+        } else {
+            throw new Exception("Operation not permitted!");
+        }
+
+    }
+
     function login($username, $password) {
         global $max_user_tokens;
 
