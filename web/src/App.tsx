@@ -1,26 +1,16 @@
 import React from "react";
 import { render } from "react-dom";
-import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
-import Login from "./Login";
+import { Provider } from "react-redux";
 
 import "./style.css";
-import Header from "./common/Header";
+
+import store from "./store";
 
 const App = () => {
   return (
-    <div>
-      <Header />
-      <Router>
-        <Switch>
-          <Route path="/login">
-            <Login />
-          </Route>
-          <Route path="/">
-            <Login />
-          </Route>
-        </Switch>
-      </Router>
-    </div>
+    <Provider store={store}>
+      <Routes />
+    </Provider>
   );
 };
 

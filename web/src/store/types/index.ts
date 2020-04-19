@@ -7,16 +7,14 @@ import { LobbyState } from "./lobby";
 import { LoginState } from "./login";
 
 export enum ScreenState {
-  INITIAL_LOADING,
+  INITIAL,
   LOGIN,
-  LOGIN_LOADING,
   LOBBY,
-  LOBBY_LOADING,
   GAME,
-  GAME_LOADING,
 }
 
 export enum LoaderStep {
+  INACTIVE,
   LOADING,
   FAILED,
 }
