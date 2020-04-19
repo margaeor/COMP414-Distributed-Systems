@@ -18,12 +18,12 @@ export interface UpdatePlayDataAction {
 
 export interface StartMoveAction {
   type: typeof START_MOVE;
-  move: String;
+  move: string;
 }
 
 export interface MakeMoveAction {
   type: typeof MAKE_MOVE;
-  move: String;
+  move: string;
 }
 
 export function setPlay(play: Play): SetPlayAction {
@@ -44,14 +44,14 @@ export function updatePlayData(
   };
 }
 
-export function startMove(move: String): StartMoveAction {
+export function startMove(move: string): StartMoveAction {
   return {
     type: START_MOVE,
     move,
   };
 }
 
-export function makeMove(move: String): MakeMoveAction {
+export function makeMove(move: string): MakeMoveAction {
   return {
     type: MAKE_MOVE,
     move,

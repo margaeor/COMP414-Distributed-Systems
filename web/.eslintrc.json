@@ -3,6 +3,7 @@
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:import/errors",
+    "plugin:import/typescript",
     "plugin:react/recommended",
     "plugin:jsx-a11y/recommended",
     "prettier",
@@ -15,7 +16,8 @@
     "react-hooks/rules-of-hooks": 2,
     "react-hooks/exhaustive-deps": 1,
     "@typescript-eslint/interface-name-prefix": 0,
-    "@typescript-eslint/no-var-requires": 0
+    "@typescript-eslint/no-var-requires": 0,
+    "@typescript-eslint/explicit-function-return-type": 0
   },
   "plugins": ["react", "import", "jsx-a11y", "react-hooks"],
   "parser": "@typescript-eslint/parser",

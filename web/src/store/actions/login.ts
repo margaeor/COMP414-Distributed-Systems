@@ -1,4 +1,4 @@
-import { LobbyState, LoginStep } from "../types";
+import { LoginStep } from "../types";
 
 export const UPDATE_LOGIN_DATA = "UPDATE_LOGIN_DATA";
 export const UPDATE_LOGIN_STEP = "UPDATE_LOGIN_STEP";
@@ -7,21 +7,21 @@ export const FORGOT_PASSWORD = "FORGOT_PASSWORD";
 
 export interface UpdateLoginDataAction {
   type: typeof UPDATE_LOGIN_DATA;
-  username: String;
-  password: String;
-  answer: String;
+  username: string;
+  password: string;
+  answer: string;
 }
 
 export interface UpdateLoginStepAction {
   type: typeof UPDATE_LOGIN_STEP;
   step: LoginStep;
-  error: String;
+  error: string;
 }
 
 export function updateLoginData(
-  username: String,
-  password: String,
-  answer: String
+  username: string,
+  password: string,
+  answer: string
 ): UpdateLoginDataAction {
   return {
     type: UPDATE_LOGIN_DATA,
@@ -33,7 +33,7 @@ export function updateLoginData(
 
 export function updateLoginStep(
   step: LoginStep,
-  error: String
+  error: string
 ): UpdateLoginStepAction {
   return {
     type: UPDATE_LOGIN_STEP,

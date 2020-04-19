@@ -2,7 +2,7 @@ import { Game, Play } from "./game";
 
 export interface Tournament {
   id: string;
-  name: String;
+  name: string;
   game: Game;
   players: number;
   maxPlayers: number;

@@ -6,10 +6,10 @@ export enum LoginStep {
 
 export interface LoginState {
   step: LoginStep;
-  username: String;
-  password: String;
-  answer: String;
-  error: String;
+  username: string;
+  password: string;
+  answer: string;
+  error: string;
 }
 
 export const NULL_LOGIN_STATE: LoginState = {

@@ -6,7 +6,7 @@ import lobby from "./lobby";
 import login from "./login";
 
 function screen(
-  state = ScreenState.INITIAL_LOADING,
+  state = ScreenState.INITIAL,
   action: ChangeScreenAction
 ): ScreenState {
   if (action.type == CHANGE_SCREEN) {
