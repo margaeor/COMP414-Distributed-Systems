@@ -22,3 +22,14 @@ export interface LobbyState {
   tournament: TournamentState;
   ongoingPlays: OngoingPlayState;
 }
+
+export const NULL_LOBBY_STATE: LobbyState = {
+  tournament: {
+    fetched: false,
+    tournaments: [],
+  },
+  ongoingPlays: {
+    fetched: false,
+    plays: [],
+  },
+};

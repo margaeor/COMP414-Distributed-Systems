@@ -34,3 +34,17 @@ export interface PlayState {
 export function isTournamentPlay(play: Play): play is TournamentPlay {
   return "name" in play;
 }
+
+export const NULL_PLAY_STATE: PlayState = {
+  play: {
+    id: "",
+    opponent: "",
+    game: Game.CHESS,
+    won: false,
+    started: false,
+  },
+  step: PlayStep.ONGOING,
+  data: {
+    board: "",
+  },
+};

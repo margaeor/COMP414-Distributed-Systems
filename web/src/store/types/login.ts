@@ -11,3 +11,11 @@ export interface LoginState {
   answer: String;
   error: String;
 }
+
+export const NULL_LOGIN_STATE: LoginState = {
+  step: LoginStep.FORM,
+  username: "",
+  password: "",
+  answer: "",
+  error: "",
+};

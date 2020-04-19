@@ -26,5 +26,5 @@ export interface State {
   loader: LoaderStep;
   login: LoginState;
   lobby: LobbyState;
-  play: PlayState;
+  game: PlayState;
 }
