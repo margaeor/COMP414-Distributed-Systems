@@ -6,13 +6,10 @@ interface IProp {
   apple: string;
 }
 
-const App: React.FunctionComponent<IProp> = props => {
+const App: React.FunctionComponent<IProp> = (props) => {
   return (
     <div>
       <h1>Hello World!</h1>
-      <picture>
-        <img src={require("./img/meme.jpg")} alt="Very good meme" />
-      </picture>
     </div>
   );
 };
