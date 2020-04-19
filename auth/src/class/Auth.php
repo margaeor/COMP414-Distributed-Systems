@@ -1,10 +1,14 @@
 <?php
-require_once("./config.php");
 require_once("./class/Database.php");
+require("./vendor/autoload.php");
+
+use \Firebase\JWT\JWT;
 
 class Auth {
 
     public $db;
+
+    private $config;
 
     function __construct() {
         global $dbhost, $dbuser, $dbpass, $dbname;
@@ -13,6 +17,7 @@ class Auth {
 
         $this->db->connect();
 
+        $this->config = include('./config.php');
 
     }
 
@@ -72,13 +77,12 @@ class Auth {
 
     function changeRole($token, $username, $new_role) {
         
-        global $user_roles;
 
         if(!$this->db || !$this->db->conn) throw new Exception("Database connection not established!");
 
         $user_info = $this->getUserInfo($token);
 
-        if($user_info['role'] === 'admin' && in_array($new_role,$user_roles)) {
+        if($user_info['role'] === 'admin' && in_array($new_role,$this->config['user_roles'])) {
             if($this->db->updateRole($username, $new_role) === 0) {
                 return True;
             } else {
@@ -91,14 +95,14 @@ class Auth {
     }
 
     function login($username, $password) {
-        global $max_user_tokens;
 
         if(!$this->db || !$this->db->conn) throw new Exception("Database connection not established!");
 
         $error = "";
 
         $response = array(
-            'access_token' => ''
+            'jwt' => '',
+            'refres'
         );
 
         if ($user = $this->db->fetchUser($username,$password)) {
@@ -112,16 +116,39 @@ class Auth {
                 $token_count = $this->db->countUserTokens($user_id);
                 
                 // Delete some tokens if the user has many tokens
-                if($token_count >= $max_user_tokens) {
-                    $tokens_to_delete = $token_count-$max_user_tokens+1;
+                if($token_count >= $this->config['max_refresh_tokens']) {
+                    $tokens_to_delete = $token_count-$this->config['max_refresh_tokens']+1;
                     $this->db->deleteOldestTokens($user_id,max($tokens_to_delete,0));
                 }
                 
                 // Create and insert token
-                $token = bin2hex(openssl_random_pseudo_bytes(32));
+                $refresh_token = bin2hex(openssl_random_pseudo_bytes(32));
+
+                $secret_key = $this->config['secret_key'];
+                $issuer_claim = $this->config['key_issuer']; 
+                $issuedat_claim = time(); // issued at
+                $expire_claim = $issuedat_claim + $this->config['token_lifetime']; // expire time in seconds
+                $token = array(
+                    "iss" => $issuer_claim,
+                    "iat" => $issuedat_claim,
+                    "exp" => $expire_claim,
+                    "data" => array(
+                        "id" => $user['id'],
+                        "username" => $user['username'],
+                        "email" => $user['email'],
+                        "role" => $user['role']
+                ));
+
+                $jwt = JWT::encode($token, $secret_key);
                 
-                if($this->db->insertToken($token, $user_id) == 0 && $this->db->updateLastLoginTime($username) == 0) {
-                    $response['access_token'] = $token;
+                if($this->db->insertToken($refresh_token, $user_id, $this->config['refresh_token_lifetime']) == 0) {
+                    $this->db->updateLastLoginTime($username);
+
+                    return array(
+                        'jwt' => $jwt,
+                        'refresh_token' => $refresh_token,
+                        'refresh_expiration' => $issuedat_claim + $this->config['refresh_token_lifetime']
+                    );
                 } else {
                     throw new Exception("Access token generation error!");
                 }
@@ -133,7 +160,6 @@ class Auth {
             throw new Exception("Such user does not exist!");
         }
 
-        return $response;
     }
 
     function __destruct() {

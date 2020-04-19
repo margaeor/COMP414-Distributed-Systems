@@ -9,10 +9,8 @@ if(isset($_GET['username'],$_GET['password']) && !empty($_GET['username']) && !e
     $auth = new Auth();
     try {
         $login_response = $auth->login($_GET['username'],$_GET['password']);
-        echo json_encode([
-            'status' => 200,
-            'token' => $login_response['access_token']
-        ]);
+        $login_response['status'] = 200;
+        echo json_encode($login_response);
 
     } catch (Exception $e) {
         echo json_encode([

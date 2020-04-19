@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS `users` (
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `access_tokens` (
+CREATE TABLE IF NOT EXISTS `refresh_tokens` (
 	`id` varchar(64) NOT NULL,
     `user_id` int(11) NOT NULL,
     `date_created` DATETIME NOT NULL,
