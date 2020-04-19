@@ -22,7 +22,7 @@ class Auth {
     }
 
     function hasExpired($token) {
-
+        
         if(isset($token['date_created'], $token['valid_until'])) {
 
             if(is_null($token['valid_until'])) return True;
@@ -51,14 +51,38 @@ class Auth {
     function getUserInfo($access_token) {
 
         if(!$this->db || !$this->db->conn) throw new Exception("Database connection not established!");
+        
+        try {
+            
+            $decoded = JWT::decode($access_token, $this->config['secret_key'], array($this->config['algorithm']));
 
-        $info = $this->db->getUserFromToken($access_token);
+            return (array)$decoded->data;
 
-        if($info && !$this->hasExpired($info) ) {
+        } catch (Exception $e){
 
-            return $info;
+            throw new Exception("Access is denied.");
 
-        } else throw new Exception("Access is denied.");
+        } 
+
+    }
+
+    function refreshToken($token) {
+
+        if(!$this->db || !$this->db->conn) throw new Exception("Database connection not established!");
+        
+        if($user_token = $this->db->getUserFromToken($token)) {
+
+            if($this->hasExpired($user_token)) throw new Exception("Access denied.");
+
+            $result = $this->createJWTToken($user_token);
+
+            $this->db->deleteToken($token);
+
+            return $result;
+
+        } else {
+            throw new Exception("Access denied.");
+        }
     }
 
     function resetPassword($username, $new_password, $secret) {
@@ -80,7 +104,19 @@ class Auth {
 
         if(!$this->db || !$this->db->conn) throw new Exception("Database connection not established!");
 
-        $user_info = $this->getUserInfo($token);
+        $decoded = array();
+
+        try {
+            
+            $decoded = JWT::decode($token, $this->config['secret_key'], array($this->config['algorithm']));
+
+        } catch (Exception $e){
+
+            throw new Exception("Access is denied.");
+
+        } 
+
+        $user_info = $this->db->fetchUser($decoded->data->username);
 
         if($user_info['role'] === 'admin' && in_array($new_role,$this->config['user_roles'])) {
             if($this->db->updateRole($username, $new_role) === 0) {
@@ -92,6 +128,42 @@ class Auth {
             throw new Exception("Operation not permitted!");
         }
 
+    }
+
+    function createJWTToken($user) {
+
+        // Create and insert token
+        $refresh_token = bin2hex(openssl_random_pseudo_bytes(32));
+
+        $secret_key = $this->config['secret_key'];
+        $issuer_claim = $this->config['key_issuer']; 
+        $issuedat_claim = time(); // issued at
+        $expire_claim = $issuedat_claim + $this->config['token_lifetime']; // expire time in seconds
+        $token = array(
+            "iss" => $issuer_claim,
+            "iat" => $issuedat_claim,
+            "exp" => $expire_claim,
+            "data" => array(
+                "id" => $user['id'],
+                "username" => $user['username'],
+                "email" => $user['email'],
+                "role" => $user['role']
+        ));
+
+        $jwt = JWT::encode($token, $secret_key);
+        
+        if($this->db->insertToken($refresh_token, $user['id'], $this->config['refresh_token_lifetime']) == 0) {
+            $this->db->updateLastLoginTime($user['username']);
+
+            return array(
+                'jwt' => $jwt,
+                'refresh_token' => $refresh_token,
+                'refresh_expiration' => $issuedat_claim + $this->config['refresh_token_lifetime']
+            );
+        } else {
+            
+            throw new Exception("Access token generation error!");
+        }
     }
 
     function login($username, $password) {
@@ -121,37 +193,7 @@ class Auth {
                     $this->db->deleteOldestTokens($user_id,max($tokens_to_delete,0));
                 }
                 
-                // Create and insert token
-                $refresh_token = bin2hex(openssl_random_pseudo_bytes(32));
-
-                $secret_key = $this->config['secret_key'];
-                $issuer_claim = $this->config['key_issuer']; 
-                $issuedat_claim = time(); // issued at
-                $expire_claim = $issuedat_claim + $this->config['token_lifetime']; // expire time in seconds
-                $token = array(
-                    "iss" => $issuer_claim,
-                    "iat" => $issuedat_claim,
-                    "exp" => $expire_claim,
-                    "data" => array(
-                        "id" => $user['id'],
-                        "username" => $user['username'],
-                        "email" => $user['email'],
-                        "role" => $user['role']
-                ));
-
-                $jwt = JWT::encode($token, $secret_key);
-                
-                if($this->db->insertToken($refresh_token, $user_id, $this->config['refresh_token_lifetime']) == 0) {
-                    $this->db->updateLastLoginTime($username);
-
-                    return array(
-                        'jwt' => $jwt,
-                        'refresh_token' => $refresh_token,
-                        'refresh_expiration' => $issuedat_claim + $this->config['refresh_token_lifetime']
-                    );
-                } else {
-                    throw new Exception("Access token generation error!");
-                }
+                return $this->createJWTToken($user);
                 
             } else {
                 throw new Exception("Wrong password!");

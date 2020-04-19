@@ -14,5 +14,6 @@ return array(
     'token_lifetime'         => 1800, // In seconds
     'refresh_token_lifetime' => 18000,// In seconds
     'max_refresh_tokens'     => 1,
+    'algorithm'              => 'HS256',
     'user_roles'             => array('admin','player','official')
 );

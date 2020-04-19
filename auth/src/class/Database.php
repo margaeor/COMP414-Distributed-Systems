@@ -81,16 +81,20 @@ class DB {
 
         if(!$this->conn) return -1;
 
+        if(!$this->fetchUser($username)) return -1;
+
         $stmt = $this->conn->prepare("UPDATE users SET role = ? WHERE username = ? LIMIT 1");
         $stmt->bind_param("ss", $newrole, $username);
         $stmt->execute();
+        
+        return 0;
 
-        if ($stmt->affected_rows === 1) {
-            $stmt->close();
-            return 0;
-        } else {
-            return -1;
-        }
+        // if ($stmt->affected_rows === 1) {
+        //     $stmt->close();
+        //     return 0;
+        // } else {
+        //     return -1;
+        // }
     }
 
     function updatePassword($username,$hash, $secret) {
@@ -131,6 +135,18 @@ class DB {
     function deleteOldestTokens($user_id, $num_to_delete) {
         $stmt = $this->conn->prepare("DELETE FROM refresh_tokens WHERE user_id = ? ORDER BY date_created ASC LIMIT ?;");
         $stmt->bind_param("ii", $user_id, $num_to_delete);
+        
+        if($stmt->execute()) {
+            $stmt->close();
+            return 0;
+        } else {
+            return -1;
+        }
+    }
+
+    function deleteToken($token) {
+        $stmt = $this->conn->prepare("DELETE FROM refresh_tokens WHERE id = ?;");
+        $stmt->bind_param("s", $token);
         
         if($stmt->execute()) {
             $stmt->close();
