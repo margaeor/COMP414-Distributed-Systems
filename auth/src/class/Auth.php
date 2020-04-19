@@ -132,8 +132,6 @@ class Auth {
 
     function createJWTToken($user) {
 
-        // Create and insert token
-        $refresh_token = bin2hex(openssl_random_pseudo_bytes(32));
 
         $secret_key = $this->config['secret_key'];
         $issuer_claim = $this->config['key_issuer']; 
@@ -152,18 +150,25 @@ class Auth {
 
         $jwt = JWT::encode($token, $secret_key);
         
-        if($this->db->insertToken($refresh_token, $user['id'], $this->config['refresh_token_lifetime']) == 0) {
-            $this->db->updateLastLoginTime($user['username']);
 
-            return array(
-                'jwt' => $jwt,
-                'refresh_token' => $refresh_token,
-                'refresh_expiration' => $issuedat_claim + $this->config['refresh_token_lifetime']
-            );
-        } else {
-            
-            throw new Exception("Access token generation error!");
+        $refresh_token = bin2hex(openssl_random_pseudo_bytes(32));
+
+        // On collision retry (collision is almost impossible)
+        $i = 0;
+        while($this->db->insertToken($refresh_token, $user['id'], $this->config['refresh_token_lifetime']) != 0) {
+            $refresh_token = bin2hex(openssl_random_pseudo_bytes(32));
+            $i++;
+            if($i > 5) throw new Exception("Refresh token generation error!");
         }
+
+
+        $this->db->updateLastLoginTime($user['username']);
+
+        return array(
+            'jwt' => $jwt,
+            'refresh_token' => $refresh_token,
+            'refresh_expiration' => $issuedat_claim + $this->config['refresh_token_lifetime']
+        );
     }
 
     function login($username, $password) {

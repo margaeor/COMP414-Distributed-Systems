@@ -13,6 +13,8 @@ services:
       DB_PASSWORD: "${DB_PASSWORD}"
       AUTH_SECRET: "${AUTH_SECRET}"
       AUTH_ISSUER: "${AUTH_ISSUER}"
+      AUTH_PUBLIC: "${AUTH_PUBLIC}"
+      AUTH_PRIVATE: "${AUTH_PRIVATE}"
     volumes:
       - ./auth/src/:/var/www/html/:rw
     networks:

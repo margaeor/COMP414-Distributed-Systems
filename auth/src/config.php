@@ -11,6 +11,8 @@ return array(
     // Authorization config
     'secret_key'             => getenv('AUTH_SECRET'),
     'key_issuer'             => getenv('AUTH_ISSUER'),
+    'auth_public'            => getenv('AUTH_PUBLIC'),
+    'auth_private'           => getenv('AUTH_PRIVATE'),
     'token_lifetime'         => 1800, // In seconds
     'refresh_token_lifetime' => 18000,// In seconds
     'max_refresh_tokens'     => 1,
