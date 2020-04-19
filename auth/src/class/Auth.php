@@ -54,7 +54,7 @@ class Auth {
         
         try {
             
-            $decoded = JWT::decode($access_token, $this->config['secret_key'], array($this->config['algorithm']));
+            $decoded = JWT::decode($access_token, $this->config['auth_public'], array($this->config['algorithm']));
 
             return (array)$decoded->data;
 
@@ -108,7 +108,7 @@ class Auth {
 
         try {
             
-            $decoded = JWT::decode($token, $this->config['secret_key'], array($this->config['algorithm']));
+            $decoded = JWT::decode($token, $this->config['auth_public'], array($this->config['algorithm']));
 
         } catch (Exception $e){
 
@@ -133,7 +133,7 @@ class Auth {
     function createJWTToken($user) {
 
 
-        $secret_key = $this->config['secret_key'];
+        $secret_key = $this->config['auth_private'];
         $issuer_claim = $this->config['key_issuer']; 
         $issuedat_claim = time(); // issued at
         $expire_claim = $issuedat_claim + $this->config['token_lifetime']; // expire time in seconds
@@ -156,7 +156,7 @@ class Auth {
         // On collision retry (collision is almost impossible)
         $i = 0;
         while($this->db->insertToken($refresh_token, $user['id'], $this->config['refresh_token_lifetime']) != 0) {
-            $refresh_token = bin2hex(openssl_random_pseudo_bytes(32));
+            $refresh_token = bin2hex(random_bytes (32));
             $i++;
             if($i > 5) throw new Exception("Refresh token generation error!");
         }
@@ -167,7 +167,8 @@ class Auth {
         return array(
             'jwt' => $jwt,
             'refresh_token' => $refresh_token,
-            'refresh_expiration' => $issuedat_claim + $this->config['refresh_token_lifetime']
+            'refresh_expiration' => $issuedat_claim + $this->config['refresh_token_lifetime'],
+            'public_key' => base64_encode($this->config['auth_public'])
         );
     }
 
