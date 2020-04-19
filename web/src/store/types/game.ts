@@ -3,12 +3,21 @@ export enum Game {
   TICTACTOE,
 }
 
+export enum PlayStep {
+  ONGOING,
+  FINISHED,
+}
+
 export interface Play {
   id: string;
   opponent: string;
   game: Game;
-  won?: boolean;
+  won: boolean;
   started: boolean;
+}
+
+export interface PlayData {
+  board: string;
 }
 
 export interface TournamentPlay extends Play {
@@ -17,6 +26,8 @@ export interface TournamentPlay extends Play {
 
 export interface PlayState {
   play: Play;
+  step: PlayStep;
+  data: PlayData;
 }
 
 // Guards

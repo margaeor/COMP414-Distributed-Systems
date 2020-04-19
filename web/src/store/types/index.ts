@@ -9,17 +9,21 @@ import { LoginState } from "./login";
 export enum ScreenState {
   INITIAL_LOADING,
   LOGIN,
-  LOGIN_FORGOT,
   LOGIN_LOADING,
+  LOBBY,
   LOBBY_LOADING,
-  LOBBY_WAITING,
+  GAME,
   GAME_LOADING,
-  GAME_ONGOING,
-  GAME_FINISHED,
+}
+
+export enum LoaderStep {
+  LOADING,
+  FAILED,
 }
 
 export interface State {
   screen: ScreenState;
+  loader: LoaderStep;
   login: LoginState;
   lobby: LobbyState;
   play: PlayState;
