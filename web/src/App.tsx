@@ -1,7 +1,7 @@
 import React from "react";
 import { render } from "react-dom";
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
-import Login from "./login";
+import Login from "./Login";
 
 import "./style.css";
 import Header from "./common/Header";
