@@ -1,17 +1,27 @@
 import React from "react";
 import { render } from "react-dom";
+import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
+import Login from "./login";
+
 import "./style.css";
+import Header from "./common/Header";
 
-interface IProp {
-  apple: string;
-}
-
-const App: React.FunctionComponent<IProp> = (props) => {
+const App = () => {
   return (
     <div>
-      <h1>Hello World!</h1>
+      <Header />
+      <Router>
+        <Switch>
+          <Route path="/login">
+            <Login />
+          </Route>
+          <Route path="/">
+            <Login />
+          </Route>
+        </Switch>
+      </Router>
     </div>
   );
 };
 
-render(<App apple="green" />, document.getElementById("root"));
+render(<App />, document.getElementById("root"));

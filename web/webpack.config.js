@@ -58,6 +58,7 @@ module.exports = {
       },
     ],
   },
+  resolve: { extensions: [".js", ".jsx", ".ts", ".tsx"] },
 };
 
 if (process.env.NODE_ENV === "development") {
