@@ -1,5 +1,6 @@
 version: '3.2'
 services:
+  # Authentication
   auth:
     build: 
       context: './auth/'
@@ -11,7 +12,6 @@ services:
       DB_NAME: "${DB_NAME}"
       DB_USERNAME: "${DB_USERNAME}"
       DB_PASSWORD: "${DB_PASSWORD}"
-      AUTH_SECRET: "${AUTH_SECRET}"
       AUTH_ISSUER: "${AUTH_ISSUER}"
       AUTH_PUBLIC: "${AUTH_PUBLIC}"
       AUTH_PRIVATE: "${AUTH_PRIVATE}"
@@ -43,6 +43,51 @@ services:
       MYSQL_INITDB_SKIP_TZINFO: "yes"
     container_name: auth-db
   
+  # API
+  api:
+    build: 
+      context: './api/'
+      dockerfile: Dockerfile.web
+    ports:
+      - "8079:8080"
+    environment: 
+      DB_HOST: "auth-db"
+      DB_NAME: "${DB_NAME}"
+      DB_USERNAME: "${DB_USERNAME}"
+      DB_PASSWORD: "${DB_PASSWORD}"
+      AUTH_ISSUER: "${AUTH_ISSUER}"
+      AUTH_PUBLIC: "${AUTH_PUBLIC}"
+    volumes:
+      - ./api/src/:/var/www/html/:rw
+    networks:
+      - backend
+    container_name: api
+  api-db:
+    build:
+      context: './api-db/'
+      dockerfile: Dockerfile.web
+      args:
+        MYSQL_VERSION: ${MYSQL_VERSION}
+    restart: always
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./api-db/db_init:/docker-entrypoint-initdb.d
+      #- data:/var/lib/mysql
+    networks:
+      - backend
+    environment:
+      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
+      MYSQL_DATABASE: "${DB_NAME}"
+      MYSQL_USER: "${DB_USERNAME}"
+      MYSQL_PASSWORD: "${DB_PASSWORD}"
+      MYSQL_INITDB_SKIP_TZINFO: "yes"
+    container_name: api-db
+  redis:
+    build: ./api/redis
+    container_name: redis
+
+  # Others
   zookeeper:
     image: 'bitnami/zookeeper:latest'
     networks:
@@ -51,12 +96,14 @@ services:
       ALLOW_ANONYMOUS_LOGIN: "yes"
     volumes:
       - ./zookeeper/config/zoo.cfg:/opt/bitnami/zookeeper/conf/zoo.cfg
+      - ./zookeeper/scripts:/opt/zoo/scripts
     container_name: zookeeper
-
+    #command: /opt/zoo/scripts/init_script.sh
+  
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest  
     depends_on:
-      - auth-db
+      - api-db
     networks:
       - frontend
       - backend
@@ -64,7 +111,7 @@ services:
       - "8081:80"
     container_name: phpmyadmin
     environment:
-      PMA_HOST: auth-db
+      PMA_HOST: api-db
       PMA_USER: root
       PMA_PASSWORD: "${DB_ROOT_PASSWORD}"
 
