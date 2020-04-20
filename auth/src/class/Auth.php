@@ -1,10 +1,14 @@
 <?php
-require_once("./config.php");
 require_once("./class/Database.php");
+require("./vendor/autoload.php");
+
+use \Firebase\JWT\JWT;
 
 class Auth {
 
     public $db;
+
+    private $config;
 
     function __construct() {
         global $dbhost, $dbuser, $dbpass, $dbname;
@@ -13,11 +17,12 @@ class Auth {
 
         $this->db->connect();
 
+        $this->config = include('./config.php');
 
     }
 
     function hasExpired($token) {
-
+        
         if(isset($token['date_created'], $token['valid_until'])) {
 
             if(is_null($token['valid_until'])) return True;
@@ -46,14 +51,38 @@ class Auth {
     function getUserInfo($access_token) {
 
         if(!$this->db || !$this->db->conn) throw new Exception("Database connection not established!");
+        
+        try {
+            
+            $decoded = JWT::decode($access_token, $this->config['auth_public'], array($this->config['algorithm']));
 
-        $info = $this->db->getUserFromToken($access_token);
+            return (array)$decoded->data;
 
-        if($info && !$this->hasExpired($info) ) {
+        } catch (Exception $e){
 
-            return $info;
+            throw new Exception("Access is denied.");
 
-        } else throw new Exception("Access is denied.");
+        } 
+
+    }
+
+    function refreshToken($token) {
+
+        if(!$this->db || !$this->db->conn) throw new Exception("Database connection not established!");
+        
+        if($user_token = $this->db->getUserFromToken($token)) {
+
+            if($this->hasExpired($user_token)) throw new Exception("Access denied.");
+
+            $result = $this->createJWTToken($user_token);
+
+            $this->db->deleteToken($token);
+
+            return $result;
+
+        } else {
+            throw new Exception("Access denied.");
+        }
     }
 
     function resetPassword($username, $new_password, $secret) {
@@ -72,13 +101,24 @@ class Auth {
 
     function changeRole($token, $username, $new_role) {
         
-        global $user_roles;
 
         if(!$this->db || !$this->db->conn) throw new Exception("Database connection not established!");
 
-        $user_info = $this->getUserInfo($token);
+        $decoded = array();
 
-        if($user_info['role'] === 'admin' && in_array($new_role,$user_roles)) {
+        try {
+            
+            $decoded = JWT::decode($token, $this->config['auth_public'], array($this->config['algorithm']));
+
+        } catch (Exception $e){
+
+            throw new Exception("Access is denied.");
+
+        } 
+
+        $user_info = $this->db->fetchUser($decoded->data->username);
+
+        if($user_info['role'] === 'admin' && in_array($new_role,$this->config['user_roles'])) {
             if($this->db->updateRole($username, $new_role) === 0) {
                 return True;
             } else {
@@ -90,15 +130,57 @@ class Auth {
 
     }
 
+    function createJWTToken($user) {
+
+
+        $secret_key = $this->config['auth_private'];
+        $issuer_claim = $this->config['key_issuer']; 
+        $issuedat_claim = time(); // issued at
+        $expire_claim = $issuedat_claim + $this->config['token_lifetime']; // expire time in seconds
+        $token = array(
+            "iss" => $issuer_claim,
+            "iat" => $issuedat_claim,
+            "exp" => $expire_claim,
+            "data" => array(
+                "id" => $user['id'],
+                "username" => $user['username'],
+                "email" => $user['email'],
+                "role" => $user['role']
+        ));
+
+        $jwt = JWT::encode($token, $secret_key);
+        
+
+        $refresh_token = bin2hex(openssl_random_pseudo_bytes(32));
+
+        // On collision retry (collision is almost impossible)
+        $i = 0;
+        while($this->db->insertToken($refresh_token, $user['id'], $this->config['refresh_token_lifetime']) != 0) {
+            $refresh_token = bin2hex(random_bytes (32));
+            $i++;
+            if($i > 5) throw new Exception("Refresh token generation error!");
+        }
+
+
+        $this->db->updateLastLoginTime($user['username']);
+
+        return array(
+            'jwt' => $jwt,
+            'refresh_token' => $refresh_token,
+            'refresh_expiration' => $issuedat_claim + $this->config['refresh_token_lifetime'],
+            'public_key' => base64_encode($this->config['auth_public'])
+        );
+    }
+
     function login($username, $password) {
-        global $max_user_tokens;
 
         if(!$this->db || !$this->db->conn) throw new Exception("Database connection not established!");
 
         $error = "";
 
         $response = array(
-            'access_token' => ''
+            'jwt' => '',
+            'refres'
         );
 
         if ($user = $this->db->fetchUser($username,$password)) {
@@ -112,19 +194,12 @@ class Auth {
                 $token_count = $this->db->countUserTokens($user_id);
                 
                 // Delete some tokens if the user has many tokens
-                if($token_count >= $max_user_tokens) {
-                    $tokens_to_delete = $token_count-$max_user_tokens+1;
+                if($token_count >= $this->config['max_refresh_tokens']) {
+                    $tokens_to_delete = $token_count-$this->config['max_refresh_tokens']+1;
                     $this->db->deleteOldestTokens($user_id,max($tokens_to_delete,0));
                 }
                 
-                // Create and insert token
-                $token = bin2hex(openssl_random_pseudo_bytes(32));
-                
-                if($this->db->insertToken($token, $user_id) == 0 && $this->db->updateLastLoginTime($username) == 0) {
-                    $response['access_token'] = $token;
-                } else {
-                    throw new Exception("Access token generation error!");
-                }
+                return $this->createJWTToken($user);
                 
             } else {
                 throw new Exception("Wrong password!");
@@ -133,7 +208,6 @@ class Auth {
             throw new Exception("Such user does not exist!");
         }
 
-        return $response;
     }
 
     function __destruct() {

@@ -3,10 +3,10 @@
 require('./class/Auth.php');
 
 
-if(isset($_GET['auth']) && !empty($_GET['auth']) ) {
+if(isset($_GET['jwt']) && !empty($_GET['jwt']) ) {
     $auth = new Auth();
     try {
-        $info = $auth->getUserInfo($_GET['auth']);
+        $info = $auth->getUserInfo($_GET['jwt']);
         echo json_encode([
             'status' => 200,
             'username' => $info['username'],

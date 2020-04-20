@@ -5,12 +5,19 @@ require_once("./config.php");
 class DB {
 
 	public $conn;
-	
+    
+    private $config;
+    
 	function connect() {
-		global $dbhost,$dbuser, $dbpass, $dbname;
-		
+
+		$this->config = include('./config.php');
+        
+        $dbhost = $this->config['dbhost'];
+        $dbname = $this->config['dbname'];
+        $dbuser = $this->config['dbuser'];
+        $dbpass = $this->config['dbpass'];
+        
 		$this->conn = new mysqli($dbhost, $dbuser, $dbpass, $dbname);
-		
 		
 		return !$this->conn ? $this->conn : $this->conn->connect_error;
     }
@@ -18,7 +25,7 @@ class DB {
     function getUserFromToken($token) {
         if(!$this->conn) return -1;
 
-        $query = "SELECT * FROM access_tokens as at
+        $query = "SELECT * FROM refresh_tokens as at
         INNER JOIN users as u ON at.user_id=u.id
         WHERE at.id = ?
         LIMIT 1";
@@ -74,16 +81,20 @@ class DB {
 
         if(!$this->conn) return -1;
 
+        if(!$this->fetchUser($username)) return -1;
+
         $stmt = $this->conn->prepare("UPDATE users SET role = ? WHERE username = ? LIMIT 1");
         $stmt->bind_param("ss", $newrole, $username);
         $stmt->execute();
+        
+        return 0;
 
-        if ($stmt->affected_rows === 1) {
-            $stmt->close();
-            return 0;
-        } else {
-            return -1;
-        }
+        // if ($stmt->affected_rows === 1) {
+        //     $stmt->close();
+        //     return 0;
+        // } else {
+        //     return -1;
+        // }
     }
 
     function updatePassword($username,$hash, $secret) {
@@ -106,7 +117,7 @@ class DB {
     function countUserTokens($user_id) {
         if(!$this->conn) return -1;
 
-        $stmt = $this->conn->prepare("SELECT COUNT(`id`) FROM `access_tokens` WHERE `user_id` = ?");
+        $stmt = $this->conn->prepare("SELECT COUNT(`id`) FROM `refresh_tokens` WHERE `user_id` = ?");
         $stmt->bind_param("i", $user_id);
 
         $stmt->execute();
@@ -122,8 +133,20 @@ class DB {
     }
 
     function deleteOldestTokens($user_id, $num_to_delete) {
-        $stmt = $this->conn->prepare("DELETE FROM access_tokens WHERE user_id = ? ORDER BY date_created ASC LIMIT ?;");
+        $stmt = $this->conn->prepare("DELETE FROM refresh_tokens WHERE user_id = ? ORDER BY date_created ASC LIMIT ?;");
         $stmt->bind_param("ii", $user_id, $num_to_delete);
+        
+        if($stmt->execute()) {
+            $stmt->close();
+            return 0;
+        } else {
+            return -1;
+        }
+    }
+
+    function deleteToken($token) {
+        $stmt = $this->conn->prepare("DELETE FROM refresh_tokens WHERE id = ?;");
+        $stmt->bind_param("s", $token);
         
         if($stmt->execute()) {
             $stmt->close();
@@ -152,10 +175,10 @@ class DB {
 
     }
 
-    function insertToken($token, $user_id) {
+    function insertToken($token, $user_id, $token_lifetime) {
 
-        $stmt = $this->conn->prepare("INSERT INTO access_tokens VALUES (?,?,NOW(),NULL)");
-        $stmt->bind_param("si", $token, $user_id);
+        $stmt = $this->conn->prepare("INSERT INTO refresh_tokens VALUES (?,?,NOW(),TIMESTAMPADD(SECOND,?,NOW()))");
+        $stmt->bind_param("sii", $token, $user_id, $token_lifetime);
         
         if($stmt->execute()) {
             return 0;

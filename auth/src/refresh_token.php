@@ -1,18 +1,16 @@
+
 <?php 
 
 
 require('./class/Auth.php');
 
 
-if(isset($_GET['username'],$_GET['jwt'],$_GET['new_role']) && 
-   !empty($_GET['username']) && !empty($_GET['jwt']) && !empty($_GET['new_role'])
-) {
+if(isset($_GET['refresh_token']) && !empty($_GET['refresh_token'])) {
     $auth = new Auth();
     try {
-        $login_response = $auth->changeRole($_GET['jwt'],$_GET['username'],$_GET['new_role']);
-        echo json_encode([
-            'status' => 200
-        ]);
+        $login_response = $auth->refreshToken($_GET['refresh_token']);
+        $login_response['status'] = 200;
+        echo json_encode($login_response);
 
     } catch (Exception $e) {
         echo json_encode([
