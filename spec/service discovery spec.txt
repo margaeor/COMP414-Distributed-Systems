@@ -35,13 +35,11 @@ if it doesn't exist it creates an empty row and acquires the lock by depositing 
 if it does and it contains an id then:
 the server checks if the node exists in the zookeeper
 if it does, an active server has acquired the play. The server responds to the client
-redirects it to the ip of such server
+redirecting it to the ip of that server
 if it doesn't, then the other server has failed (the lock is stale) and our server acquires the lock
-by adding the ip of the old server as a filter so that it fails if another server acquires
-the lock first
 
-If, for whatever reason, when a play server updates the row and finds another lock in the returned value
-it shuts down and forces the clients to reaqcuire a play server
+if an update ever fails it shuts down the play 
+and forces the clients to reaqcuire a play server
 If the server loses the connection to the zookeeper its locks become stale
 From now on it is not allowed to touch the database
 It kicks off all of its clients and creates a fresh id
@@ -49,5 +47,9 @@ The clients reconnect to other servers which replace the server's locks
 It remains inactive until a connection to the zookeeper network is reacquired
 Then, it starts over
 
-If a client disconnects, the server releases the lock
+If the clients disconnect, the server releases the lock
+
+Also, during every update of the play row the server uses a timestamp as a filter
+If another server changes the timestamp the update will fail, causing the server
+to shutdown the play. This is called Optimistic concurrency control 
 
