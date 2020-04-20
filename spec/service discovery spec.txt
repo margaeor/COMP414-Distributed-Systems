@@ -1,0 +1,55 @@
+when a game server goes online it creates an ephemeral node on zookeeper 
+in JSON format containing:
+a unique id as name,
+the number of ongoing games,
+the ip/hostname of the server
+
+For example:
+/game/id70923457
+{
+	ip: "10.23.2.2",
+	plays: 150
+}
+
+It is ephemeral because it is deleted once the server goes offline
+
+The api server then offers the following service:
+whenever a client requests it, return the least loaded game server
+without hitting the database (such as when a play is created)
+
+It does it as follows:
+lists the /game directory from zookeeper and finds the node with the
+lowest plays, returning its ip or domain name to the user
+
+Failover recovery:
+In order to comply with the recovery non functional req the game
+server acts in the following manner:
+
+A sharded mongodb server exists with a row for each ongoing play
+one of the columns contains the name of the play server responsible for it
+
+When a play server is created it connects to Zookeeper and creates its node
+Then, when a client connects to it asking to resume or to start a play it:
+checks the mongodb row with the play information
+if it doesn't exist it creates an empty row and acquires the lock by depositing its id
+if it does and it contains an id then:
+the server checks if the node exists in the zookeeper
+if it does, an active server has acquired the play. The server responds to the client
+redirecting it to the ip of that server
+if it doesn't, then the other server has failed (the lock is stale) and our server acquires the lock
+
+if an update ever fails it shuts down the play 
+and forces the clients to reaqcuire a play server
+If the server loses the connection to the zookeeper its locks become stale
+From now on it is not allowed to touch the database
+It kicks off all of its clients and creates a fresh id
+The clients reconnect to other servers which replace the server's locks
+It remains inactive until a connection to the zookeeper network is reacquired
+Then, it starts over
+
+If the clients disconnect, the server releases the lock
+
+Also, during every update of the play row the server uses a timestamp as a filter
+If another server changes the timestamp the update will fail, causing the server
+to shutdown the play. This is called Optimistic concurrency control 
+
