@@ -8,10 +8,10 @@ module.exports = {
   entry: "./src/App.tsx",
   output: {
     filename: "bundle.[hash:8].js",
-    path: path.resolve(__dirname, "dist"),
+    path: path.resolve(__dirname, "dist/web"),
   },
   devServer: {
-    contentBase: "./dist",
+    contentBase: "./dist/web",
     port: 3000,
     hot: true,
     host: "0.0.0.0",

@@ -1,0 +1,54 @@
+{
+  "name": "bored_games_game_server",
+  "version": "1.0.0",
+  "description": "A distributed board gaming service.",
+  "main": "index.ts",
+  "private": true,
+  "scripts": {
+    "start": "npm run build && nodemon dist/index.js",
+    "build": "babel src -d dist --extensions \".ts,.tsx\"",
+    "serve": "node dist/index.js",
+    "restart": "npm run build && npm run serve",
+    "dev": "nodemon --exec npm run restart --ignore dist --ext ts, json"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.9.0",
+    "@babel/node": "^7.8.7",
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
+    "@babel/preset-env": "^7.9.5",
+    "@babel/preset-typescript": "^7.9.0",
+    "@types/express": "^4.17.6",
+    "@types/socket.io": "^2.1.4",
+    "@typescript-eslint/eslint-plugin": "^2.29.0",
+    "@typescript-eslint/parser": "^2.29.0",
+    "cross-env": "^7.0.2",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.10.1",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "nodemon": "^2.0.3",
+    "prettier": "^2.0.4",
+    "typescript": "^3.8.3",
+    "dotenv": "^8.2.0"
+  },
+  "dependencies": {
+    "chess.js": "^0.10.3",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "socket.io": "^2.3.0"
+  },
+  "browserslist": [
+    "last 2 Chrome versions",
+    "last 2 ChromeAndroid versions",
+    "last 2 Firefox versions",
+    "last 2 FirefoxAndroid versions",
+    "last 2 Safari versions",
+    "last 2 iOS versions",
+    "last 2 Edge versions",
+    "last 2 Opera versions",
+    "last 2 OperaMobile versions"
+  ]
+}
