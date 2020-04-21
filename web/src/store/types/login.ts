@@ -1,7 +1,7 @@
 export enum LoginStep {
   FORM,
   FORGOT,
-  FAILED,
+  SIGN_UP,
 }
 
 export interface LoginState {

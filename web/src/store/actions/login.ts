@@ -1,5 +1,4 @@
 import { LoginStep } from "../types";
-import { UpdatePlayDataAction } from "./game";
 
 export const UPDATE_LOGIN_DATA = "UPDATE_LOGIN_DATA";
 export const UPDATE_LOGIN_USERNAME = "UPDATE_LOGIN_USERNAME";
@@ -7,9 +6,9 @@ export const UPDATE_LOGIN_PASSWORD = "UPDATE_LOGIN_PASSWORD";
 export const UPDATE_LOGIN_ANSWER = "UPDATE_LOGIN_ANSWER";
 export const UPDATE_LOGIN_STEP = "UPDATE_LOGIN_STEP";
 export const SUBMIT_LOGIN = "SUBMIT_LOGIN";
-export const SUBMIT_FORGOT = "SUBMIT_FORGOT";
 export const FORGOT_PASSWORD = "FORGOT_PASSWORD";
-export const REMEMBERED_PASSWORD = "REMEMBERED_PASSWORD";
+export const GO_TO_SIGN_UP = "GO_TO_SIGN_UP";
+export const RETURN_TO_LOGIN = "RETURN_TO_LOGIN";
 
 export interface UpdateLoginDataAction {
   type: typeof UPDATE_LOGIN_DATA;
@@ -94,20 +93,20 @@ export function submitLogin() {
   };
 }
 
-export function submitForgot() {
-  return {
-    type: SUBMIT_FORGOT,
-  };
-}
-
 export function forgotPassword() {
   return {
     type: FORGOT_PASSWORD,
   };
 }
 
-export function rememberedPassword() {
+export function goToSignUp() {
   return {
-    type: REMEMBERED_PASSWORD,
+    type: GO_TO_SIGN_UP,
+  };
+}
+
+export function returnToLogin() {
+  return {
+    type: RETURN_TO_LOGIN,
   };
 }

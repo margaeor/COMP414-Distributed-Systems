@@ -15,7 +15,7 @@ function* joinFakeGame() {
   yield put(changeScreen(ScreenState.LOGIN, LoaderStep.INACTIVE));
 
   yield put(updateLoginData("bob", "1234", "Mary"));
-  yield put(updateLoginStep(LoginStep.FORM, "Login Failed"));
+  yield put(updateLoginStep(LoginStep.SIGN_UP, "Login Failed"));
   yield put(
     updateLobby({
       fetched: true,
