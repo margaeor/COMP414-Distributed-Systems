@@ -1,3 +1,5 @@
+import getAccessToken from "../login";
+
 const REFRESH_NAME = "refresh";
 const REFRESH_DAYS = 30;
 
@@ -39,6 +41,7 @@ export async function checkRefreshToken(): Promise<boolean> {
 
 export async function renewRefreshToken(username: string, password: string) {
   // TODO: Implement this call
+  setRefreshToken("abc");
 }
 
 export async function signUp(
@@ -60,6 +63,6 @@ export async function changePassword(
 export async function renewAccessToken(): Promise<string> {
   // Todo: implement the api call
   await new Promise((r) => setTimeout(r, 200));
-  throw new Error("poopie");
-  //return "abc";
+  if (getRefreshToken() === "") throw new Error("poopie");
+  return "abc";
 }

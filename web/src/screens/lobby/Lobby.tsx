@@ -1,38 +1,39 @@
 import React from "react";
 import "./Lobby.css";
 import { connect } from "react-redux";
-import { State, Play, Tournament } from "../../store/types";
+import { State, Play, Tournament, Game } from "../../store/types";
 import {
   selectLobbyDataFetched,
   selectOngoingPlays,
   selectTournaments,
 } from "../../store/selectors";
-
+import { joinGame, joinTournament, joinQuickPlay } from "../../store/actions";
 interface IProps {
   fetched: boolean;
   plays: Play[];
   tournaments: Tournament[];
+  joinGame: (a: string) => void;
+  joinTournament: (a: string) => void;
+  joinQuickPlay: (a: Game) => void;
 }
 
-const Lobby: React.FunctionComponent<IProps> = ({
-  fetched,
-  plays,
-  tournaments,
-}) => {
+const Lobby: React.FunctionComponent<IProps> = (props) => {
   return (
     <div className="lobby">
       <div className="quickPlay">
         <span>Quick Play</span>
-        <button>Chess</button>
-        <button>Tic Tac Toe</button>
+        <button onClick={(e) => props.joinQuickPlay(Game.CHESS)}>Chess</button>
+        <button onClick={(e) => props.joinQuickPlay(Game.TICTACTOE)}>
+          Tic Tac Toe
+        </button>
       </div>
       <div className="tournamentPlay">
         <span>Tournaments</span>
         <ul className="tournamentList">
-          {tournaments.map((t) => (
+          {props.tournaments.map((t) => (
             <li>
               <span>{`${t.players}/${t.maxPlayers} ${t.name}`}</span>
-              <button>Join</button>
+              <button onClick={(e) => props.joinTournament(t.id)}>Join</button>
             </li>
           ))}
         </ul>
@@ -40,12 +41,12 @@ const Lobby: React.FunctionComponent<IProps> = ({
       <div className="currentPlays">
         <span>Ongoing Matches</span>
         <ul className="playList">
-          {plays.map((p) => (
+          {props.plays.map((p) => (
             <li>
               <span>{`Opponent: ${p.opponent} ${
                 p.started ? "Started" : ""
               }`}</span>
-              <button>Join</button>
+              <button onClick={(e) => props.joinGame(p.id)}>Join</button>
             </li>
           ))}
         </ul>
@@ -62,4 +63,10 @@ const mapStateToProps = (state: State) => {
   };
 };
 
-export default connect(mapStateToProps)(Lobby);
+const mapDispatchToProps = {
+  joinGame,
+  joinTournament,
+  joinQuickPlay,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Lobby);

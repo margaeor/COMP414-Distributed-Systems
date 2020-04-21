@@ -14,7 +14,7 @@ import {
   signUp,
   changePassword,
   renewAccessToken,
-} from "./loginUtils";
+} from "./api/login";
 
 function* handleModeButtons() {
   while (1) {
