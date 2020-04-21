@@ -9,7 +9,12 @@ import {
 } from "../actions";
 import { ScreenState, LoaderStep, LoginStep, LoginState } from "../types";
 import { selectLoginData } from "../selectors";
-import { renewRefreshToken, signUp, changePassword } from "./loginUtils";
+import {
+  renewRefreshToken,
+  signUp,
+  changePassword,
+  renewAccessToken,
+} from "./loginUtils";
 
 function* handleModeButtons() {
   while (1) {
@@ -32,12 +37,11 @@ function* handleModeButtons() {
   }
 }
 
-export default function* login() {
-  let success = true;
-  do {
+function* login() {
+  yield put(updateLoginStep(LoginStep.FORM, ""));
+  while (1) {
     // Setup login screen
     yield put(changeScreen(ScreenState.LOGIN, LoaderStep.INACTIVE));
-    yield put(updateLoginStep(LoginStep.FORM, ""));
     const buttonHandler = yield fork(handleModeButtons);
     // Wait for submit
     yield take(SUBMIT_LOGIN);
@@ -59,9 +63,20 @@ export default function* login() {
           yield call(signUp, d.username, d.password, d.answer);
           break;
       }
+      return yield call(renewAccessToken);
     } catch (e) {
       updateLoginStep(d.step, e.toString());
-      success = false;
     }
-  } while (!success);
+  }
+}
+
+export default function* getAccessToken() {
+  for (let i = 0; i < 4; i++) {
+    try {
+      return yield call(renewAccessToken);
+    } catch (e) {
+      console.log(e.toString());
+    }
+  }
+  return yield* login();
 }
