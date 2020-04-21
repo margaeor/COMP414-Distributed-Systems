@@ -4,6 +4,8 @@ notes
 *.gnuplot
 *.table
 
+**/node_modules/
+
 *.asv
 csv
 

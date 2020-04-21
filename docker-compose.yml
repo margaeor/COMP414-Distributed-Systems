@@ -45,47 +45,64 @@ services:
   
   # API
   api:
-    build: 
-      context: './api/'
-      dockerfile: Dockerfile.web
-    ports:
-      - "8079:8080"
-    environment: 
-      DB_HOST: "auth-db"
-      DB_NAME: "${DB_NAME}"
-      DB_USERNAME: "${DB_USERNAME}"
-      DB_PASSWORD: "${DB_PASSWORD}"
-      AUTH_ISSUER: "${AUTH_ISSUER}"
-      AUTH_PUBLIC: "${AUTH_PUBLIC}"
-    volumes:
-      - ./api/src/:/var/www/html/:rw
-    networks:
-      - backend
     container_name: api
-  api-db:
-    build:
-      context: './api-db/'
-      dockerfile: Dockerfile.web
-      args:
-        MYSQL_VERSION: ${MYSQL_VERSION}
     restart: always
-    ports:
-      - "3307:3306"
+    build: ./node-api/api
     volumes:
-      - ./api-db/db_init:/docker-entrypoint-initdb.d
-      #- data:/var/lib/mysql
-    networks:
-      - backend
-    environment:
-      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
-      MYSQL_DATABASE: "${DB_NAME}"
-      MYSQL_USER: "${DB_USERNAME}"
-      MYSQL_PASSWORD: "${DB_PASSWORD}"
-      MYSQL_INITDB_SKIP_TZINFO: "yes"
-    container_name: api-db
-  redis:
-    build: ./api/redis
-    container_name: redis
+        - ./node-api/api/src:/usr/src/app
+    ports:
+      - "3001:3000"
+    depends_on:
+      - mongo
+  mongo:
+    container_name: mongo
+    image: mongo
+    #volumes:
+      #- ./node-api/mongo/data:/data/db
+    ports:
+      - "27017:27017"
+  # api:
+  #   build: 
+  #     context: './api/'
+  #     dockerfile: Dockerfile.web
+  #   ports:
+  #     - "8079:8080"
+  #   environment: 
+  #     DB_HOST: "auth-db"
+  #     DB_NAME: "${DB_NAME}"
+  #     DB_USERNAME: "${DB_USERNAME}"
+  #     DB_PASSWORD: "${DB_PASSWORD}"
+  #     AUTH_ISSUER: "${AUTH_ISSUER}"
+  #     AUTH_PUBLIC: "${AUTH_PUBLIC}"
+  #   volumes:
+  #     - ./api/src/:/var/www/html/:rw
+  #   networks:
+  #     - backend
+  #   container_name: api
+  # api-db:
+  #   build:
+  #     context: './api-db/'
+  #     dockerfile: Dockerfile.web
+  #     args:
+  #       MYSQL_VERSION: ${MYSQL_VERSION}
+  #   restart: always
+  #   ports:
+  #     - "3307:3306"
+  #   volumes:
+  #     - ./api-db/db_init:/docker-entrypoint-initdb.d
+  #     #- data:/var/lib/mysql
+  #   networks:
+  #     - backend
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
+  #     MYSQL_DATABASE: "${DB_NAME}"
+  #     MYSQL_USER: "${DB_USERNAME}"
+  #     MYSQL_PASSWORD: "${DB_PASSWORD}"
+  #     MYSQL_INITDB_SKIP_TZINFO: "yes"
+  #   container_name: api-db
+  # redis:
+  #   build: ./api/redis
+  #   container_name: redis
 
   # Others
   zookeeper:
@@ -100,20 +117,20 @@ services:
     container_name: zookeeper
     #command: /opt/zoo/scripts/init_script.sh
   
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin:latest  
-    depends_on:
-      - api-db
-    networks:
-      - frontend
-      - backend
-    ports:
-      - "8081:80"
-    container_name: phpmyadmin
-    environment:
-      PMA_HOST: api-db
-      PMA_USER: root
-      PMA_PASSWORD: "${DB_ROOT_PASSWORD}"
+  # phpmyadmin:
+  #   image: phpmyadmin/phpmyadmin:latest  
+  #   depends_on:
+  #     - api-db
+  #   networks:
+  #     - frontend
+  #     - backend
+  #   ports:
+  #     - "8081:80"
+  #   container_name: phpmyadmin
+  #   environment:
+  #     PMA_HOST: api-db
+  #     PMA_USER: root
+  #     PMA_PASSWORD: "${DB_ROOT_PASSWORD}"
 
 networks:
   frontend:
