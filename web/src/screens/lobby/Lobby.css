@@ -1,4 +1,46 @@
 .lobby {
+  max-width: 800px;
+  width: 100%;
   display: flex;
   flex-direction: row;
+  justify-content: space-evenly;
+}
+
+.lobby .quickPlay {
+  display: flex;
+  flex-direction: column;
+}
+
+.lobby .quickPlay * {
+  margin-bottom: 20px;
+}
+
+.lobby .tournamentPlay {
+  display: flex;
+  flex-direction: column;
+}
+
+.lobby .currentPlays {
+  display: flex;
+  flex-direction: column;
+}
+
+.lobby .tournamentList li {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.lobby .tournamentList button {
+  margin-left: 5px;
+}
+
+.lobby .playList li {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.lobby .playList button {
+  margin-left: 5px;
 }

@@ -1,5 +1,5 @@
 import { Dispatch } from "redux";
-import { put } from "redux-saga/effects";
+import { put, take } from "redux-saga/effects";
 import {
   updateLoginData,
   updateLoginStep,
@@ -7,11 +7,12 @@ import {
   setPlay,
   changeScreen,
   updatePlayData,
+  SUBMIT_LOGIN,
 } from "../actions";
 import { LoginStep, Game, ScreenState, LoaderStep, PlayStep } from "../types";
 
 function* joinFakeGame() {
-  yield put(changeScreen(ScreenState.GAME, LoaderStep.INACTIVE));
+  yield put(changeScreen(ScreenState.LOGIN, LoaderStep.INACTIVE));
 
   yield put(updateLoginData("bob", "1234", "Mary"));
   yield put(updateLoginStep(LoginStep.FORM, "Login Failed"));
@@ -81,6 +82,9 @@ function* joinFakeGame() {
       board: "rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2",
     })
   );
+
+  yield take(SUBMIT_LOGIN);
+  alert("Logging in...");
 }
 
 export default function* rootSaga(dispatch: Dispatch) {

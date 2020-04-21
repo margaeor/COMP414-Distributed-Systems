@@ -1,4 +1,6 @@
 export * from "./game";
+export * from "./lobby";
+export * from "./login";
 
 import { State } from "../types";
 

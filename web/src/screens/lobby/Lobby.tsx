@@ -1,7 +1,24 @@
 import React from "react";
 import "./Lobby.css";
+import { connect } from "react-redux";
+import { State, Play, Tournament } from "../../store/types";
+import {
+  selectLobbyDataFetched,
+  selectOngoingPlays,
+  selectTournaments,
+} from "../../store/selectors";
 
-const Login: React.FunctionComponent = () => {
+interface IProps {
+  fetched: boolean;
+  plays: Play[];
+  tournaments: Tournament[];
+}
+
+const Lobby: React.FunctionComponent<IProps> = ({
+  fetched,
+  plays,
+  tournaments,
+}) => {
   return (
     <div className="lobby">
       <div className="quickPlay">
@@ -11,14 +28,38 @@ const Login: React.FunctionComponent = () => {
       </div>
       <div className="tournamentPlay">
         <span>Tournaments</span>
-        <ul id="tournamentList"></ul>
+        <ul className="tournamentList">
+          {tournaments.map((t) => (
+            <li>
+              <span>{`${t.players}/${t.maxPlayers} ${t.name}`}</span>
+              <button>Join</button>
+            </li>
+          ))}
+        </ul>
       </div>
       <div className="currentPlays">
         <span>Ongoing Matches</span>
-        <ul id="ongoingPlays"></ul>
+        <ul className="playList">
+          {plays.map((p) => (
+            <li>
+              <span>{`Opponent: ${p.opponent} ${
+                p.started ? "Started" : ""
+              }`}</span>
+              <button>Join</button>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );
 };
 
-export default Login;
+const mapStateToProps = (state: State) => {
+  return {
+    fetched: selectLobbyDataFetched(state),
+    plays: selectOngoingPlays(state),
+    tournaments: selectTournaments(state),
+  };
+};
+
+export default connect(mapStateToProps)(Lobby);
