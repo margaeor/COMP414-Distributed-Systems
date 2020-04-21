@@ -1,9 +1,9 @@
 import React from "react";
-import "./style.css";
+import "./Login.css";
 
 const Login: React.FunctionComponent = () => {
   return (
-    <form action="">
+    <form className="login" action="">
       <input type="text" id="username" placeholder="Username" />
       <input type="password" id="password" placeholder="Password" />
       <input className="loginButton" type="submit" value="Submit" />

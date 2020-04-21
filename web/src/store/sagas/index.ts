@@ -11,7 +11,7 @@ import {
 import { LoginStep, Game, ScreenState, LoaderStep, PlayStep } from "../types";
 
 function* joinFakeGame() {
-  yield put(changeScreen(ScreenState.LOBBY, LoaderStep.INACTIVE));
+  yield put(changeScreen(ScreenState.GAME, LoaderStep.INACTIVE));
 
   yield put(updateLoginData("bob", "1234", "Mary"));
   yield put(updateLoginStep(LoginStep.FORM, "Login Failed"));

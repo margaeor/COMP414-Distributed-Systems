@@ -1,20 +1,19 @@
-.gameContainer {
+.game {
   display: flex;
   flex-direction: row;
 }
 
-.chat {
+.game .chat {
   display: flex;
   flex-direction: column;
 }
 
-.form {
+.game .form {
   display: flex;
   flex-direction: row;
 }
 
-#chatBox,
-#history {
+.game .chat textarea {
   flex: 1;
   resize: none;
 }

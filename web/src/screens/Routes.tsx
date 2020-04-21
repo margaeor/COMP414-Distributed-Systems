@@ -2,10 +2,10 @@ import React from "react";
 import { connect } from "react-redux";
 
 import { ScreenState, LoaderStep, State } from "../store/types";
-import Login from "./Login";
-import Lobby from "./Lobby";
+import Login from "./login/Login";
+import Lobby from "./lobby/Lobby";
+import Game from "./game/Game";
 import Loader from "./Loader";
-import Game from "./Game";
 import { selectScreen, selectLoader } from "../store/selectors";
 import Header from "./common/Header";
 

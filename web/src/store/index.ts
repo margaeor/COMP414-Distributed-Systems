@@ -10,7 +10,7 @@ const middleware: Middleware[] = [sagaMiddleware];
 // Add redux dev tool
 let composeEnhancers = compose;
 if (process.env.NODE_ENV !== "production") {
-  /* eslint-disable no-underscore-dangle */
+  /* eslint-disable no-underscore-dangle, @typescript-eslint/ban-ts-ignore */
   // @ts-ignore
   composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
   /* eslint-enable */

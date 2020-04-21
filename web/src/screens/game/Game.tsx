@@ -4,11 +4,11 @@ import { State } from "../../store/types";
 import { selectBoard } from "../../store/selectors";
 import Chessboard from "chessboardjsx";
 
-import "./style.css";
+import "./Game.css";
 
 const Game = ({ board }: { board: string }) => {
   return (
-    <div className="gameContainer">
+    <div className="game">
       <div className="chat">
         <textarea id="history" readOnly />
         <div className="form">

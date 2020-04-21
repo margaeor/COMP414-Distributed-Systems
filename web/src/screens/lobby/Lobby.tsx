@@ -1,9 +1,9 @@
 import React from "react";
-import "./style.css";
+import "./Lobby.css";
 
 const Login: React.FunctionComponent = () => {
   return (
-    <div className="container">
+    <div className="lobby">
       <div className="quickPlay">
         <span>Quick Play</span>
         <button>Chess</button>
