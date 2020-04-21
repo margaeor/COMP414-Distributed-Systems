@@ -18,7 +18,6 @@ interface IDispatchProps {
   updateLoginPassword: (a: string) => void;
   updateLoginAnswer: (a: string) => void;
   submitLogin: () => void;
-  submitForgot: () => void;
   forgotPassword: () => void;
   goToSignUp: () => void;
   returnToLogin: () => void;

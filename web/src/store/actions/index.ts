@@ -5,6 +5,7 @@ export * from "./lobby";
 export * from "./login";
 
 export const CHANGE_SCREEN = "CHANGE_SCREEN";
+export const LOGOUT = "LOGOUT";
 
 export interface ChangeScreenAction {
   type: typeof CHANGE_SCREEN;
@@ -20,5 +21,11 @@ export function changeScreen(
     type: CHANGE_SCREEN,
     screen,
     loader,
+  };
+}
+
+export function logout() {
+  return {
+    type: LOGOUT,
   };
 }
