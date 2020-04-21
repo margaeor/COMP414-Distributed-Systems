@@ -49,7 +49,7 @@ export async function signUp(
   // TODO: Implement this call
 }
 
-export async function forgotPassword(
+export async function changePassword(
   username: string,
   password: string,
   answer: string

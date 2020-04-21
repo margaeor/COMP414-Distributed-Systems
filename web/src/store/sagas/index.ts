@@ -10,6 +10,7 @@ import {
   SUBMIT_LOGIN,
 } from "../actions";
 import { LoginStep, Game, ScreenState, LoaderStep, PlayStep } from "../types";
+import login from "./login";
 
 function* joinFakeGame() {
   yield put(changeScreen(ScreenState.LOGIN, LoaderStep.INACTIVE));
@@ -83,8 +84,7 @@ function* joinFakeGame() {
     })
   );
 
-  yield take(SUBMIT_LOGIN);
-  alert("Logging in...");
+  yield login();
 }
 
 export default function* rootSaga(dispatch: Dispatch) {
