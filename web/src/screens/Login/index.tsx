@@ -1,14 +1,13 @@
 import React from "react";
+import "./style.css";
 
 const Login: React.FunctionComponent = () => {
   return (
-    <div>
-      <form action="">
-        <input type="text" id="fname" name="fname" />
-        <input type="text" id="lname" name="lname" />
-        <input type="submit" value="Submit" />
-      </form>
-    </div>
+    <form action="">
+      <input type="text" id="username" placeholder="Username" />
+      <input type="password" id="password" placeholder="Password" />
+      <input className="loginButton" type="submit" value="Submit" />
+    </form>
   );
 };
 

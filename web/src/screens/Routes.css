@@ -1,5 +1,8 @@
 .container {
+  margin-left: auto;
+  margin-right: auto;
   display: flex;
   flex-direction: column;
+  align-items: center;
   max-width: 800px;
 }

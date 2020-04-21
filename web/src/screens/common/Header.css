@@ -1,3 +1,7 @@
+nav {
+  align-self: flex-end;
+}
+
 nav ul {
   display: flex;
   flex-direction: row;
