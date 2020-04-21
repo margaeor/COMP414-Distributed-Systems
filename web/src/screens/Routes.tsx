@@ -7,6 +7,9 @@ import Lobby from "./Lobby";
 import Loader from "./Loader";
 import Game from "./Game";
 import { selectScreen, selectLoader } from "../store/selectors";
+import Header from "./common/Header";
+
+import "./Routes.css";
 
 const Routes = ({
   screen,
@@ -35,4 +38,15 @@ const mapStateToProps = (state: State) => {
   };
 };
 
-export default connect(mapStateToProps)(Routes);
+const ConnectedRoutes = connect(mapStateToProps)(Routes);
+
+const Wrapper = () => {
+  return (
+    <div className="container">
+      <Header />
+      <ConnectedRoutes />
+    </div>
+  );
+};
+
+export default Wrapper;

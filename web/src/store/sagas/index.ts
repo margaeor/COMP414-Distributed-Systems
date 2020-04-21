@@ -6,8 +6,9 @@ import {
   updateLobby,
   setPlay,
   changeScreen,
+  updatePlayData,
 } from "../actions";
-import { LoginStep, Game, ScreenState, LoaderStep } from "../types";
+import { LoginStep, Game, ScreenState, LoaderStep, PlayStep } from "../types";
 
 function* joinFakeGame() {
   yield put(changeScreen(ScreenState.GAME, LoaderStep.INACTIVE));
@@ -73,6 +74,11 @@ function* joinFakeGame() {
       opponent: "john",
       started: false,
       won: false,
+    })
+  );
+  yield put(
+    updatePlayData(PlayStep.ONGOING, {
+      board: "rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2",
     })
   );
 }

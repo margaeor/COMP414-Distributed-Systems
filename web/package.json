@@ -48,8 +48,8 @@
     "dotenv-webpack": "^1.7.0"
   },
   "dependencies": {
-    "@chrisoakman/chessboardjs": "^1.0.0",
     "chess.js": "^0.10.3",
+    "chessboardjsx": "^2.4.2",
     "react": "^16.13.1",
     "react-cookie": "^4.0.3",
     "react-dom": "^16.13.1",

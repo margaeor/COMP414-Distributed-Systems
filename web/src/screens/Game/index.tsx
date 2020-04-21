@@ -1,7 +1,32 @@
-import React from "react";
+import React, { useLayoutEffect } from "react";
+import { connect } from "react-redux";
+import { State } from "../../store/types";
+import { selectBoard } from "../../store/selectors";
+import Chessboard from "chessboardjsx";
 
-const Game: React.FunctionComponent = () => {
-  return <h1>Pro gamer move</h1>;
+import "./style.css";
+
+const Game = ({ board }: { board: string }) => {
+  return (
+    <div className="gameContainer">
+      <div className="chat">
+        <textarea id="history" readOnly />
+        <div className="form">
+          <textarea id="chatBox" readOnly />
+          <button type="button">Send</button>
+        </div>
+      </div>
+      <Chessboard position={board} />
+    </div>
+  );
 };
 
-export default Game;
+const mapStateToProps = (state: State) => {
+  return {
+    board: selectBoard(state),
+  };
+};
+
+const mapDispatchToProps = {};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Game);

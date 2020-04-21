@@ -1,3 +1,5 @@
+export * from "./game";
+
 import { State } from "../types";
 
 export function selectScreen({ screen }: State) {
