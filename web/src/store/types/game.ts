@@ -47,7 +47,7 @@ export const NULL_PLAY_STATE: PlayState = {
   },
   step: PlayStep.ONGOING,
   data: {
-    board: "",
+    board: "start;;w",
   },
   history: "",
   message: "",

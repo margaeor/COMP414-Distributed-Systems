@@ -31,7 +31,7 @@ const Lobby: React.FunctionComponent<IProps> = (props) => {
         <span>Tournaments</span>
         <ul className="tournamentList">
           {props.tournaments.map((t) => (
-            <li>
+            <li key={t.id}>
               <span>{`${t.players}/${t.maxPlayers} ${t.name}`}</span>
               <button onClick={(e) => props.joinTournament(t.id)}>Join</button>
             </li>
@@ -42,7 +42,7 @@ const Lobby: React.FunctionComponent<IProps> = (props) => {
         <span>Ongoing Matches</span>
         <ul className="playList">
           {props.plays.map((p) => (
-            <li>
+            <li key={p.id}>
               <span>{`Opponent: ${p.opponent} ${
                 p.started ? "Started" : ""
               }`}</span>

@@ -1,14 +1,13 @@
 import React, { useLayoutEffect } from "react";
 import { connect } from "react-redux";
 import { State } from "../../store/types";
-import { selectBoard, selectMessage } from "../../store/selectors";
-import { updateMessage, sendMessage } from "../../store/actions";
-import Chessboard from "chessboardjsx";
+import { selectGameData, selectMessage } from "../../store/selectors";
+import { updateMessage, sendMessage, makeMove } from "../../store/actions";
 
 import "./Game.css";
+import ValidatedChessboard from "./ValidatedChessboard";
 
 interface IProps {
-  board: string;
   message: string;
   history: string;
   updateMessage: (a: string) => void;
@@ -29,14 +28,14 @@ const Game = (props: IProps) => {
           <button onClick={(e) => props.sendMessage()}>Send</button>
         </div>
       </div>
-      <Chessboard position={props.board} />
+      <ValidatedChessboard />
     </div>
   );
 };
 
 const mapStateToProps = (state: State) => {
   return {
-    board: selectBoard(state),
+    board: selectGameData(state),
     message: selectMessage(state),
   };
 };
