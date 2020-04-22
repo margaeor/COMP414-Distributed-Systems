@@ -10,6 +10,8 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.1",
-    "mongoose": "^5.9"
+    "mongoose": "^5.9",
+    "node-zookeeper-client": "^1.1.0",
+    "zookeeper": "^4.5.2"
   }
 }

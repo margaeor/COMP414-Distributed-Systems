@@ -54,9 +54,14 @@ services:
       - "3001:3000"
     depends_on:
       - mongo
+      - zookeeper
+    networks:
+      - backend
   mongo:
     container_name: mongo
     image: mongo
+    networks:
+      - backend
     #volumes:
       #- ./node-api/mongo/data:/data/db
     ports:

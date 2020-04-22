@@ -3,7 +3,7 @@ mkdir /tmp/node
 
 loc=/media/windows/Distributed/project/node-api/api/src
 
-cp $loc/package.json /tmp/node
+%cp $loc/package.json /tmp/node
 
 cd /tmp/node
 
