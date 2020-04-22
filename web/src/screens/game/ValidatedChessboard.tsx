@@ -6,7 +6,7 @@ import { makeMove } from "../../store/actions";
 import {
   highlightPossibleMoves,
   styleActiveSquares,
-  styleDropSquare,
+  DROP_SQUARE_STYLE,
   BOARD_STYLE,
 } from "./ChessboardStyle";
 import { connect } from "react-redux";
@@ -33,7 +33,7 @@ interface IPropsWithChildren extends IProps {
 // Stolen from https://chessboardjsx.com/integrations/move-validation
 class ChessController extends Component<IPropsWithChildren, IState> {
   state = {
-    dropSquareStyle: {},
+    dropSquareStyle: DROP_SQUARE_STYLE,
     squareStyles: {},
     pieceSquare: "" as "" | Square,
     square: "" as "" | Square,
@@ -92,25 +92,6 @@ class ChessController extends Component<IPropsWithChildren, IState> {
     });
   };
 
-  // onMouseOutSquare = (square: Square) => {
-  //   console.log("mouse_out");
-  //   this.setState({
-  //     squareStyles: styleActiveSquares(this.props.game, this.state.pieceSquare),
-  //   });
-  // };
-
-  // central squares get diff dropSquareStyles
-  onDragOverSquare = (square: Square) => {
-    // Memoize the location of the square
-    if (this.state.square === square) return;
-
-    this.setState({
-      square,
-      ...styleDropSquare(square),
-      squareStyles: styleActiveSquares(this.props.game, ""),
-    });
-  };
-
   onSquareRightClick = (square: Square) =>
     this.setState({
       squareStyles: { [square]: { backgroundColor: "deepPink" } },
@@ -123,10 +104,8 @@ class ChessController extends Component<IPropsWithChildren, IState> {
       squareStyles,
       position: this.props.game.fen(),
       onMouseOverSquare: this.onMouseOverSquare,
-      // onMouseOutSquare: this.onMouseOutSquare,
       onDrop: this.onDrop,
       dropSquareStyle,
-      onDragOverSquare: this.onDragOverSquare,
       onSquareClick: this.onSquareClick,
       onSquareRightClick: this.onSquareRightClick,
     });
@@ -141,7 +120,6 @@ function ValidatedChessboard(props: IProps) {
           position,
           onDrop,
           onMouseOverSquare,
-          onMouseOutSquare,
           squareStyles,
           dropSquareStyle,
           onDragOverSquare,
@@ -149,13 +127,12 @@ function ValidatedChessboard(props: IProps) {
           onSquareRightClick,
         }) => (
           <Chessboard
-            width={320}
+            width={600}
             transitionDuration={300}
             position={position}
             orientation={props.color === "w" ? "white" : "black"}
             onDrop={onDrop}
             onMouseOverSquare={onMouseOverSquare}
-            onMouseOutSquare={onMouseOutSquare}
             boardStyle={BOARD_STYLE}
             squareStyles={squareStyles}
             dropSquareStyle={dropSquareStyle}

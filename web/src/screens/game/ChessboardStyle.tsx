@@ -1,6 +1,9 @@
 import { ShortMove, Square, ChessInstance } from "chess.js";
 
 const ACTIVE_SQUARE_STYLE = { backgroundColor: "rgba(255, 255, 0, 0.4)" };
+export const DROP_SQUARE_STYLE = {
+  boxShadow: "inset 0 0 1px 4px rgb(255, 255, 0)",
+};
 const POSSIBLE_SQUARE_STYLE = {
   background: "radial-gradient(circle, #fffc00 36%, transparent 40%)",
   borderRadius: "50%",
