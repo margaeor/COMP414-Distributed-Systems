@@ -4,8 +4,8 @@ export enum Game {
 }
 
 export enum PlayStep {
-  ONGOING,
-  FINISHED,
+  ONGOING = 0,
+  FINISHED = 1,
 }
 
 export interface Play {

@@ -87,7 +87,7 @@ class ChessController extends Component<IPropsWithChildren, IState> {
       square,
       squareStyles: {
         ...styleActiveSquares(this.props.game, this.state.pieceSquare),
-        ...highlightPossibleMoves(this.props.game, square),
+        ...highlightPossibleMoves(this.props.game, square, this.props.color),
       },
     });
   };
@@ -102,7 +102,6 @@ class ChessController extends Component<IPropsWithChildren, IState> {
 
     return this.props.children({
       squareStyles,
-      position: this.props.game.fen(),
       onMouseOverSquare: this.onMouseOverSquare,
       onDrop: this.onDrop,
       dropSquareStyle,
@@ -117,7 +116,6 @@ function ValidatedChessboard(props: IProps) {
     <div>
       <ChessController {...props}>
         {({
-          position,
           onDrop,
           onMouseOverSquare,
           squareStyles,
@@ -129,7 +127,7 @@ function ValidatedChessboard(props: IProps) {
           <Chessboard
             width={600}
             transitionDuration={300}
-            position={position}
+            position={props.game.fen()}
             orientation={props.color === "w" ? "white" : "black"}
             onDrop={onDrop}
             onMouseOverSquare={onMouseOverSquare}
@@ -156,7 +154,9 @@ const mapStateToProps = (state: State) => {
 
   // Recreate board from received data
   // @ts-ignore ts(2351)
+  console.log(board, move, color);
   const game = new Chess(board);
+  console.log(game.fen());
   if (move != "") game.move(move);
 
   return {

@@ -42,13 +42,15 @@ export const styleDropSquare = (square: Square) => {
 // show possible moves
 export const highlightPossibleMoves = (
   chess: ChessInstance,
-  square: Square
+  square: Square,
+  color: "b" | "w"
 ) => {
   const possibleSquares = chess
     .moves({
       square: square,
       verbose: true,
     })
+    .filter((m) => m.color === color)
     .map((m) => m.to);
 
   return possibleSquares.reduce((a, c) => {
