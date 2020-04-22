@@ -6,100 +6,109 @@ const HOST = '0.0.0.0';
 const express = require('express');
 const app = express();
 const connect = require('./connect.js');
-const zookeeper = require('node-zookeeper-client');
- 
-const client = zookeeper.createClient('zookeeper:2181',{ sessionTimeout: 5000 });
-
-const getChildrenPromise = (...args) => {
-  return new Promise((resolve, reject) => {
-    client.getChildren(...args, (error, children, stat) => {
-      error ? reject(error) : resolve(children)
-    })
-  })
-}
-
-const getValuePromise = (...args) => {
-  return new Promise((resolve, reject) => {
-    client.getData(...args, (error, value, stat) => {
-      error ? resolve("-1") : resolve(value)
-    })
-  })
-}
-
-client.on('connected', function () {
-  console.log('Connected to Zookeeper server.');
-});
-client.on('disconnected', function () {
-  console.log('Client state is changed to disconnected.');
-});
-client.on('expired', function () {
-  console.log('Client state is changed to expired.');
-});
-client.on('authenticationFailed', function () {
-  console.log('Client state is changed to authenticationFailed .');
-});
-client.on('connectedReadOnly', function () {
-  console.log('Client state is changed to connectedReadOnly.');
-});
-
-client.connect();
-
-
-
-// client.on('error', (err) => {
-//   console.error('whoops! there was an error');
-// });
-
-
+const {client, getChildren, getValue, getBestServer} = require('./zookeeper/functions.js');
+const globals = require('./global.js');
 
 const MAX_TOURNAMENT_PLAYERS = 3;
 
-const User = require('./user_model.js');
-const Tournament = require('./tournament_model.js');
-const {Game, ActiveGame} = require('./game_model.js');
-
+const User = require('./model/user_model.js');
+const Tournament = require('./model/tournament_model.js');
+const {Game, ActiveGame} = require('./model/game_model.js');
+const Lobby = require('./model/lobby_model.js');
 
 app.get('/get_server', async (req, res) => {
-  console.log('hi');
 
-  var path = '/playmasters';
-  var children;
-  var results;
-  var key_values;
 
-  try {
+  var server = await getBestServer();
 
-    children = await getChildrenPromise(path);
-
-    children = ['192.168.1.100','192.168.1.101','192.168.1.200'];
-    results = await Promise.all(children.map(async (x) => getValuePromise(path+'/'+x)));
-    results = results.map((key, idx) => parseInt(key.toString('utf8')));
-
-    key_values = children.reduce((obj, key, index) => ({ ...obj, [key]: results[index] }), {});
-
-  } catch (e) {
-
-      return res.send(e);
+  if(server) {
+    res.json(server);
+  } else {
+    res.send('Server not found');
   }
-  
 
-  res.json(key_values);
 
-  // client.getChildren(
-  //     path,
-  //     function (error, children, stat) {
-  //         if (error) {
-  //             res.send('Server list failed');
-  //             return;
-  //         }
-
-  //         res.json(children);
-  //     }
-  // );
-
-  //return res.send(listChildren(client,'/'));
-  //return res.send('Received a GET HTTP method servera');
 });
+
+app.get('/practice/join_queue', async (req, res) => {
+  
+  var username = req.query.username;
+  var game_type = req.query.game_type;
+
+  if(username && game_type && globals.game_types.includes(game_type)) {
+
+    try {
+      let query = {'_id':username};
+      let user_data = {'_id':username, email:username+'@gmail.com'};
+
+      let options = {upsert: true, new: true, setDefaultsOnInsert: true};
+
+      // If user doesn't exist, create it
+      let user = await User.findOneAndUpdate(query, user_data, options).exec();
+
+      let session = null;
+
+      Lobby.startSession().
+      then(_session => {
+        session = _session;
+        session.startTransaction();
+        return Lobby.findOne({ game_type: game_type }).session(session);
+      }).
+      then(lobby => {
+        console.log(lobby);
+      }).
+      then(() => session.commitTransaction()).
+      then(() => session.endSession());
+
+      // Customer.createCollection().
+      //   then(() => Customer.startSession()).
+      //   then(_session => {
+      //     session = _session;
+      //     session.startTransaction();
+      //     return Customer.create([{ name: 'Test' }], { session: session });
+      //   }).
+      //   then(() => Customer.create([{ name: 'Test2' }], { session: session })).
+      //   then(() => session.abortTransaction()).
+      //   then(() => Customer.countDocuments()).
+      //   then(count => assert.strictEqual(count, 0)).
+      //   then(() => session.endSession());
+      
+      res.json(tournament);
+    } catch(e) {
+      return res.send('Cannot create');
+    }
+
+  }
+  else return res.send('Wrong parameters');
+});
+
+//New practice game request
+// app.get('/practice/request', async (req, res) => {
+
+//   var opponent = req.query.opponent;
+//   var username = req.query.username;
+//   var game_type = req.query.game;
+
+//   if(opponent && game_type) {
+
+//     try {
+//       let query = {'_id':username};
+//       let user_data = {'_id':username, email:username+'@gmail.com'};
+  
+//       let options = {upsert: true, new: true, setDefaultsOnInsert: true};
+  
+//       // If user doesn't exist, create it
+//       let user = await User.findOneAndUpdate(query, user_data, options).exec();
+
+//     } catch(e) {
+//       return res.send('Cannot create');
+//     }
+
+//   }
+//   else return res.send('Wrong parameters');
+// });
+
+
 
 //Create new tournament
 app.get('/tournament/create', async (req, res) => {
@@ -108,14 +117,19 @@ app.get('/tournament/create', async (req, res) => {
 
   if(tournament_name) {
 
-    let tournament =  await Tournament.create({
-      name: tournament_name,
-      date_created: new Date()
-    });
+    try {
+      let tournament =  await Tournament.create({
+        name: tournament_name,
+        date_created: new Date()
+      });
+  
+      res.json(tournament);
+    } catch(e) {
+      return res.send('Cannot create');
+    }
 
-    res.json(tournament);
   }
-  else return res.send('Received a GET HTTP method2');
+  else return res.send('Wrong parameters');
 });
 
 // Register to tournament
@@ -126,11 +140,13 @@ app.get('/tournament/register', async function(req, res) {
 
   if(tournament_id && username) {
 
-    let query = {'username':username};
+    let query = {'_id':username};
+    let user_data = {'_id':username, email:username+'@gmail.com'};
+
     let options = {upsert: true, new: true, setDefaultsOnInsert: true};
 
     // If user doesn't exist, create it
-    let user = await User.findOneAndUpdate(query, query, options).exec();
+    let user = await User.findOneAndUpdate(query, user_data, options).exec();
 
     let participant_limiter = String("participants."+(MAX_TOURNAMENT_PLAYERS-1));
 
@@ -141,7 +157,7 @@ app.get('/tournament/register', async function(req, res) {
     };
     query[participant_limiter] = { "$exists": false };
 
-    // Try to join the tournament
+    //Try to join the tournament
     let tournament = await Tournament
       .findOneAndUpdate(
         query,
@@ -151,7 +167,7 @@ app.get('/tournament/register', async function(req, res) {
           runValidators: true,
           context: query
         }
-      ).exec();
+      ).populate('user').exec();
 
     
     if(tournament) {
@@ -175,6 +191,12 @@ app.get('/tournament/list', (req, res) => {
 
   //return res.send('Received a GET HTTP method3');
 });
+
+
+
+
+
+
 
 
 console.log(`Running on http://${HOST}:${PORT}`);

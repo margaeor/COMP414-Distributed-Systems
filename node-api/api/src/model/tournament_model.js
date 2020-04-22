@@ -24,7 +24,7 @@ var tournament = new mongoose.Schema({
     default: false
   },
   participants: {
-    type: [{ type: Schema.Types.ObjectId, ref: 'User'}],
+    type: [{ type: String, ref: 'User'}],//Schema.Types.ObjectId
     validate: {
       validator: function (v) {
           return v.length <= 1
