@@ -17,6 +17,7 @@ interface IState {
   dropSquareStyle: CSSProperties; // square styles for active drop square
   squareStyles: { [square in Square]?: CSSProperties }; // custom square styles
   pieceSquare: Square | ""; // square with the currently clicked piece
+  square: Square | ""; // square below the cursor
 }
 
 interface IProps {
@@ -34,7 +35,8 @@ class ChessController extends Component<IPropsWithChildren, IState> {
   state = {
     dropSquareStyle: {},
     squareStyles: {},
-    pieceSquare: "" as "",
+    pieceSquare: "" as "" | Square,
+    square: "" as "" | Square,
   };
 
   movePiece = (sourceSquare: Square | "", targetSquare: Square) => {
@@ -53,7 +55,7 @@ class ChessController extends Component<IPropsWithChildren, IState> {
       this.props.game.undo();
       return false;
     } else {
-      makeMove(move.san);
+      this.props.makeMove(move.san);
       return true;
     }
   };
@@ -78,7 +80,11 @@ class ChessController extends Component<IPropsWithChildren, IState> {
   };
 
   onMouseOverSquare = (square: Square) => {
+    // Memoize the location of the square
+    if (this.state.square === square) return;
+
     this.setState({
+      square,
       squareStyles: {
         ...styleActiveSquares(this.props.game, this.state.pieceSquare),
         ...highlightPossibleMoves(this.props.game, square),
@@ -86,15 +92,20 @@ class ChessController extends Component<IPropsWithChildren, IState> {
     });
   };
 
-  onMouseOutSquare = (square: Square) => {
-    this.setState({
-      squareStyles: styleActiveSquares(this.props.game, this.state.pieceSquare),
-    });
-  };
+  // onMouseOutSquare = (square: Square) => {
+  //   console.log("mouse_out");
+  //   this.setState({
+  //     squareStyles: styleActiveSquares(this.props.game, this.state.pieceSquare),
+  //   });
+  // };
 
   // central squares get diff dropSquareStyles
   onDragOverSquare = (square: Square) => {
+    // Memoize the location of the square
+    if (this.state.square === square) return;
+
     this.setState({
+      square,
       ...styleDropSquare(square),
       squareStyles: styleActiveSquares(this.props.game, ""),
     });
@@ -112,7 +123,7 @@ class ChessController extends Component<IPropsWithChildren, IState> {
       squareStyles,
       position: this.props.game.fen(),
       onMouseOverSquare: this.onMouseOverSquare,
-      onMouseOutSquare: this.onMouseOutSquare,
+      // onMouseOutSquare: this.onMouseOutSquare,
       onDrop: this.onDrop,
       dropSquareStyle,
       onDragOverSquare: this.onDragOverSquare,

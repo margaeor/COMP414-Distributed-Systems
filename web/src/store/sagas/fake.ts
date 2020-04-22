@@ -1,14 +1,6 @@
 import { put } from "redux-saga/effects";
-import {
-  changeScreen,
-  setPlay,
-  updateLobby,
-  updateLoginData,
-  updateLoginStep,
-  updatePlayData,
-} from "../actions";
-import { Game, LoaderStep, LoginStep, PlayStep, ScreenState } from "../types";
-import login from "./login";
+import { setPlay, updatePlayData } from "../actions";
+import { Game, PlayStep } from "../types";
 
 export default function* joinFakeGame() {
   document.cookie = "refresh=; SameSite=Strict";
