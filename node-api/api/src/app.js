@@ -45,35 +45,41 @@ app.get('/practice/join_queue', async (req, res) => {
 
       // If user doesn't exist, create it
       let user = await User.findOneAndUpdate(query, user_data, options).exec();
-
       let session = null;
+      let other_user = null;
 
-      Lobby.startSession().
+      // Initialize transaction to pair users
+      await Lobby.startSession().
       then(_session => {
         session = _session;
         session.startTransaction();
         return Lobby.findOne({ game_type: game_type }).session(session);
       }).
       then(lobby => {
-        console.log(lobby);
+        if(lobby.queue.length == 0) {
+          lobby.queue.push(user._id);
+          return lobby.save();
+        } else {
+          other_user = lobby.queue.pop();
+          if(other_user == user._id) throw "User already in queue";
+          return lobby.save();
+        }
       }).
       then(() => session.commitTransaction()).
-      then(() => session.endSession());
+      then(() => session.endSession()).
+      catch((e) => console.log(e));
 
-      // Customer.createCollection().
-      //   then(() => Customer.startSession()).
-      //   then(_session => {
-      //     session = _session;
-      //     session.startTransaction();
-      //     return Customer.create([{ name: 'Test' }], { session: session });
-      //   }).
-      //   then(() => Customer.create([{ name: 'Test2' }], { session: session })).
-      //   then(() => session.abortTransaction()).
-      //   then(() => Customer.countDocuments()).
-      //   then(count => assert.strictEqual(count, 0)).
-      //   then(() => session.endSession());
+      if(other_user) {
+        if(other_user == user._id) {
+          res.send('Duplicate');
+        } else {
+          res.send('Creating game with '+other_user);
+        }
+      } else {
+        res.send('Added to queue');
+      }
       
-      res.json(tournament);
+      
     } catch(e) {
       return res.send('Cannot create');
     }
@@ -205,7 +211,7 @@ console.log(`Running on http://${HOST}:${PORT}`);
 app.set('port', process.env.PORT || PORT);
 
 
-connect('mongodb://mongo/test', {useNewUrlParser: true,useUnifiedTopology: true})
+connect('mongodb://root:password123@mongodb-primary/', {useNewUrlParser: true,useUnifiedTopology: true})
   .then(() => app.listen(PORT, () => {
     console.log('server on http://localhost:3000')
   }))

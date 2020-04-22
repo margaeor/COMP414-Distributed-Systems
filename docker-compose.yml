@@ -53,19 +53,65 @@ services:
     ports:
       - "3001:3000"
     depends_on:
-      - mongo
+      - mongodb-primary
       - zookeeper
     networks:
       - backend
-  mongo:
-    container_name: mongo
-    image: mongo
-    networks:
-      - backend
-    #volumes:
-      #- ./node-api/mongo/data:/data/db
+  # mongo:
+  #   container_name: mongo
+  #   image: mongo
+  #   networks:
+  #     - backend
+  #   #volumes:
+  #     #- ./node-api/mongo/data:/data/db
+  #   ports:
+  #     - "27017:27017"
+
+  mongodb-primary:
+    image: 'bitnami/mongodb:latest'
+    environment:
+      - MONGODB_ADVERTISED_HOSTNAME=mongodb-primary
+      - MONGODB_REPLICA_SET_MODE=primary
+      - MONGODB_ROOT_PASSWORD=password123
+      - MONGODB_REPLICA_SET_KEY=replicasetkey123
     ports:
       - "27017:27017"
+    networks:
+      - backend
+    container_name: mongodb-primary
+    #volumes:
+    #  - 'mongodb_master_data:/bitnami'
+
+  mongodb-secondary:
+    image: 'bitnami/mongodb:latest'
+    networks:
+      - backend
+    depends_on:
+      - mongodb-primary
+    environment:
+      - MONGODB_ADVERTISED_HOSTNAME=mongodb-secondary
+      - MONGODB_REPLICA_SET_MODE=secondary
+      - MONGODB_PRIMARY_HOST=mongodb-primary
+      - MONGODB_PRIMARY_PORT_NUMBER=27017
+      - MONGODB_PRIMARY_ROOT_PASSWORD=password123
+      - MONGODB_REPLICA_SET_KEY=replicasetkey123
+    container_name: mongodb-secondary
+
+  mongodb-arbiter:
+    image: 'bitnami/mongodb:latest'
+    networks:
+      - backend
+    depends_on:
+      - mongodb-primary
+    environment:
+      - MONGODB_ADVERTISED_HOSTNAME=mongodb-arbiter
+      - MONGODB_REPLICA_SET_MODE=arbiter
+      - MONGODB_PRIMARY_HOST=mongodb-primary
+      - MONGODB_PRIMARY_PORT_NUMBER=27017
+      - MONGODB_PRIMARY_ROOT_PASSWORD=password123
+      - MONGODB_REPLICA_SET_KEY=replicasetkey123
+    container_name: mongodb-arbiter
+
   # api:
   #   build: 
   #     context: './api/'
