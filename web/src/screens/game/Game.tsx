@@ -1,22 +1,35 @@
 import React, { useLayoutEffect } from "react";
 import { connect } from "react-redux";
 import { State } from "../../store/types";
-import { selectBoard } from "../../store/selectors";
+import { selectBoard, selectMessage } from "../../store/selectors";
+import { updateMessage, sendMessage } from "../../store/actions";
 import Chessboard from "chessboardjsx";
 
 import "./Game.css";
 
-const Game = ({ board }: { board: string }) => {
+interface IProps {
+  board: string;
+  message: string;
+  history: string;
+  updateMessage: (a: string) => void;
+  sendMessage: () => void;
+}
+
+const Game = (props: IProps) => {
   return (
     <div className="game">
       <div className="chat">
-        <textarea id="history" readOnly />
+        <textarea id="history" readOnly value={props.history} />
         <div className="form">
-          <textarea id="chatBox" readOnly />
-          <button type="button">Send</button>
+          <textarea
+            id="chatBox"
+            value={props.message}
+            onChange={(e) => props.updateMessage(e.target.value)}
+          />
+          <button onClick={(e) => props.sendMessage()}>Send</button>
         </div>
       </div>
-      <Chessboard position={board} />
+      <Chessboard position={props.board} />
     </div>
   );
 };
@@ -24,9 +37,10 @@ const Game = ({ board }: { board: string }) => {
 const mapStateToProps = (state: State) => {
   return {
     board: selectBoard(state),
+    message: selectMessage(state),
   };
 };
 
-const mapDispatchToProps = {};
+const mapDispatchToProps = { updateMessage, sendMessage };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Game);

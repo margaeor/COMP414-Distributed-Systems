@@ -11,3 +11,11 @@ export function selectBoard({
 export function selectPlay({ game: { play } }: State): Play {
   return play;
 }
+
+export function selectMessage({ game: { message } }: State) {
+  return message;
+}
+
+export function selectHistory({ game: { history } }: State) {
+  return history;
+}

@@ -28,6 +28,8 @@ export interface PlayState {
   play: Play;
   step: PlayStep;
   data: PlayData;
+  history: string;
+  message: string;
 }
 
 // Guards
@@ -47,4 +49,6 @@ export const NULL_PLAY_STATE: PlayState = {
   data: {
     board: "",
   },
+  history: "",
+  message: "",
 };

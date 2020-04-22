@@ -4,6 +4,9 @@ export const SET_PLAY = "SET_PLAY";
 export const UPDATE_PLAY_DATA = "UPDATE_PLAY_DATA";
 export const START_MOVE = "START_MOVE";
 export const MAKE_MOVE = "MAKE_MOVE";
+export const UPDATE_MESSAGE = "UPDATE_MESSAGE";
+export const UPDATE_HISTORY = "UPDATE_HISTORY";
+export const SEND_MESSAGE = "SEND_MESSAGE";
 
 export interface SetPlayAction {
   type: typeof SET_PLAY;
@@ -24,6 +27,16 @@ export interface StartMoveAction {
 export interface MakeMoveAction {
   type: typeof MAKE_MOVE;
   move: string;
+}
+
+export interface UpdateMessageAction {
+  type: typeof UPDATE_MESSAGE;
+  message: string;
+}
+
+export interface UpdateHistoryAction {
+  type: typeof UPDATE_HISTORY;
+  history: string;
 }
 
 export function setPlay(play: Play): SetPlayAction {
@@ -55,5 +68,25 @@ export function makeMove(move: string): MakeMoveAction {
   return {
     type: MAKE_MOVE,
     move,
+  };
+}
+
+export function updateMessage(message: string): UpdateMessageAction {
+  return {
+    type: UPDATE_MESSAGE,
+    message,
+  };
+}
+
+export function updateHistory(history: string): UpdateHistoryAction {
+  return {
+    type: UPDATE_HISTORY,
+    history,
+  };
+}
+
+export function sendMessage() {
+  return {
+    type: SEND_MESSAGE,
   };
 }
