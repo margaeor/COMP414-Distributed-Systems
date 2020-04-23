@@ -58,6 +58,15 @@ module.exports = {
           options: { name: "./res/[name].[contenthash:8].[ext]" },
         },
       },
+      // FIXME: Temporary fix for the react warnings
+      {
+        test: /chessboard.min.js$/,
+        loader: "string-replace-loader",
+        options: {
+          search: "componentWillReceiveProps",
+          replace: "UNSAFE_componentWillReceiveProps",
+        },
+      },
     ],
   },
   resolve: { extensions: [".js", ".jsx", ".ts", ".tsx"] },
@@ -65,7 +74,7 @@ module.exports = {
 
 if (process.env.NODE_ENV === "development") {
   module.exports.mode = "development";
-  module.exports.devtool = "inline-source-map";
+  module.exports.devtool = "source-map";
   module.exports.optimization = {
     removeAvailableModules: false,
     removeEmptyChunks: false,

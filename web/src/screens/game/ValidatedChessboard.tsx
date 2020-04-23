@@ -1,6 +1,6 @@
 import Chess, { ChessInstance, Square } from "chess.js";
 import Chessboard from "chessboardjsx";
-import React, { useEffect, useLayoutEffect, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { connect } from "react-redux";
 import { makeMove } from "../../store/actions";
 import { selectGameData } from "../../store/selectors";
@@ -29,7 +29,6 @@ const ValidatedChessboard = ({ game, color, makeMove }: IProps) => {
     from: "e1" as Square,
     to: "e1" as Square,
   });
-  const [squareStyles, setSquareStyles] = useState({});
   const [pieceSquare, setPieceSquare] = useState("" as Square | "");
   const [hoverSquare, setHoverSquare] = useState("" as Square | "");
   const [position, setPosition] = useState("");
@@ -84,26 +83,35 @@ const ValidatedChessboard = ({ game, color, makeMove }: IProps) => {
     });
 
     setPosition(newGame.fen());
-    makeMove(move.san);
-
     setPromotion({
       has: false,
       from: "e1",
       to: "e1",
     });
+
+    makeMove(move.san);
   };
 
-  // Set up an effect to color squares
-  useEffect(() => {
-    setSquareStyles({
+  // Memoize squares
+  const squareStyles = useMemo(
+    () => ({
       ...(hoverSquare && highlightPossibleMoves(game, hoverSquare, color)),
+      ...(pieceSquare && highlightPossibleMoves(game, pieceSquare, color)),
       ...styleActiveSquares(game, pieceSquare),
-    });
-  }, [pieceSquare, hoverSquare, game]);
+    }),
+    [pieceSquare, hoverSquare, game]
+  );
 
-  useLayoutEffect(() => {
+  // Update position when receiving new board
+  // it's not a good implementation
+  useMemo(() => {
+    setPromotion({
+      has: false,
+      from: "e1",
+      to: "e1",
+    });
     setPosition(game.fen());
-  }, [game]);
+  }, [game.fen()]);
 
   return (
     <div>

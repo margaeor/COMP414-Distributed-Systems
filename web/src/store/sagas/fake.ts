@@ -19,25 +19,26 @@ export default function* joinFakeGame() {
 }
 
 export function* generateFens() {
-  const gen_fen = (fen: string) =>
-    put(updatePlayData(PlayStep.ONGOING, fen + ";;w"));
+  const gen_fen = (fen: string, move: string = "") =>
+    put(updatePlayData(PlayStep.ONGOING, fen + ";" + move + ";w"));
 
   // @ts-ignore ts(2351)
   const game = new Chess(
     "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
   );
+  yield gen_fen(game.fen());
 
   while (1) {
-    yield gen_fen(game.fen());
     const { move }: MakeMoveAction = yield take(MAKE_MOVE);
+    yield call(sleep, 100);
+    yield gen_fen(game.fen(), move);
     game.move(move);
-    yield gen_fen(game.fen());
 
-    // yield call(sleep, 200);
+    yield call(sleep, 300);
 
     const moves = game.moves();
     const randomMove = moves[Math.floor(Math.random() * moves.length)];
+    yield gen_fen(game.fen(), randomMove);
     game.move(randomMove);
-    yield gen_fen(game.fen());
   }
 }
