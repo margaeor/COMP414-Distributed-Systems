@@ -1,5 +1,6 @@
-import { call, put } from "redux-saga/effects";
-import { setPlay, updatePlayData } from "../actions";
+import Chess from "chess.js";
+import { put, take, call } from "redux-saga/effects";
+import { MakeMoveAction, MAKE_MOVE, setPlay, updatePlayData } from "../actions";
 import { Game, PlayStep } from "../types";
 import { sleep } from "./utils";
 
@@ -21,16 +22,22 @@ export function* generateFens() {
   const gen_fen = (fen: string) =>
     put(updatePlayData(PlayStep.ONGOING, fen + ";;w"));
 
-  yield gen_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-  yield call(sleep, 10000);
-  yield gen_fen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1");
-  yield call(sleep, 2000);
-  yield gen_fen(
-    "rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2"
+  // @ts-ignore ts(2351)
+  const game = new Chess(
+    "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
   );
-  yield call(sleep, 2000);
-  yield gen_fen(
-    "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2"
-  );
-  yield call(sleep, 2000);
+
+  while (1) {
+    yield gen_fen(game.fen());
+    const { move }: MakeMoveAction = yield take(MAKE_MOVE);
+    game.move(move);
+    yield gen_fen(game.fen());
+
+    // yield call(sleep, 200);
+
+    const moves = game.moves();
+    const randomMove = moves[Math.floor(Math.random() * moves.length)];
+    game.move(randomMove);
+    yield gen_fen(game.fen());
+  }
 }

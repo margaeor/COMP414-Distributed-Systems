@@ -24,12 +24,12 @@ interface IPropsWithChildren extends IProps {
 }
 
 const ValidatedChessboard = ({ game, color, makeMove }: IProps) => {
-  const [promotion, updatePromotion] = useState({
+  const [promotion, setPromotion] = useState({
     has: false,
     from: "e1" as Square,
     to: "e1" as Square,
   });
-  const [squareStyles, updateSquareStyles] = useState({});
+  const [squareStyles, setSquareStyles] = useState({});
   const [pieceSquare, setPieceSquare] = useState("" as Square | "");
   const [hoverSquare, setHoverSquare] = useState("" as Square | "");
   const [position, setPosition] = useState("");
@@ -37,25 +37,30 @@ const ValidatedChessboard = ({ game, color, makeMove }: IProps) => {
   const movePiece = (sourceSquare: Square, targetSquare: Square) => {
     // see if the move is legal
     // @ts-ignore ts(2351)
-    const newGame = new Chess(game.fen());
+    const newGame: ChessInstance = new Chess(game.fen());
     let move = newGame.move({
       from: sourceSquare,
       to: targetSquare,
-      promotion: "q", // always promote to a queen for example simplicity
+      promotion: "q",
     });
 
     // illegal move or wrong color
     if (move === null || move.color !== color) return false;
     else if (move.flags.includes("p")) {
-      updatePromotion({
+      setPromotion({
         has: true,
         from: sourceSquare,
         to: targetSquare,
       });
+
+      // Move pawn manually
+      newGame.remove(sourceSquare);
+      newGame.put({ color, type: "p" }, targetSquare);
+      setPosition(newGame.fen());
     } else {
+      setPosition(newGame.fen());
       makeMove(move.san);
     }
-    setPosition(newGame.fen());
     return true;
   };
 
@@ -75,15 +80,22 @@ const ValidatedChessboard = ({ game, color, makeMove }: IProps) => {
     let move = newGame.move({
       from: promotion.from,
       to: promotion.to,
-      promotion: p, // always promote to a queen for example simplicity
+      promotion: p,
     });
+
     setPosition(newGame.fen());
     makeMove(move.san);
+
+    setPromotion({
+      has: false,
+      from: "e1",
+      to: "e1",
+    });
   };
 
   // Set up an effect to color squares
   useEffect(() => {
-    updateSquareStyles({
+    setSquareStyles({
       ...(hoverSquare && highlightPossibleMoves(game, hoverSquare, color)),
       ...styleActiveSquares(game, pieceSquare),
     });
