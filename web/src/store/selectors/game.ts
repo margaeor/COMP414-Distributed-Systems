@@ -1,11 +1,7 @@
 import { State, Play } from "../types";
 
-export function selectGameData({
-  game: {
-    data: { board },
-  },
-}: State) {
-  return board;
+export function selectGameData({ game: { data } }: State) {
+  return data;
 }
 
 export function selectPlay({ game: { play } }: State): Play {

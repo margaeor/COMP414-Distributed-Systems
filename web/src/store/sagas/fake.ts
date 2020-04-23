@@ -19,11 +19,7 @@ export default function* joinFakeGame() {
 
 export function* generateFens() {
   const gen_fen = (fen: string) =>
-    put(
-      updatePlayData(PlayStep.ONGOING, {
-        board: fen + ";;w",
-      })
-    );
+    put(updatePlayData(PlayStep.ONGOING, fen + ";;w"));
 
   yield gen_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
   yield call(sleep, 10000);

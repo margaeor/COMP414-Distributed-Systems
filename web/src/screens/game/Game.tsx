@@ -1,9 +1,8 @@
-import React, { useLayoutEffect } from "react";
+import React from "react";
 import { connect } from "react-redux";
-import { State } from "../../store/types";
+import { sendMessage, updateMessage } from "../../store/actions";
 import { selectGameData, selectMessage } from "../../store/selectors";
-import { updateMessage, sendMessage, makeMove } from "../../store/actions";
-
+import { State } from "../../store/types";
 import "./Game.css";
 import ValidatedChessboard from "./ValidatedChessboard";
 

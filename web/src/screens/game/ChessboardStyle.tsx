@@ -1,4 +1,4 @@
-import { ShortMove, Square, ChessInstance } from "chess.js";
+import { ChessInstance, Square } from "chess.js";
 
 const ACTIVE_SQUARE_STYLE = { backgroundColor: "rgba(255, 255, 0, 0.4)" };
 export const DROP_SQUARE_STYLE = {

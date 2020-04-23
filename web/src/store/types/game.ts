@@ -16,10 +16,6 @@ export interface Play {
   started: boolean;
 }
 
-export interface PlayData {
-  board: string;
-}
-
 export interface TournamentPlay extends Play {
   name: string;
 }
@@ -27,7 +23,7 @@ export interface TournamentPlay extends Play {
 export interface PlayState {
   play: Play;
   step: PlayStep;
-  data: PlayData;
+  data: string;
   history: string;
   message: string;
 }
@@ -46,9 +42,7 @@ export const NULL_PLAY_STATE: PlayState = {
     started: false,
   },
   step: PlayStep.ONGOING,
-  data: {
-    board: "start;;w",
-  },
+  data: "start;;w",
   history: "",
   message: "",
 };
