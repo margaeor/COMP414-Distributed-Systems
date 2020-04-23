@@ -52,6 +52,7 @@
   "dependencies": {
     "chess.js": "^0.10.3",
     "chessboardjsx": "^2.4.2",
+    "history": "^4.10.1",
     "react": "^16.13.1",
     "react-cookie": "^4.0.3",
     "react-dom": "^16.13.1",

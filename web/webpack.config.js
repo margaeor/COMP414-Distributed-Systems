@@ -16,6 +16,7 @@ module.exports = {
     hot: true,
     host: "0.0.0.0",
     disableHostCheck: true,
+    historyApiFallback: true,
   },
   plugins: [
     new CleanWebpackPlugin(),
