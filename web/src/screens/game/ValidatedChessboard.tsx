@@ -44,7 +44,7 @@ const ValidatedChessboard = ({ game, color, makeMove }: IProps) => {
     });
 
     // illegal move or wrong color
-    if (move === null || move.color !== color) return false;
+    if (move === null || move.color !== color || promotion.has) return false;
     else if (move.flags.includes("p")) {
       setPromotion({
         has: true,
