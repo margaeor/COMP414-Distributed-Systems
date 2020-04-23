@@ -1,22 +1,24 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
+var globals = require('../globals.js');
 
 var game = new mongoose.Schema({
-    player_1: {
-        type: Schema.Types.ObjectId, 
+    player1: {
+        type: String, 
         ref: 'User',
         required: true,
         default: null
     },
-    player_2: {
-        type: Schema.Types.ObjectId, 
+    player2: {
+        type: String, 
         ref: 'User',
         required: true,
         default: null
     },
-    date_created: {
-      type: Date,
-      required: true
+    game_type : {
+        type: String,
+        enum : globals.game_types,
+        required: true
     },
     has_started: {
       type: Boolean,
@@ -46,8 +48,7 @@ var active_game = new mongoose.Schema({
 _id: {
     type: Schema.Types.ObjectId, 
     ref: 'Game',
-    required: true,
-    default: null
+    required: true
 },
 server_id: {
     type: String,
@@ -63,7 +64,7 @@ var ActiveGame = mongoose.model('active_game', active_game);
 
 
 module.exports = {
-    game: Game,
-    active_game: ActiveGame,
+    Game,
+    ActiveGame,
 };
 

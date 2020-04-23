@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-var globals = require('../global.js');
+var globals = require('../globals.js');
 var connect = require('../connect.js');
 
 var Schema = mongoose.Schema;

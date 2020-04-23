@@ -6,8 +6,9 @@ const HOST = '0.0.0.0';
 const express = require('express');
 const app = express();
 const connect = require('./connect.js');
-const {client, getChildren, getValue, getBestServer} = require('./zookeeper/functions.js');
-const globals = require('./global.js');
+const zookeeper = require('./zookeeper/functions.js');
+const globals = require('./globals.js');
+const transactions = require('./transactions.js');
 
 const MAX_TOURNAMENT_PLAYERS = 3;
 
@@ -16,10 +17,121 @@ const Tournament = require('./model/tournament_model.js');
 const {Game, ActiveGame} = require('./model/game_model.js');
 const Lobby = require('./model/lobby_model.js');
 
+
+/**
+ * Performs an atomic matchmaking of user.
+ * First it checks the queue. If the queue is
+ * empty, the user is added to the queue.
+ * Otherwise, the user in the queue is
+ * extracted and returned.
+ * @param {Session} session 
+ * @param {String} username 
+ * @param {String} game_type 
+ * 
+ * @returns null if the user was added
+ * to queue and a username if another
+ * user wan in the queue
+ */
+function atomicPracticePairing(session, username, game_type) {
+
+  let other_user = null;
+
+  return Lobby.findOne({ game_type: game_type }).session(session)
+  .then( async (lobby) => {
+    //await new Promise(r => setTimeout(r, 8000));
+    if(lobby.queue.length == 0) {
+      //lobby.queue.push(username);
+    } else {
+      other_user = lobby.queue[0];
+      if(other_user != username) {
+        //lobby.queue.pop();
+      }
+    }
+    return Promise.all([other_user,lobby.save()]);
+  }).
+  then( (values) =>{
+    return new Promise((resolve, reject) => {
+      resolve(values[0]);
+    });
+  });
+
+}
+
+
+/** @TODO: Make function atomic
+ * Creates a game between 2 players (if possible)
+ * and adds the game to the active game list 
+ * of the players.
+ * @returns 
+ */
+async function createGame(user1,user2,type) {
+  
+  if(user1 && user2 && globals.game_types.includes(type)) {
+
+    try {
+      
+      let player_1 = await User.findById(user1).exec();
+      let player_2 = await User.findById(user2).exec();
+      if(player_1.active_games.length >= globals.max_games || player_2.active_games.length >= globals.max_games) 
+      {
+        throw "Maximum number of active games exceeded";
+      }
+
+      let game = await Game.create({
+        player1:user1,
+        player2:user2,
+        game_type:type
+      });
+      
+      var server = await zookeeper.getBestServer();
+
+      if(server) {
+        let active_game = await ActiveGame.create({
+          _id:game._id,
+          server_id:server.id,
+          server_ip:server.ip
+        });
+        
+        await User.updateMany(
+          {$or:[{_id:user1},{_id:user2}]},
+          {"$addToSet": {active_games: game._id}},
+          {
+            runValidators: true
+          }
+        ).exec();
+        return [game,active_game];
+      } else {
+        console.log('No play server found');
+        await Game.findByIdAndDelete(game._id).exec();
+        return false;
+      }
+
+      return false;
+    } catch(e) {
+      console.log(e);
+      return false;
+    }
+
+  }
+}
+
+async function createUserIfNotExists(username) {
+  let query = {'_id':username};
+  let user_data = {'_id':username};
+
+  let options = {upsert: true, new: true, setDefaultsOnInsert: true};
+
+  // If user doesn't exist, create it
+  let user = await User.findOneAndUpdate(query, user_data, options).exec();
+
+  return user;
+}
+
+
 app.get('/get_server', async (req, res) => {
 
 
-  var server = await getBestServer();
+  var server = await zookeeper.getBestServer();
 
   if(server) {
     res.json(server);
@@ -30,6 +142,7 @@ app.get('/get_server', async (req, res) => {
 
 });
 
+
 app.get('/practice/join_queue', async (req, res) => {
   
   var username = req.query.username;
@@ -38,55 +151,34 @@ app.get('/practice/join_queue', async (req, res) => {
   if(username && game_type && globals.game_types.includes(game_type)) {
 
     try {
-      let query = {'_id':username};
-      let user_data = {'_id':username, email:username+'@gmail.com'};
+      createUserIfNotExists(username);
+      let opponent = await transactions.runTransactionWithRetry(atomicPracticePairing, Lobby, username, game_type);
 
-      let options = {upsert: true, new: true, setDefaultsOnInsert: true};
-
-      // If user doesn't exist, create it
-      let user = await User.findOneAndUpdate(query, user_data, options).exec();
-      let session = null;
-      let other_user = null;
-
-      // Initialize transaction to pair users
-      await Lobby.startSession().
-      then(_session => {
-        session = _session;
-        session.startTransaction();
-        return Lobby.findOne({ game_type: game_type }).session(session);
-      }).
-      then(lobby => {
-        if(lobby.queue.length == 0) {
-          lobby.queue.push(user._id);
-          return lobby.save();
+      if(opponent) {
+        if(username == opponent) {
+          res.send('Already in queue');
         } else {
-          other_user = lobby.queue.pop();
-          if(other_user == user._id) throw "User already in queue";
-          return lobby.save();
-        }
-      }).
-      then(() => session.commitTransaction()).
-      then(() => session.endSession()).
-      catch((e) => console.log(e));
-
-      if(other_user) {
-        if(other_user == user._id) {
-          res.send('Duplicate');
-        } else {
-          res.send('Creating game with '+other_user);
+          createUserIfNotExists(opponent);
+          let result = await createGame(username,opponent,game_type);
+          if(result) {
+            let active_game = result[1];
+            res.json(active_game);
+          } 
+          else res.send('Error creating game');
         }
       } else {
         res.send('Added to queue');
       }
       
-      
     } catch(e) {
-      return res.send('Cannot create');
+      return res.send(e);
     }
 
   }
   else return res.send('Wrong parameters');
 });
+
+
 
 //New practice game request
 // app.get('/practice/request', async (req, res) => {
@@ -114,6 +206,46 @@ app.get('/practice/join_queue', async (req, res) => {
 //   else return res.send('Wrong parameters');
 // });
 
+
+app.get('/practice/join', async (req, res) => {
+  
+  var game_id = req.query.game_id;
+
+  if(game_id) {
+
+    try {
+      
+      let active_game = await ActiveGame.findById(game_id).exec();
+      
+      if(active_game) {
+        let server_exists = await zookeeper.isServerAvailable(active_game.server_id);
+        if(server_exists) {
+
+          // Server is available so return it
+          return res.json(active_game);
+        } else {
+
+          // We need a new server
+          var server = await zookeeper.getBestServer();
+
+          if(server) {
+
+            active_game.server_id = server.id;
+            active_game.server_ip = server.ip;
+            active_game.save();
+
+            res.json(active_game);
+          } else throw "No server found";
+        }
+      }
+      
+    } catch(e) {
+      return res.send(e);
+    }
+
+  }
+  else return res.send('Wrong parameters');
+});
 
 
 //Create new tournament
@@ -173,7 +305,7 @@ app.get('/tournament/register', async function(req, res) {
           runValidators: true,
           context: query
         }
-      ).populate('user').exec();
+      ).exec();
 
     
     if(tournament) {

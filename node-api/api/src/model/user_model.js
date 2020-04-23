@@ -13,6 +13,10 @@ var user = new Schema({
    game_requests: [{
      username: {type: String, required: true},
      game_type: {type: String, required: true},
+   }],
+   active_games: [{
+     type: Schema.Types.ObjectId,
+     ref: 'Game'
    }]
  });
 

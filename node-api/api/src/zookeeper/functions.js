@@ -1,6 +1,6 @@
 
 const client = require('./connect');
-
+const globals = require('../globals.js');
 
 const getChildrenPromise = (...args) => {
     return new Promise((resolve, reject) => {
@@ -18,6 +18,22 @@ const getValuePromise = (...args) => {
     })
 }
 
+const nodeExistsPromise = (...args) => {
+  return new Promise((resolve, reject) => {
+      client.exists(...args, (error, stat) => {
+      error ? reject("") : resolve(stat)
+      })
+  })
+}
+
+async function isServerAvailable(server_id) {
+  try {
+    return await nodeExistsPromise('/playmasters/'+server_id);
+  } catch(e) {
+    console.log(e);
+    return false;
+  }
+}
 
 async function getBestServer() {
   var children;
@@ -26,12 +42,12 @@ async function getBestServer() {
 
   var counter = 0;
 
-  while(!server_ip && counter < 3) {
+  while(!server_ip && counter++ < globals.max_zookeeper_reattempts) {
     try {
 
       children = await getChildrenPromise('/load_balance');
       
-      if(children.length <= 0 ) return res.send("Cannot list servers");
+      if(children.length <= 0 ) throw "Cannot list servers";
 
       children = children.map((x) => x.split('_'));
       children = children.map((x) => [x[0],parseInt(x[1])]);
@@ -43,16 +59,17 @@ async function getBestServer() {
       best_server_id = best_server[0];
 
     } catch (e) {
-        return false;
+        console.log(e);
+        continue;
     }
 
     try {
       server_ip = (await getValuePromise('/playmasters/'+best_server_id)).toString('utf8');
     } catch (e) {
-        console.log("Attempting again...");
+        console.log(e);
+        continue;
     }
-
-    counter++;
+    
   }
 
   if(!server_ip) return false;
@@ -65,5 +82,6 @@ module.exports = {
     client: client,
     getChildren: getChildrenPromise,
     getValue: getValuePromise,
-    getBestServer: getBestServer
+    getBestServer: getBestServer,
+    isServerAvailable: isServerAvailable
 };
