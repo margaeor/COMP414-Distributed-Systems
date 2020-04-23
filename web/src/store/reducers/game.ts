@@ -19,7 +19,6 @@ export default function game(
     | UpdatePlayDataAction
     | UpdateMessageAction
     | UpdateHistoryAction
-    | MakeMoveAction
 ): PlayState {
   switch (action.type) {
     case SET_PLAY:
@@ -32,11 +31,6 @@ export default function game(
         ...state,
         step: action.step,
         data: action.data,
-      };
-    case MAKE_MOVE:
-      return {
-        ...state,
-        data: action.cachedData,
       };
     case UPDATE_MESSAGE:
       return {

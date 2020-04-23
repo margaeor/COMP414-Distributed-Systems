@@ -1,6 +1,6 @@
 import Chess, { ChessInstance, Square } from "chess.js";
-import Chessboard, { Piece } from "chessboardjsx";
-import React, { Component, CSSProperties } from "react";
+import Chessboard from "chessboardjsx";
+import React, { CSSProperties, useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { makeMove } from "../../store/actions";
 import { selectGameData } from "../../store/selectors";
@@ -35,27 +35,20 @@ interface IPropsWithChildren extends IProps {
   children: (...args: any) => JSX.Element;
 }
 
-// Stolen from https://chessboardjsx.com/integrations/move-validation
-class ChessController extends Component<IPropsWithChildren, IState> {
-  state = {
-    dropSquareStyle: DROP_SQUARE_STYLE,
-    squareStyles: {},
-    pieceSquare: "" as "" | Square,
-    square: "" as "" | Square,
-    promotion: {
-      has: false,
-      from: "e1" as Square,
-      to: "e1" as Square,
-    },
-  };
+const ValidatedChessboard = (props: IProps) => {
+  const [promotion, updatePromotion] = useState({
+    has: false,
+    from: "e1" as Square,
+    to: "e1" as Square,
+  });
+  const [squareStyles, updateSquareStyles] = useState({});
+  const [pieceSquare, setPieceSquare] = useState("" as Square | "");
+  const [hoverSquare, setHoverSquare] = useState("" as Square | "");
 
-  movePiece = (sourceSquare: Square | "", targetSquare: Square) => {
-    if (sourceSquare == "") return false;
-
+  const movePiece = (sourceSquare: Square, targetSquare: Square) => {
     // see if the move is legal
     // @ts-ignore ts(2351)
-    const newGame = new Chess(this.props.game.fen());
-    let move = newGame.move({
+    let move = new Chess(props.game.fen()).move({
       from: sourceSquare,
       to: targetSquare,
       promotion: "q", // always promote to a queen for example simplicity
@@ -64,62 +57,26 @@ class ChessController extends Component<IPropsWithChildren, IState> {
     // illegal move or wrong color
     if (move === null) return false;
     else if (move.flags.includes("p")) {
-      this.setState({
-        promotion: {
-          has: true,
-          from: sourceSquare,
-          to: targetSquare,
-        },
+      updatePromotion({
+        has: true,
+        from: sourceSquare,
+        to: targetSquare,
       });
     } else {
-      this.props.makeMove(move.san);
+      props.makeMove(move.san);
     }
     return true;
   };
 
-  onDrop = ({
-    sourceSquare,
-    targetSquare,
-  }: {
-    sourceSquare: Square;
-    targetSquare: Square;
-  }) => this.movePiece(sourceSquare, targetSquare);
-
-  onSquareClick = (square: Square) => {
-    this.setState({
-      squareStyles: styleActiveSquares(this.props.game, square),
-      pieceSquare: square,
-    });
-
-    let moved = this.movePiece(this.state.pieceSquare, square);
-
-    if (moved) {
-      this.setState({
-        pieceSquare: "",
-      });
+  const onSquareClick = (square: Square) => {
+    if (pieceSquare && movePiece(pieceSquare, square)) {
+      setPieceSquare("");
+    } else {
+      setPieceSquare(square);
     }
   };
 
-  onMouseOverSquare = (square: Square) => {
-    // Memoize the location of the square
-    if (this.state.square === square) return;
-
-    this.setState({
-      square,
-      squareStyles: {
-        ...styleActiveSquares(this.props.game, this.state.pieceSquare),
-        ...highlightPossibleMoves(this.props.game, square, this.props.color),
-      },
-    });
-  };
-
-  onSquareRightClick = (square: Square) =>
-    this.setState({
-      squareStyles: { [square]: { backgroundColor: "deepPink" } },
-    });
-
-  onPromotion = (p: Piece) => {
-    const promotion = this.state.promotion;
+  const onPromotion = (p: string) => {
     if (!promotion.has) return;
 
     // @ts-ignore ts(2351)
@@ -128,70 +85,47 @@ class ChessController extends Component<IPropsWithChildren, IState> {
       to: promotion.to,
       promotion: p, // always promote to a queen for example simplicity
     });
-    this.props.makeMove(move.san);
+    props.makeMove(move.san);
   };
 
-  render() {
-    const { dropSquareStyle, squareStyles } = this.state;
-
-    return this.props.children({
-      squareStyles,
-      onMouseOverSquare: this.onMouseOverSquare,
-      onDrop: this.onDrop,
-      dropSquareStyle,
-      onSquareClick: this.onSquareClick,
-      onSquareRightClick: this.onSquareRightClick,
-      onPromotion: this.onPromotion,
-      hasPromotion: this.state.promotion.has,
+  // Set up an effect to color squares
+  useEffect(() => {
+    updateSquareStyles({
+      ...(hoverSquare &&
+        highlightPossibleMoves(props.game, hoverSquare, props.color)),
+      ...styleActiveSquares(props.game, pieceSquare),
     });
-  }
-}
+  }, [pieceSquare, hoverSquare, props.game]);
 
-function ValidatedChessboard(props: IProps) {
   return (
     <div>
-      <ChessController {...props}>
-        {({
-          onDrop,
-          onMouseOverSquare,
-          squareStyles,
-          dropSquareStyle,
-          onDragOverSquare,
-          onSquareClick,
-          onSquareRightClick,
-          onPromotion,
-          hasPromotion,
-        }) => (
-          <div>
-            <Chessboard
-              width={600}
-              transitionDuration={300}
-              position={props.game.fen()}
-              orientation={props.color === "w" ? "white" : "black"}
-              onDrop={onDrop}
-              onMouseOverSquare={onMouseOverSquare}
-              boardStyle={BOARD_STYLE}
-              squareStyles={squareStyles}
-              dropSquareStyle={dropSquareStyle}
-              onDragOverSquare={onDragOverSquare}
-              onSquareClick={onSquareClick}
-              onSquareRightClick={onSquareRightClick}
-            />
-            <div
-              className="promotionBar"
-              style={{ visibility: hasPromotion ? "visible" : "hidden" }}
-            >
-              <button onClick={(e) => onPromotion("q")}>Queen</button>
-              <button onClick={(e) => onPromotion("r")}>Rook</button>
-              <button onClick={(e) => onPromotion("b")}>Bishop</button>
-              <button onClick={(e) => onPromotion("n")}>Knight</button>
-            </div>
-          </div>
-        )}
-      </ChessController>
+      <Chessboard
+        width={600}
+        transitionDuration={300}
+        position={props.game.fen()}
+        orientation={props.color === "w" ? "white" : "black"}
+        onDrop={({ sourceSquare, targetSquare }) =>
+          movePiece(sourceSquare, targetSquare)
+        }
+        onDragOverSquare={(s) => setHoverSquare("")}
+        onMouseOverSquare={(s) => setHoverSquare(s)}
+        boardStyle={BOARD_STYLE}
+        squareStyles={squareStyles}
+        dropSquareStyle={DROP_SQUARE_STYLE}
+        onSquareClick={onSquareClick}
+      />
+      <div
+        className="promotionBar"
+        style={{ visibility: promotion.has ? "visible" : "hidden" }}
+      >
+        <button onClick={(e) => onPromotion("q")}>Queen</button>
+        <button onClick={(e) => onPromotion("r")}>Rook</button>
+        <button onClick={(e) => onPromotion("b")}>Bishop</button>
+        <button onClick={(e) => onPromotion("n")}>Knight</button>
+      </div>
     </div>
   );
-}
+};
 
 const mapStateToProps = (state: State) => {
   const dataString = selectGameData(state);
