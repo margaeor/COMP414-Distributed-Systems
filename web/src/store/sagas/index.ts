@@ -1,48 +1,20 @@
+import { createBrowserHistory, History } from "history";
 import { Dispatch } from "redux";
-import {
-  call,
-  fork,
-  take,
-  cancel,
-  select,
-  takeEvery,
-} from "redux-saga/effects";
-import { Play, LoaderStep, ScreenState } from "../types";
+import { takeLatest } from "redux-saga/effects";
+import { ChangeScreenAction, CHANGE_SCREEN } from "../actions";
+import { Play, ScreenState } from "../types";
 import joinFakeGame from "./fake";
 import game from "./game";
 import lobby from "./lobby";
 import getAccessToken from "./login";
-import { createBrowserHistory, History } from "history";
-import { ChangeScreenAction, CHANGE_SCREEN } from "../actions";
-import { selectPlay } from "../selectors";
+import { updateUrl, decodeUrl } from "./urls";
 
-/**
- * Small task that updates the url as we move around the app
- */
-function* updateUrl(history: History, { screen, loader }: ChangeScreenAction) {
-  if (loader != LoaderStep.INACTIVE) {
-    history.push("/loading");
-  } else {
-    switch (screen) {
-      case ScreenState.LOGIN:
-        history.push("/login");
-        break;
-      case ScreenState.GAME:
-        const { id }: Play = yield select(selectPlay);
-        history.push("/game?id=" + id);
-        break;
-      default:
-        history.push("/");
-        break;
-    }
-  }
-}
-
-function* mainSaga(history: History) {
+function* mainSaga(previousScreen: ScreenState, id?: string) {
   yield* joinFakeGame();
+
   const token = yield* getAccessToken();
 
-  switch (history.location) {
+  switch (previousScreen) {
     default:
       const play: Play = yield* lobby(token);
       yield* game(token, play);
@@ -51,11 +23,13 @@ function* mainSaga(history: History) {
 
 export default function* rootSaga(dispatch: Dispatch) {
   const history = createBrowserHistory();
-  yield takeEvery(CHANGE_SCREEN, (a) =>
+  yield takeLatest(CHANGE_SCREEN, (a) =>
     updateUrl(history, a as ChangeScreenAction)
   );
 
+  const { screen, id } = decodeUrl(history);
+
   while (1) {
-    yield* mainSaga(history);
+    yield* mainSaga(screen, id);
   }
 }

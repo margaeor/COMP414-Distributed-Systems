@@ -10,7 +10,7 @@ import game from "./game";
 import lobby from "./lobby";
 
 function screen(
-  state = ScreenState.INITIAL,
+  state = ScreenState.LOBBY,
   action: ChangeScreenAction
 ): ScreenState {
   if (action.type == CHANGE_SCREEN) {
