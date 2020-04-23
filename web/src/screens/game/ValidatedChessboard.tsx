@@ -1,6 +1,6 @@
 import Chess, { ChessInstance, Square } from "chess.js";
 import Chessboard from "chessboardjsx";
-import React, { CSSProperties, useState, useEffect } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import { connect } from "react-redux";
 import { makeMove } from "../../store/actions";
 import { selectGameData } from "../../store/selectors";
@@ -13,18 +13,6 @@ import {
 } from "./ChessboardStyle";
 import "./ValidatedChessboard.css";
 
-interface IState {
-  dropSquareStyle: CSSProperties; // square styles for active drop square
-  squareStyles: { [square in Square]?: CSSProperties }; // custom square styles
-  pieceSquare: Square | ""; // square with the currently clicked piece
-  square: Square | ""; // square below the cursor
-  promotion: {
-    has: boolean;
-    from: Square;
-    to: Square;
-  };
-}
-
 interface IProps {
   game: ChessInstance;
   color: "b" | "w";
@@ -35,7 +23,7 @@ interface IPropsWithChildren extends IProps {
   children: (...args: any) => JSX.Element;
 }
 
-const ValidatedChessboard = (props: IProps) => {
+const ValidatedChessboard = ({ game, color, makeMove }: IProps) => {
   const [promotion, updatePromotion] = useState({
     has: false,
     from: "e1" as Square,
@@ -44,18 +32,20 @@ const ValidatedChessboard = (props: IProps) => {
   const [squareStyles, updateSquareStyles] = useState({});
   const [pieceSquare, setPieceSquare] = useState("" as Square | "");
   const [hoverSquare, setHoverSquare] = useState("" as Square | "");
+  const [position, setPosition] = useState("");
 
   const movePiece = (sourceSquare: Square, targetSquare: Square) => {
     // see if the move is legal
     // @ts-ignore ts(2351)
-    let move = new Chess(props.game.fen()).move({
+    const newGame = new Chess(game.fen());
+    let move = newGame.move({
       from: sourceSquare,
       to: targetSquare,
       promotion: "q", // always promote to a queen for example simplicity
     });
 
     // illegal move or wrong color
-    if (move === null) return false;
+    if (move === null || move.color !== color) return false;
     else if (move.flags.includes("p")) {
       updatePromotion({
         has: true,
@@ -63,8 +53,9 @@ const ValidatedChessboard = (props: IProps) => {
         to: targetSquare,
       });
     } else {
-      props.makeMove(move.san);
+      makeMove(move.san);
     }
+    setPosition(newGame.fen());
     return true;
   };
 
@@ -80,30 +71,35 @@ const ValidatedChessboard = (props: IProps) => {
     if (!promotion.has) return;
 
     // @ts-ignore ts(2351)
-    let move = new Chess(this.props.game.fen()).move({
+    const newGame = new Chess(game.fen());
+    let move = newGame.move({
       from: promotion.from,
       to: promotion.to,
       promotion: p, // always promote to a queen for example simplicity
     });
-    props.makeMove(move.san);
+    setPosition(newGame.fen());
+    makeMove(move.san);
   };
 
   // Set up an effect to color squares
   useEffect(() => {
     updateSquareStyles({
-      ...(hoverSquare &&
-        highlightPossibleMoves(props.game, hoverSquare, props.color)),
-      ...styleActiveSquares(props.game, pieceSquare),
+      ...(hoverSquare && highlightPossibleMoves(game, hoverSquare, color)),
+      ...styleActiveSquares(game, pieceSquare),
     });
-  }, [pieceSquare, hoverSquare, props.game]);
+  }, [pieceSquare, hoverSquare, game]);
+
+  useLayoutEffect(() => {
+    setPosition(game.fen());
+  }, [game]);
 
   return (
     <div>
       <Chessboard
         width={600}
         transitionDuration={300}
-        position={props.game.fen()}
-        orientation={props.color === "w" ? "white" : "black"}
+        position={position}
+        orientation={color === "w" ? "white" : "black"}
         onDrop={({ sourceSquare, targetSquare }) =>
           movePiece(sourceSquare, targetSquare)
         }
