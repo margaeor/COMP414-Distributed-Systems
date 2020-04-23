@@ -1,16 +1,23 @@
-import { ScreenState, LoaderStep } from "../types";
+import { ScreenState, LoaderStep, User } from "../types";
 
+export * from "./administration";
 export * from "./game";
 export * from "./lobby";
 export * from "./login";
 
 export const CHANGE_SCREEN = "CHANGE_SCREEN";
 export const LOGOUT = "LOGOUT";
+export const SET_USER = "SET_USER";
 
 export interface ChangeScreenAction {
   type: typeof CHANGE_SCREEN;
   screen: ScreenState;
   loader: LoaderStep;
+}
+
+export interface SetUserAction {
+  type: typeof SET_USER;
+  user: User;
 }
 
 export function changeScreen(
@@ -27,5 +34,12 @@ export function changeScreen(
 export function logout() {
   return {
     type: LOGOUT,
+  };
+}
+
+export function setUser(user: User): SetUserAction {
+  return {
+    type: SET_USER,
+    user,
   };
 }

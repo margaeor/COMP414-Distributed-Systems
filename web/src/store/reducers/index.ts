@@ -1,10 +1,12 @@
 import { combineReducers } from "redux";
-import { State, ScreenState, LoaderStep } from "../types";
+import { State, ScreenState, LoaderStep, NULL_USER } from "../types";
 import {
   ChangeScreenAction,
   CHANGE_SCREEN,
-  UpdateLoginErrorAction,
-  UPDATE_LOGIN_ERROR,
+  UpdateLoginErrorAction as UpdateErrorAction,
+  UPDATE_ERROR,
+  SetUserAction,
+  SET_USER,
 } from "../actions";
 import game from "./game";
 import lobby from "./lobby";
@@ -29,14 +31,19 @@ function loader(
   return state;
 }
 
-function loginError(state = "", action: UpdateLoginErrorAction) {
-  return action.type == UPDATE_LOGIN_ERROR ? action.error : state;
+function error(state = "", action: UpdateErrorAction) {
+  return action.type == UPDATE_ERROR ? action.error : state;
+}
+
+function user(state = NULL_USER, action: SetUserAction) {
+  return action.type == SET_USER ? action.user : state;
 }
 
 export default combineReducers<State>({
   screen,
   loader,
-  loginError,
+  error,
+  user,
   game,
   lobby,
 });

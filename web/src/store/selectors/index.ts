@@ -11,6 +11,10 @@ export function selectLoader({ loader }: State) {
   return loader;
 }
 
-export function selectLoginError({ loginError }: State): string {
+export function selectError({ error: loginError }: State): string {
   return loginError;
+}
+
+export function selectUser({ user }: State) {
+  return user;
 }

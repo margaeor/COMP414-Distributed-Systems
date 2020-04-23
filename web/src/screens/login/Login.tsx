@@ -3,7 +3,7 @@ import "./Login.css";
 import { connect } from "react-redux";
 import { State } from "../../store/types";
 import { loginSubmit, loginForgot, loginSignUp } from "../../store/actions";
-import { selectLoginError } from "../../store/selectors";
+import { selectError } from "../../store/selectors";
 
 interface IProps {
   loginSubmit: typeof loginSubmit;
@@ -87,7 +87,7 @@ const Login = ({ loginSignUp, loginSubmit, loginForgot, error }: IProps) => {
 
 const mapStateToProps = (state: State) => {
   return {
-    error: selectLoginError(state),
+    error: selectError(state),
   };
 };
 

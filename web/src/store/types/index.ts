@@ -18,10 +18,23 @@ export enum LoaderStep {
   FAILED = 2,
 }
 
+export interface User {
+  username: string;
+  officer: boolean;
+  admin: boolean;
+}
+
+export const NULL_USER = {
+  username: "",
+  officer: false,
+  admin: false,
+};
+
 export interface State {
   screen: ScreenState;
   loader: LoaderStep;
-  loginError: string;
+  error: string;
+  user: User;
   lobby: LobbyState;
   game: PlayState;
 }

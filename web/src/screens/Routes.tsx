@@ -10,6 +10,7 @@ import { selectScreen, selectLoader } from "../store/selectors";
 import Header from "./common/Header";
 
 import "./Routes.css";
+import Administration from "./admin/Administration";
 
 const Routes = ({
   screen,
@@ -26,6 +27,8 @@ const Routes = ({
       return <Lobby />;
     case ScreenState.GAME:
       return <Game />;
+    case ScreenState.ADMINISTRATION:
+      return <Administration />;
     default:
       return <Loader />;
   }
