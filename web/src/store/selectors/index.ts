@@ -1,6 +1,5 @@
 export * from "./game";
 export * from "./lobby";
-export * from "./login";
 
 import { State } from "../types";
 
@@ -10,4 +9,8 @@ export function selectScreen({ screen }: State) {
 
 export function selectLoader({ loader }: State) {
   return loader;
+}
+
+export function selectLoginError({ loginError }: State): string {
+  return loginError;
 }

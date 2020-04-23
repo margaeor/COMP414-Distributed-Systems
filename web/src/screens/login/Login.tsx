@@ -1,73 +1,70 @@
-import React from "react";
+import React, { useState } from "react";
 import "./Login.css";
 import { connect } from "react-redux";
-import { State, LoginState, LoginStep } from "../../store/types";
-import { selectLoginData } from "../../store/selectors";
-import {
-  updateLoginUsername,
-  updateLoginPassword,
-  updateLoginAnswer,
-  submitLogin,
-  forgotPassword,
-  goToSignUp,
-  returnToLogin,
-} from "../../store/actions";
+import { State } from "../../store/types";
+import { loginSubmit, loginForgot, loginSignUp } from "../../store/actions";
+import { selectLoginError } from "../../store/selectors";
 
-interface IDispatchProps {
-  updateLoginUsername: (a: string) => void;
-  updateLoginPassword: (a: string) => void;
-  updateLoginAnswer: (a: string) => void;
-  submitLogin: () => void;
-  forgotPassword: () => void;
-  goToSignUp: () => void;
-  returnToLogin: () => void;
+interface IProps {
+  loginSubmit: typeof loginSubmit;
+  loginForgot: typeof loginForgot;
+  loginSignUp: typeof loginSignUp;
+  error: string;
 }
 
-interface IProps extends IDispatchProps, LoginState {}
+enum LoginType {
+  LOGIN = 0,
+  FORGOT = 1,
+  SIGN_UP = 2,
+}
 
-const Login = (props: IProps) => {
-  const s = props.step;
+const Login = ({ loginSignUp, loginSubmit, loginForgot, error }: IProps) => {
+  const [type, setType] = useState(LoginType.LOGIN);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [answer, setAnswer] = useState("");
+
+  const submit = () => {
+    switch (type) {
+      case LoginType.LOGIN:
+        loginSubmit(username, password);
+        break;
+      case LoginType.FORGOT:
+        loginForgot(username, password, answer);
+        break;
+      case LoginType.SIGN_UP:
+        loginSignUp(username, password, answer);
+        break;
+    }
+  };
+
   return (
     <div className="login">
       <span className="header">
-        {s == LoginStep.FORM && "Sign In"}
-        {s == LoginStep.FORGOT && "Forgot Password"}
-        {s == LoginStep.SIGN_UP && "Sign Up"}
+        {type == LoginType.LOGIN && "Sign In"}
+        {type == LoginType.FORGOT && "Forgot Password"}
+        {type == LoginType.SIGN_UP && "Sign Up"}
       </span>
 
       <input
         type="text"
         placeholder="Username"
-        value={props.username}
-        onChange={(e) => props.updateLoginUsername(e.target.value)}
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
       />
       <input
         type="password"
-        placeholder={s == LoginStep.FORM ? "Password" : "New Password"}
-        value={props.password}
-        onChange={(e) => props.updateLoginPassword(e.target.value)}
+        placeholder={type == LoginType.LOGIN ? "Password" : "New Password"}
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
       />
 
-      {s == LoginStep.FORM ? (
+      {type == LoginType.LOGIN ? (
         <div className="actionButtons">
-          <a
-            href=""
-            onClick={(e) => {
-              e.preventDefault();
-              props.forgotPassword();
-            }}
-          >
+          <button onClick={() => setType(LoginType.FORGOT)}>
             Forgot Password
-          </a>
-          <a
-            href=""
-            onClick={(e) => {
-              e.preventDefault();
-              props.goToSignUp();
-            }}
-          >
-            Sign Up
-          </a>
+          </button>
+          <button onClick={() => setType(LoginType.SIGN_UP)}>Sign Up</button>
         </div>
       ) : (
         <>
@@ -75,51 +72,29 @@ const Login = (props: IProps) => {
           <input
             type="text"
             placeholder="Answer"
-            value={props.answer}
-            onChange={(e) => props.updateLoginAnswer(e.target.value)}
+            value={answer}
+            onChange={(e) => setAnswer(e.target.value)}
           />
-          <a
-            href=""
-            onClick={(e) => {
-              e.preventDefault();
-              props.returnToLogin();
-            }}
-          >
-            Go back
-          </a>
+          <button onClick={() => setType(LoginType.LOGIN)}>Go Back</button>
         </>
       )}
 
-      {props.error !== "" && <span className="error">{props.error}</span>}
-      <input
-        className="loginButton"
-        type="submit"
-        value="Submit"
-        onClick={(e) => props.submitLogin()}
-      />
+      {error !== "" && <span className="error">{error}</span>}
+      <button onClick={submit}>Submit</button>
     </div>
   );
 };
 
 const mapStateToProps = (state: State) => {
-  const d = selectLoginData(state);
   return {
-    step: d.step,
-    username: d.username,
-    password: d.password,
-    answer: d.answer,
-    error: d.error,
+    error: selectLoginError(state),
   };
 };
 
 const mapDispatchToProps = {
-  updateLoginUsername,
-  updateLoginPassword,
-  updateLoginAnswer,
-  submitLogin,
-  forgotPassword,
-  goToSignUp,
-  returnToLogin,
+  loginSubmit,
+  loginForgot,
+  loginSignUp,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Login);

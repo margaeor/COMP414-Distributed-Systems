@@ -1,71 +1,56 @@
 import { put, take, fork, cancel, select, call } from "redux-saga/effects";
 import {
-  changeScreen,
-  FORGOT_PASSWORD,
-  GO_TO_SIGN_UP,
-  RETURN_TO_LOGIN,
-  updateLoginStep,
-  SUBMIT_LOGIN,
-} from "../actions";
-import { ScreenState, LoaderStep, LoginStep, LoginState } from "../types";
-import { selectLoginData } from "../selectors";
-import {
   renewRefreshToken,
   signUp,
   changePassword,
   renewAccessToken,
 } from "./api/login";
-
-function* handleModeButtons() {
-  while (1) {
-    const { type } = yield take([
-      FORGOT_PASSWORD,
-      GO_TO_SIGN_UP,
-      RETURN_TO_LOGIN,
-    ]);
-
-    switch (type) {
-      case FORGOT_PASSWORD:
-        yield put(updateLoginStep(LoginStep.FORGOT, ""));
-        break;
-      case GO_TO_SIGN_UP:
-        yield put(updateLoginStep(LoginStep.SIGN_UP, ""));
-        break;
-      case RETURN_TO_LOGIN:
-        yield put(updateLoginStep(LoginStep.FORM, ""));
-    }
-  }
-}
+import {
+  changeScreen,
+  SUBMIT_LOGIN,
+  FORGOT_PASSWORD,
+  SIGN_UP,
+  LoginSubmitAction,
+  LoginForgotAction,
+  LoginSignUpAction,
+  updateLoginError,
+} from "../actions";
+import { ScreenState, LoaderStep } from "../types";
 
 function* login() {
-  yield put(updateLoginStep(LoginStep.FORM, ""));
   while (1) {
-    // Setup login screen
     yield put(changeScreen(ScreenState.LOGIN, LoaderStep.INACTIVE));
-    const buttonHandler = yield fork(handleModeButtons);
-    // Wait for submit
-    yield take(SUBMIT_LOGIN);
-    // Setup Loader
-    yield cancel(buttonHandler);
+    const action:
+      | LoginSubmitAction
+      | LoginForgotAction
+      | LoginSignUpAction = yield take([
+      SUBMIT_LOGIN,
+      FORGOT_PASSWORD,
+      SIGN_UP,
+    ]);
     yield put(changeScreen(ScreenState.LOGIN, LoaderStep.LOADING));
-    const d: LoginState = yield select(selectLoginData);
 
     // Make proper api call
     try {
-      switch (d.step) {
-        case LoginStep.FORM:
-          yield call(renewRefreshToken, d.username, d.password);
+      switch (action.type) {
+        case SUBMIT_LOGIN:
+          yield call(renewRefreshToken, action.username, action.password);
           break;
-        case LoginStep.FORGOT:
-          yield call(changePassword, d.username, d.password, d.answer);
+        case FORGOT_PASSWORD:
+          yield call(
+            changePassword,
+            action.username,
+            action.password,
+            action.answer
+          );
           break;
-        case LoginStep.SIGN_UP:
-          yield call(signUp, d.username, d.password, d.answer);
+        case SIGN_UP:
+          yield call(signUp, action.username, action.password, action.answer);
           break;
       }
       return yield call(renewAccessToken);
     } catch (e) {
-      updateLoginStep(d.step, e.toString());
+      updateLoginError(e.toString());
     }
   }
 }

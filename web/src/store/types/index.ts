@@ -1,10 +1,8 @@
-export * from "./login";
 export * from "./lobby";
 export * from "./game";
 
 import { PlayState } from "./game";
 import { LobbyState } from "./lobby";
-import { LoginState } from "./login";
 
 export enum ScreenState {
   INITIAL = 0,
@@ -22,7 +20,7 @@ export enum LoaderStep {
 export interface State {
   screen: ScreenState;
   loader: LoaderStep;
-  login: LoginState;
+  loginError: string;
   lobby: LobbyState;
   game: PlayState;
 }
