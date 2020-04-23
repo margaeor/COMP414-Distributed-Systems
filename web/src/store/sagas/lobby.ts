@@ -22,7 +22,7 @@ function* periodicFetch(token: string) {
     } catch (e) {
       console.log("fetching failed: " + e.toString());
     }
-    yield call(sleep, 5000);
+    yield* sleep(5000);
   }
 }
 

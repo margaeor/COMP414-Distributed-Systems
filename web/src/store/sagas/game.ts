@@ -8,5 +8,5 @@ export default function* game(token: string, play: Play) {
   yield put(changeScreen(ScreenState.GAME, LoaderStep.INACTIVE));
 
   yield call(generateFens);
-  yield call(sleep, 1000000000);
+  yield* sleep(1000000000);
 }

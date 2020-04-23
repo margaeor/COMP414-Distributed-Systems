@@ -30,11 +30,11 @@ export function* generateFens() {
 
   while (1) {
     const { move }: MakeMoveAction = yield take(MAKE_MOVE);
-    yield call(sleep, 100);
+    yield* sleep(100);
     yield gen_fen(game.fen(), move);
     game.move(move);
 
-    yield call(sleep, 300);
+    yield* sleep(300);
 
     const moves = game.moves();
     const randomMove = moves[Math.floor(Math.random() * moves.length)];

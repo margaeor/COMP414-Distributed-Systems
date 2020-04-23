@@ -1,3 +1,5 @@
-export async function sleep(ms: number) {
-  await new Promise((r) => setTimeout(r, ms));
+import { call } from "redux-saga/effects";
+
+export function* sleep(ms: number) {
+  yield call(() => new Promise((r) => setTimeout(r, ms)));
 }
