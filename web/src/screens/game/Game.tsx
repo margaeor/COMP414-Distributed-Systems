@@ -1,30 +1,37 @@
-import React from "react";
+import React, { useState } from "react";
 import { connect } from "react-redux";
-import { sendMessage, updateMessage } from "../../store/actions";
-import { selectGameData, selectMessage } from "../../store/selectors";
+import { sendMessage } from "../../store/actions";
+import { selectGameData, selectHistory } from "../../store/selectors";
 import { State } from "../../store/types";
 import "./Game.css";
 import ValidatedChessboard from "./ValidatedChessboard";
 
 interface IProps {
-  message: string;
   history: string;
-  updateMessage: (a: string) => void;
-  sendMessage: () => void;
+  sendMessage: typeof sendMessage;
 }
 
-const Game = (props: IProps) => {
+const Game = ({ history, sendMessage }: IProps) => {
+  const [message, setMessage] = useState("");
+
+  const submitMessage = () => {
+    if (message === "") return;
+    sendMessage(message);
+    setMessage("");
+  };
+
   return (
     <div className="game">
       <div className="chat">
-        <textarea id="history" readOnly value={props.history} />
+        <textarea id="history" readOnly value={history} />
         <div className="form">
-          <textarea
+          <input
             id="chatBox"
-            value={props.message}
-            onChange={(e) => props.updateMessage(e.target.value)}
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyPress={(e) => e.key === "Enter" && submitMessage()}
           />
-          <button onClick={(e) => props.sendMessage()}>Send</button>
+          <button onClick={submitMessage}>Send</button>
         </div>
       </div>
       <ValidatedChessboard />
@@ -35,10 +42,10 @@ const Game = (props: IProps) => {
 const mapStateToProps = (state: State) => {
   return {
     board: selectGameData(state),
-    message: selectMessage(state),
+    history: selectHistory(state),
   };
 };
 
-const mapDispatchToProps = { updateMessage, sendMessage };
+const mapDispatchToProps = { sendMessage };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Game);

@@ -12,9 +12,9 @@ interface IProps {
   fetched: boolean;
   plays: Play[];
   tournaments: Tournament[];
-  joinGame: (a: string) => void;
-  joinTournament: (a: string) => void;
-  joinQuickPlay: (a: Game) => void;
+  joinGame: typeof joinGame;
+  joinTournament: typeof joinTournament;
+  joinQuickPlay: typeof joinQuickPlay;
 }
 
 const Lobby: React.FunctionComponent<IProps> = (props) => {

@@ -25,7 +25,6 @@ export interface PlayState {
   step: PlayStep;
   data: string;
   history: string;
-  message: string;
 }
 
 // Guards
@@ -44,5 +43,4 @@ export const NULL_PLAY_STATE: PlayState = {
   step: PlayStep.ONGOING,
   data: "start;;w",
   history: "",
-  message: "",
 };

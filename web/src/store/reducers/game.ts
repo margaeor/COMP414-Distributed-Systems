@@ -1,14 +1,11 @@
 import {
   SetPlayAction,
   SET_PLAY,
-  UpdatePlayDataAction,
-  UPDATE_PLAY_DATA,
-  UPDATE_MESSAGE,
-  UpdateMessageAction,
-  UPDATE_HISTORY,
   UpdateHistoryAction,
-  MakeMoveAction,
-  MAKE_MOVE,
+  UpdateMessageAction,
+  UpdatePlayDataAction,
+  UPDATE_HISTORY,
+  UPDATE_PLAY_DATA,
 } from "../actions/game";
 import { NULL_PLAY_STATE, PlayState } from "../types";
 
@@ -31,11 +28,6 @@ export default function game(
         ...state,
         step: action.step,
         data: action.data,
-      };
-    case UPDATE_MESSAGE:
-      return {
-        ...state,
-        message: action.message,
       };
     case UPDATE_HISTORY:
       return {

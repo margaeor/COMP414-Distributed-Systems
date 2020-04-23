@@ -2,7 +2,6 @@ import { Play, PlayStep } from "../types";
 
 export const SET_PLAY = "SET_PLAY";
 export const UPDATE_PLAY_DATA = "UPDATE_PLAY_DATA";
-export const START_MOVE = "START_MOVE";
 export const MAKE_MOVE = "MAKE_MOVE";
 export const UPDATE_MESSAGE = "UPDATE_MESSAGE";
 export const UPDATE_HISTORY = "UPDATE_HISTORY";
@@ -19,18 +18,13 @@ export interface UpdatePlayDataAction {
   data: string;
 }
 
-export interface StartMoveAction {
-  type: typeof START_MOVE;
-  move: string;
-}
-
 export interface MakeMoveAction {
   type: typeof MAKE_MOVE;
   move: string;
 }
 
-export interface UpdateMessageAction {
-  type: typeof UPDATE_MESSAGE;
+export interface SendMessageAction {
+  type: typeof SEND_MESSAGE;
   message: string;
 }
 
@@ -57,24 +51,10 @@ export function updatePlayData(
   };
 }
 
-export function startMove(move: string): StartMoveAction {
-  return {
-    type: START_MOVE,
-    move,
-  };
-}
-
 export function makeMove(move: string): MakeMoveAction {
   return {
     type: MAKE_MOVE,
     move,
-  };
-}
-
-export function updateMessage(message: string): UpdateMessageAction {
-  return {
-    type: UPDATE_MESSAGE,
-    message,
   };
 }
 
@@ -85,8 +65,9 @@ export function updateHistory(history: string): UpdateHistoryAction {
   };
 }
 
-export function sendMessage() {
+export function sendMessage(message: string) {
   return {
     type: SEND_MESSAGE,
+    message: message,
   };
 }
