@@ -19,19 +19,19 @@ interface IProps {
   makeMove: (board: string) => void;
 }
 
-interface IPropsWithChildren extends IProps {
-  children: (...args: any) => JSX.Element;
-}
-
 const ValidatedChessboard = ({ game, color, makeMove }: IProps) => {
-  const [promotion, setPromotion] = useState({
+  const NO_PROMOTION = {
     has: false,
     from: "e1" as Square,
     to: "e1" as Square,
-  });
+  };
+  const [promotion, setPromotion] = useState(NO_PROMOTION);
+
   const [pieceSquare, setPieceSquare] = useState("" as Square | "");
   const [hoverSquare, setHoverSquare] = useState("" as Square | "");
+
   const [position, setPosition] = useState("");
+  const [serverPosition, setServerPosition] = useState("");
 
   const movePiece = (sourceSquare: Square, targetSquare: Square) => {
     // see if the move is legal
@@ -83,11 +83,7 @@ const ValidatedChessboard = ({ game, color, makeMove }: IProps) => {
     });
 
     setPosition(newGame.fen());
-    setPromotion({
-      has: false,
-      from: "e1",
-      to: "e1",
-    });
+    setPromotion(NO_PROMOTION);
 
     makeMove(move.san);
   };
@@ -95,23 +91,19 @@ const ValidatedChessboard = ({ game, color, makeMove }: IProps) => {
   // Memoize squares
   const squareStyles = useMemo(
     () => ({
-      ...(hoverSquare && highlightPossibleMoves(game, hoverSquare, color)),
       ...(pieceSquare && highlightPossibleMoves(game, pieceSquare, color)),
+      ...(hoverSquare && highlightPossibleMoves(game, hoverSquare, color)),
       ...styleActiveSquares(game, pieceSquare),
     }),
     [pieceSquare, hoverSquare, game]
   );
 
   // Update position when receiving new board
-  // it's not a good implementation
-  useMemo(() => {
-    setPromotion({
-      has: false,
-      from: "e1",
-      to: "e1",
-    });
+  if (serverPosition !== game.fen()) {
+    setServerPosition(game.fen());
     setPosition(game.fen());
-  }, [game.fen()]);
+    setPromotion(NO_PROMOTION);
+  }
 
   return (
     <div>
