@@ -70,27 +70,37 @@ const Tournament = ({
   submitTournament: typeof createTournament;
 }) => {
   const [name, setName] = useState("");
-  const [players, setPlayers] = useState(6);
+  const [players, setPlayers] = useState("");
   const [game, setGame] = useState(Game.CHESS);
 
+  const updatePlayers = (n: string) => {
+    if (!isNaN(parseInt(n))) setPlayers(n);
+  };
+
   return (
-    <div className="promotion">
-      <span className="header">Change User Privileges</span>
+    <div className="tournamentCreation">
+      <span className="header">Create Tournament</span>
       <input
         type="text"
         placeholder="Name"
         value={name}
         onChange={(e) => setName(e.target.value)}
       />
+      <input
+        type="text"
+        placeholder="Max Players"
+        value={players}
+        onChange={(e) => updatePlayers(e.target.value)}
+      />
       <ul className="games">
         <li>
           <input
-            id="admin"
+            id="chess"
             type="radio"
             checked={game === Game.CHESS}
             onChange={(e) => setGame(Game.CHESS)}
           />
-          <label htmlFor="admin">Chess</label>
+          <label htmlFor="chess">Chess</label>
         </li>
         <li>
           <input
@@ -102,15 +112,9 @@ const Tournament = ({
           <label htmlFor="tictactoe">Tic Tac Toe</label>
         </li>
       </ul>
-      <input
-        type="number"
-        placeholder="Max Players"
-        value={players}
-        onChange={(e) => setPlayers(parseInt(e.target.value))}
-      />
       <button
         disabled={!isOfficer}
-        onClick={(e) => submitTournament(name, game, players)}
+        onClick={(e) => submitTournament(name, game, parseInt(players))}
       >
         Submit
       </button>
@@ -125,7 +129,7 @@ const Administration = ({
   changePrivileges,
 }: IProps) => {
   return (
-    <div className="admin">
+    <div className="administration">
       {error !== "" && <span className="error">{error}</span>}
       <Promotion isAdmin={user.admin} submitChange={changePrivileges} />
       <Tournament
