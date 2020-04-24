@@ -9,6 +9,7 @@ const connect = require('./connect.js');
 const zookeeper = require('./zookeeper/functions.js');
 const globals = require('./globals.js');
 const transactions = require('./transactions.js');
+const errors = require('./errors.js');
 
 const MAX_TOURNAMENT_PLAYERS = 3;
 
@@ -18,7 +19,7 @@ const {Game, ActiveGame} = require('./model/game_model.js');
 const Lobby = require('./model/lobby_model.js');
 
 
-/**
+/** @TODO remove functional comments
  * Performs an atomic matchmaking of user.
  * First it checks the queue. If the queue is
  * empty, the user is added to the queue.
@@ -58,23 +59,85 @@ function atomicPracticePairing(session, username, game_type) {
 }
 
 
+
+/**
+ * Resets the active state of a specific
+ * game. If the game should be active,
+ * the function creates ActiveGame object
+ * and appends it to the user lists.
+ * If the game should not be active, the
+ * function deletes the game from user
+ * lists and throws an exception.
+ * @param {Game} game 
+ * @returns ActiveGame if the game was
+ * hasn't finished
+ * @throws Exception on error
+ */
+async function resetActiveGameState(game) {
+
+    if(!game) throw new errors.InvalidArgumentException('Game does not exist');
+
+    if(!game.has_ended) {
+      
+      let active_game = await ActiveGame.findById(game._id).exec();
+      if(active_game && (await zookeeper.isServerAvailable(active_game.server_id))) {
+        await User.updateMany(
+          {$or:[{_id:game.player1},{_id:game.player2}]},
+          {"$addToSet": {active_games: game._id}},
+          {
+            runValidators: true
+          }
+        ).exec();
+        return active_game;
+      } else {
+        
+        var server = await zookeeper.getBestServer();
+        if(!server) throw new errors.InternalErrorException('No server found for game');
+
+        active_game = await ActiveGame.findOneAndUpdate({_id:game._id},{
+          _id:game._id,
+          server_id:server.id,
+          server_ip:server.ip
+        },{upsert:true,new:true});
+        
+        await User.updateMany(
+          {$or:[{_id:game.player1},{_id:game.player2}]},
+          {"$addToSet": {active_games: game._id}},
+          {
+            runValidators: true
+          }
+        ).exec();
+      }
+      return active_game;
+
+    } else {
+      await User.updateMany(
+        {$or:[{_id:game.player1},{_id:game.player2}]},
+        {"$pullAll": {active_games: game._id}},
+        {
+          runValidators: true
+        }
+      ).exec();
+      await ActiveGame.findByIdAndDelete(game._id);
+      throw new errors.InvalidOperationException('Game has ended');
+    }
+}
+
 /** @TODO: Make function atomic
  * Creates a game between 2 players (if possible)
  * and adds the game to the active game list 
  * of the players.
- * @returns 
+ * @returns [game,active_game] on success and false on failure
  */
 async function createGame(user1,user2,type) {
   
   if(user1 && user2 && globals.game_types.includes(type)) {
-
-    try {
       
       let player_1 = await User.findById(user1).exec();
       let player_2 = await User.findById(user2).exec();
       if(player_1.active_games.length >= globals.max_games || player_2.active_games.length >= globals.max_games) 
       {
-        throw "Maximum number of active games exceeded";
+        throw new errors.InvalidOperationException("Maximum number of active games exceeded");
       }
 
       let game = await Game.create({
@@ -83,38 +146,18 @@ async function createGame(user1,user2,type) {
         game_type:type
       });
       
-      var server = await zookeeper.getBestServer();
+      let active_game = await resetActiveGameState(game);
 
-      if(server) {
-        let active_game = await ActiveGame.create({
-          _id:game._id,
-          server_id:server.id,
-          server_ip:server.ip
-        });
-        
-        await User.updateMany(
-          {$or:[{_id:user1},{_id:user2}]},
-          {"$addToSet": {active_games: game._id}},
-          {
-            runValidators: true
-          }
-        ).exec();
-        return [game,active_game];
-      } else {
-        console.log('No play server found');
-        await Game.findByIdAndDelete(game._id).exec();
-        return false;
-      }
+      return [game,active_game];
 
-      return false;
-    } catch(e) {
-      console.log(e);
-      return false;
-    }
-
-  }
+  } else throw new errors.InvalidArgumentException("Wrong arguments");
 }
 
+/**
+ * Creates a user by username if the user
+ * doesn't exist.
+ * @param {String} username 
+ */
 async function createUserIfNotExists(username) {
   let query = {'_id':username};
   let user_data = {'_id':username};
@@ -142,109 +185,66 @@ app.get('/get_server', async (req, res) => {
 
 });
 
-
+// Join pracice queue
 app.get('/practice/join_queue', async (req, res) => {
   
   var username = req.query.username;
   var game_type = req.query.game_type;
 
-  if(username && game_type && globals.game_types.includes(game_type)) {
-
-    try {
+  try {
+    if(username && game_type && globals.game_types.includes(game_type)) 
+    {
       createUserIfNotExists(username);
       let opponent = await transactions.runTransactionWithRetry(atomicPracticePairing, Lobby, username, game_type);
 
       if(opponent) {
         if(username == opponent) {
-          res.send('Already in queue');
+          throw new errors.InvalidOperationException('User already in queue');
         } else {
           createUserIfNotExists(opponent);
           let result = await createGame(username,opponent,game_type);
-          if(result) {
+          if(result && result.length == 2 && result[1]) {
             let active_game = result[1];
-            res.json(active_game);
+            res.json(errors.createSuccessResponse('User added to queue',active_game));
           } 
-          else res.send('Error creating game');
+          else new errors.InternalErrorException('Could not create game');
         }
       } else {
-        res.send('Added to queue');
+        res.json(errors.createSuccessResponse('User added to queue'));
       }
-      
-    } catch(e) {
-      return res.send(e);
-    }
 
+    }
+    else throw new errors.InvalidArgumentException('Wrong parameters');
+  } catch(e) {
+    console.log(e);
+    return res.json(errors.convertExceptionToResponse(e));
   }
-  else return res.send('Wrong parameters');
 });
 
 
-
-//New practice game request
-// app.get('/practice/request', async (req, res) => {
-
-//   var opponent = req.query.opponent;
-//   var username = req.query.username;
-//   var game_type = req.query.game;
-
-//   if(opponent && game_type) {
-
-//     try {
-//       let query = {'_id':username};
-//       let user_data = {'_id':username, email:username+'@gmail.com'};
-  
-//       let options = {upsert: true, new: true, setDefaultsOnInsert: true};
-  
-//       // If user doesn't exist, create it
-//       let user = await User.findOneAndUpdate(query, user_data, options).exec();
-
-//     } catch(e) {
-//       return res.send('Cannot create');
-//     }
-
-//   }
-//   else return res.send('Wrong parameters');
-// });
-
-
+// Join existing practice game
 app.get('/practice/join', async (req, res) => {
   
   var game_id = req.query.game_id;
 
-  if(game_id) {
+  try {
+    if(game_id) {
+    
+      let game = await Game.findById(game_id).exec();
 
-    try {
-      
-      let active_game = await ActiveGame.findById(game_id).exec();
+      var active_game = await resetActiveGameState(game);
       
       if(active_game) {
-        let server_exists = await zookeeper.isServerAvailable(active_game.server_id);
-        if(server_exists) {
+        res.json(errors.createSuccessResponse('',active_game));
+      } else throw new errors.InvalidOperationException('Inactive game');
+    }  
+    else throw new errors.InvalidArgumentException('Wrong parameters');
 
-          // Server is available so return it
-          return res.json(active_game);
-        } else {
-
-          // We need a new server
-          var server = await zookeeper.getBestServer();
-
-          if(server) {
-
-            active_game.server_id = server.id;
-            active_game.server_ip = server.ip;
-            active_game.save();
-
-            res.json(active_game);
-          } else throw "No server found";
-        }
-      }
-      
-    } catch(e) {
-      return res.send(e);
-    }
-
+  } catch(e) {
+    console.log(e);
+    return res.json(errors.convertExceptionToResponse(e));
   }
-  else return res.send('Wrong parameters');
+
 });
 
 
@@ -252,22 +252,21 @@ app.get('/practice/join', async (req, res) => {
 app.get('/tournament/create', async (req, res) => {
 
   var tournament_name = req.query.name;
+  try {
+    if(tournament_name) {
 
-  if(tournament_name) {
-
-    try {
       let tournament =  await Tournament.create({
         name: tournament_name,
         date_created: new Date()
       });
-  
-      res.json(tournament);
-    } catch(e) {
-      return res.send('Cannot create');
-    }
+      res.json(errors.createSuccessResponse('Tournament created',tournament));
 
+    }
+    else throw new errors.InvalidArgumentException('Wrong parameters');
+  } catch(e) {
+    console.log(e);
+    return res.json(errors.convertExceptionToResponse(e));
   }
-  else return res.send('Wrong parameters');
 });
 
 // Register to tournament
@@ -276,61 +275,61 @@ app.get('/tournament/register', async function(req, res) {
   var tournament_id = req.query.id;
   var username = req.query.username;
 
-  if(tournament_id && username) {
+  try {
+    if(tournament_id && username) {
 
-    let query = {'_id':username};
-    let user_data = {'_id':username, email:username+'@gmail.com'};
 
-    let options = {upsert: true, new: true, setDefaultsOnInsert: true};
+      // If user doesn't exist, create it
+      let user = await createUserIfNotExists(username);
 
-    // If user doesn't exist, create it
-    let user = await User.findOneAndUpdate(query, user_data, options).exec();
+      // Limit the number of tournament participants
+      let participant_limiter = String("participants."+(MAX_TOURNAMENT_PLAYERS-1));
 
-    let participant_limiter = String("participants."+(MAX_TOURNAMENT_PLAYERS-1));
+      query = {
+        _id:tournament_id,
+        has_started:false,
+        has_ended:false
+      };
+      query[participant_limiter] = { "$exists": false };
 
-    query = {
-      _id:tournament_id,
-      has_started:false,
-      has_ended:false
-    };
-    query[participant_limiter] = { "$exists": false };
+      //Try to join the tournament
+      let tournament = await Tournament
+        .findOneAndUpdate(
+          query,
+          {"$addToSet": {participants: user._id}},
+          {
+            new: true,
+            runValidators: true,
+            context: query
+          }
+        ).exec();
 
-    //Try to join the tournament
-    let tournament = await Tournament
-      .findOneAndUpdate(
-        query,
-        {"$addToSet": {participants: user._id}},
-        {
-          new: true,
-          runValidators: true,
-          context: query
-        }
-      ).exec();
+      
+      if(tournament) {
+        res.json(errors.createSuccessResponse('Registered tournament'));
+      } else throw new errors.InvalidOperationException('Cannot register tournament');
 
-    
-    if(tournament) {
-      res.json(tournament);
-    } else {
-      return res.send('Cannot register tournament');
-    }
-
-  } else {
-    return res.send('Wrong Parameters');
+    } else throw new errors.InvalidArgumentException('Wrong parameters');
+  } catch(e){
+    console.log(e);
+    return res.json(errors.convertExceptionToResponse(e));
   }
 
-  //return res.send('Received a GET HTTP method3 '+req.query.id);
 });
 
 app.get('/tournament/list', (req, res) => {
 
-  Tournament.find().select('-participants').lean().exec(function (err, users) {
-      return res.end(JSON.stringify(users));
-  });
+  try{
+    Tournament.find().select('-participants').lean().exec(function (err, users) {
+        return res.json(errors.createSuccessResponse('',users));
+    });
 
-  //return res.send('Received a GET HTTP method3');
+  } catch(e){
+    console.log(e);
+    return res.json(errors.convertExceptionToResponse(e));
+  }
+
 });
-
-
 
 
 

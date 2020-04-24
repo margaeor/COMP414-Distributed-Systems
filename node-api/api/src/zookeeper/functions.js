@@ -13,7 +13,7 @@ const getChildrenPromise = (...args) => {
 const getValuePromise = (...args) => {
     return new Promise((resolve, reject) => {
         client.getData(...args, (error, value, stat) => {
-        error ? reject("") : resolve(value)
+        error ? reject(error) : resolve(value)
         })
     })
 }
@@ -21,7 +21,7 @@ const getValuePromise = (...args) => {
 const nodeExistsPromise = (...args) => {
   return new Promise((resolve, reject) => {
       client.exists(...args, (error, stat) => {
-      error ? reject("") : resolve(stat)
+      error ? reject(error) : resolve(stat)
       })
   })
 }
