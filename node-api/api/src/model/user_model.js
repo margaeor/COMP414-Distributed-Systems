@@ -28,11 +28,11 @@ var user = new Schema({
   },
   active_games: [{
     type: Schema.Types.ObjectId,
-    ref: 'Game'
+    ref: 'game'
   }],
   past_games: [{
     type: Schema.Types.ObjectId,
-    ref: 'Game'
+    ref: 'game'
   }]
 });
 

@@ -11,7 +11,7 @@ var lobby = new Schema({
         required: true,
         unique: true
     },
-    queue: [{type:String, ref:'User'}] 
+    queue: [{type:String, ref:'user'}] 
 });
 
 var Lobby = mongoose.model('lobby', lobby);

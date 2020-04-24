@@ -1,6 +1,32 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var User = require('./user_model.js');
+var Game = require('./game_model.js');
+
+var tournament_round = new mongoose.Schema({
+  // tournament_id: {
+  //   type: mongoose.Types.ObjectId,
+  //   required: true
+  // },
+  round_number: {
+    type: Number,
+    default: 0,
+    required: true
+  },
+  games: [{
+    type: Schema.Types.ObjectId,
+    ref: 'game'
+  }],
+  queue: [{
+    type: String,
+    ref: 'user'
+  }],
+  date_created: {
+    type: Date,
+    default: Date.now
+  }
+});
+
 
 
 var tournament = new mongoose.Schema({
@@ -11,7 +37,8 @@ var tournament = new mongoose.Schema({
   },
   date_created: {
     type: Date,
-    required: true
+    required: true,
+    default:Date.now
   },
   has_started: {
     type: Boolean,
@@ -23,20 +50,30 @@ var tournament = new mongoose.Schema({
     required: true,
     default: false
   },
+  rounds: [{
+    type: mongoose.Types.ObjectId,
+    ref: 'tournament_round'
+  }],
   participants: {
-    type: [{ type: String, ref: 'User'}],//Schema.Types.ObjectId
+    type: [{ type: String, ref: 'User'}],
     validate: {
-      validator: function (v) {
+      validator: function (v) { //@TODO: remove validation
           return v.length <= 1
       },
-      message: 'You must provide more than 1 tag.'
+      message: 'No more users'
     }
   }
 });
+
+var TournamentRound = mongoose.model('tournament_round', tournament_round);
+var Tournament = mongoose.model('tournament', tournament);
 
 function arrayLimit(val) {
   console.log("LENGTH IS "+val.length);
   return val.length <= 1;
 }
 
-module.exports = mongoose.model('tournament', tournament);     
+module.exports = {
+  Tournament:Tournament,
+  TournamentRound: TournamentRound
+};     

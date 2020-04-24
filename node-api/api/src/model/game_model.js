@@ -5,12 +5,12 @@ var globals = require('../globals.js');
 var game = new mongoose.Schema({
     player1: {
         type: String, 
-        ref: 'User',
+        ref: 'user',
         required: true
     },
     player2: {
         type: String, 
-        ref: 'User',
+        ref: 'user',
         required: true
     },
     game_type : {
@@ -35,7 +35,7 @@ var game = new mongoose.Schema({
     date_created: {
         type: Date,
         required: true,
-        default: new Date()
+        default: Date.now
     }
   });
 

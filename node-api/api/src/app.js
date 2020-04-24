@@ -23,7 +23,7 @@ const {
 
 
 const User = require('./model/user_model.js');
-const Tournament = require('./model/tournament_model.js');
+const {Tournament,TournamentRound} = require('./model/tournament_model.js');
 const {Game, ActiveGame} = require('./model/game_model.js');
 const Lobby = require('./model/lobby_model.js');
 
@@ -183,12 +183,54 @@ app.get('/tournament/create', async (req, res) => {
   try {
     if(tournament_name) {
 
+      let tournament_round = await TournamentRound.create({});
+
+      if(!tournament_round) throw new errors.InternalErrorException('Cannot create');
+
       let tournament =  await Tournament.create({
         name: tournament_name,
-        date_created: new Date()
+        rounds: [tournament_round.id]
       });
+
       res.json(errors.createSuccessResponse('Tournament created',tournament));
 
+    }
+    else throw new errors.InvalidArgumentException('Wrong parameters');
+  } catch(e) {
+    logger.log(e);
+    return res.json(errors.convertExceptionToResponse(e));
+  }
+});
+
+
+async function atomicStartTournament(session, tournament) {
+
+  if(!tournament) throw errors.InvalidArgumentException('No such tournament');
+
+
+
+}
+
+
+
+//Create new tournament
+app.get('/tournament/start', async (req, res) => {
+
+  var id = req.query.id;
+  try {
+    if(id && mongoose.Types.ObjectId.isValid(id)) {
+
+      let tournament =  await Tournament.find({_id:id}).exec();
+
+      if(tournament) {
+        
+        if(tournament.has_started) throw new errors.InvalidOperationException('Tournament already started');
+        
+
+
+        res.json(errors.createSuccessResponse('Tournament started',tournament));
+
+      } else throw new errors.InvalidArgumentException('No such tournament');
     }
     else throw new errors.InvalidArgumentException('Wrong parameters');
   } catch(e) {
@@ -209,6 +251,10 @@ app.get('/tournament/register', async function(req, res) {
 
       // If user doesn't exist, create it
       let user = await createUserIfNotExists(username);
+
+      let tournament = await Tournament.findById(tournament_id).exec();
+
+      if(!tournament) throw new errors.InvalidArgumentException('Tournament doesnt exist');
 
       // Limit the number of tournament participants
       let participant_limiter = String("participants."+(globals.MAX_TOURNAMENT_PLAYERS-1));
