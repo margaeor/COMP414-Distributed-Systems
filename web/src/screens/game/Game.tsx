@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import { sendMessage } from "../../store/actions";
 import { selectGameData, selectHistory } from "../../store/selectors";
 import { State } from "../../store/types";
-import "./Game.css";
+import "./Game.scss";
 import ValidatedChessboard from "./ValidatedChessboard";
 
 interface IProps {

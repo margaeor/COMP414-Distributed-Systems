@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import { changePrivileges, createTournament } from "../../store/actions";
 import { selectError, selectUser } from "../../store/selectors";
 import { State, User } from "../../store/types";
-import "./Administration.css";
+import "./Administration.scss";
 import Promotion from "./Promotion";
 import Tournament from "./Tournament";
 

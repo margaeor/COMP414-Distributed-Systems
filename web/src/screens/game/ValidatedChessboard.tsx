@@ -11,7 +11,7 @@ import {
   highlightPossibleMoves,
   styleActiveSquares,
 } from "./ChessboardStyle";
-import "./ValidatedChessboard.css";
+import "./ValidatedChessboard.scss";
 
 interface IProps {
   game: ChessInstance;

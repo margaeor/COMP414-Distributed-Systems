@@ -44,6 +44,11 @@ module.exports = {
         use: ["style-loader", "css-loader"],
       },
       {
+        // Sass Files / Styling
+        test: /\.scss$/,
+        use: ["style-loader", "css-loader", "sass-loader"],
+      },
+      {
         // Image Support
         test: /\.(png|svg|jpg|gif)$/,
         use: {

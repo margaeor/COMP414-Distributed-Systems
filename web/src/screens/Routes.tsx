@@ -9,7 +9,7 @@ import Loader from "./Loader";
 import { selectScreen, selectLoader } from "../store/selectors";
 import Header from "./common/Header";
 
-import "./Routes.css";
+import "./Routes.scss";
 import Administration from "./admin/Administration";
 
 const Routes = ({

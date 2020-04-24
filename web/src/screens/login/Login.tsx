@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./Login.css";
+import "./Login.scss";
 import { connect } from "react-redux";
 import { State } from "../../store/types";
 import { loginSubmit, loginForgot, loginSignUp } from "../../store/actions";

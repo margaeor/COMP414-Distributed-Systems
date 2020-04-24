@@ -41,7 +41,9 @@
     "eslint-plugin-react-hooks": "^3.0.0",
     "file-loader": "^6.0.0",
     "html-webpack-plugin": "^4.2.0",
+    "node-sass": "^4.14.0",
     "prettier": "^2.0.4",
+    "sass-loader": "^8.0.2",
     "string-replace-loader": "^2.3.0",
     "style-loader": "^1.1.4",
     "typescript": "^3.8.3",
@@ -50,6 +52,7 @@
     "webpack-dev-server": "^3.10.3"
   },
   "dependencies": {
+    "bourbon": "^7.0.0",
     "chess.js": "^0.10.3",
     "chessboardjsx": "^2.4.2",
     "history": "^4.10.1",
