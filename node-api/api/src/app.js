@@ -16,6 +16,7 @@ const logger = require('./lib/logger.js');
 const {
   createUserIfNotExists,
   atomicPracticePairing,
+  atomicEndGame,
   resetActiveGameState,
   createGame
 } = require('./lib/core.js');
@@ -74,6 +75,7 @@ app.get('/playmaster/getinfo', async (req, res) => {
 });
 
 
+
 // @TODO: Should we allow access only to a specific
 // playmaster?
 app.get('/playmaster/results', async (req, res) => {
@@ -97,19 +99,10 @@ app.get('/playmaster/results', async (req, res) => {
 
     if(score && game_id && mongoose.Types.ObjectId.isValid(game_id)) {
     
-      let game = await Game.findOneAndUpdate(
-        {_id:game_id,has_ended:false},
-        {has_ended:true,score:score},
-        {new:true})
-      .exec();
 
-      if(game) {
+      await transactions.runTransactionWithRetry(atomicEndGame, mongoose, game_id, score);
 
-        await resetActiveGameState(game);
-
-        res.json(errors.createSuccessResponse(''));
-
-      } else throw new errors.InvalidOperationException('Game not found');
+      res.json(errors.createSuccessResponse('Scores updated successfully'));
 
     } else throw new errors.InvalidArgumentException('Wrong parameters');
   } catch(e) {

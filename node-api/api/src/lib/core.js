@@ -76,6 +76,52 @@ async function createUserIfNotExists(username) {
     });
   }
   
+  /**
+ * Ends the game and records the scores
+ * atomicaly (must be called inside a transaction)
+ * @param {Session} session 
+ * @param {ObjectId} game_id 
+ * @param {Number} score 
+ */
+async function atomicEndGame(session, game_id, score) {
+  
+    let game = await Game.findOneAndUpdate(
+      {_id:game_id,has_ended:false},
+      {has_ended:true,score:score},
+      {new:true})
+    .session(session);
+    if(!game) throw new errors.InvalidArgumentException('Game not found');
+
+    // Create the users if they don't exist NON-ATOMICALLY
+    createUserIfNotExists(game.player1);
+    createUserIfNotExists(game.player2);
+
+    let user1 = await User.findByIdAndUpdate(game.player1,
+        {"$addToSet": {past_games: game._id}},{new:true,upsert:true})
+        .session(session);
+    let user2 = await User.findByIdAndUpdate(game.player2,
+        {"$addToSet": {past_games: game._id}},{new:true,upsert:true})
+        .session(session);
+    if(game && user1 && user2) {
+      await ActiveGame.findByIdAndDelete(game._id).session(session);
+      user1.total_games += 1;
+      user2.total_games += 1;
+      if(game.score == 0) {
+        user1.total_ties +=1;
+        user2.total_ties +=1;
+      } else if(game.score == 1) {
+        user1.total_wins +=1;
+        user2.total_losses +=1;
+      } else if(game.score == -1) {
+        user1.total_losses +=1;
+        user2.total_wins +=1;
+      } else throw new errors.InvalidArgumentException('Wrong score value');
+      user1.past_games.indexOf(game_id) === -1 && user1.past_games.push(game_id);
+      user2.past_games.indexOf(game_id) === -1 && user2.past_games.push(game_id);
+      await user1.save({ session });
+      await user2.save({ session });
+    } else throw new errors.InvalidArgumentException('Invalid fields');
+  }
   
   
   /**
@@ -177,6 +223,7 @@ async function createUserIfNotExists(username) {
   module.exports = {
       createUserIfNotExists: createUserIfNotExists,
       atomicPracticePairing: atomicPracticePairing,
+      atomicEndGame: atomicEndGame,
       resetActiveGameState: resetActiveGameState,
       createGame: createGame
   }

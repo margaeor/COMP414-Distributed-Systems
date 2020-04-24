@@ -9,8 +9,8 @@ function createErrorResponse(message,status_code=500) {
 }
 
 function convertExceptionToResponse(e) {
-    if('response' in e && e.response) return e.response;
-    else return createErrorResponse(e.message,500);
+    if(e.hasOwnProperty('response')) return e.response;
+    else return createErrorResponse(e,500);
 }
 
 
