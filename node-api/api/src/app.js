@@ -4,6 +4,7 @@ const PORT = 3000;
 const HOST = '0.0.0.0';
 
 const express = require('express');
+const mongoose = require('mongoose');
 const app = express();
 const connect = require('./connect.js');
 const zookeeper = require('./zookeeper/functions.js');
@@ -17,7 +18,6 @@ const {
   createGame
 } = require('./lib/core.js');
 
-const MAX_TOURNAMENT_PLAYERS = 3;
 
 const User = require('./model/user_model.js');
 const Tournament = require('./model/tournament_model.js');
@@ -26,30 +26,53 @@ const Lobby = require('./model/lobby_model.js');
 
 
 
+// View game info
+app.get('/playserver/getinfo', async (req, res) => {
+  
+  var game_id = req.query.game_id;
+  var id = req.query.id;
 
-
-app.get('/get_server', async (req, res) => {
-
-
-  var server = await zookeeper.getBestServer();
-
-  if(server) {
-    res.json(server);
-  } else {
-    res.send('Server not found');
+  var ip = (req.headers['x-forwarded-for'] || '').split(',').pop() || 
+         req.connection.remoteAddress || 
+         req.socket.remoteAddress || 
+         req.connection.socket.remoteAddress;
+  if (ip.substr(0, 7) == "::ffff:") {
+    ip = ip.substr(7)
   }
+  console.log(ip);
+  try {
+    if(!(await zookeeper.validateServerClaim(id,ip))) throw new errors.AnauthorizedException('Access is denied');
+    if(game_id && mongoose.Types.ObjectId.isValid(game_id)) {
+    
+      let game = await Game.findById(game_id).exec();
 
+      if(game) {
+        let result = {
+          _id: game._id,
+          opponents: [game.player1,game.player2],
+          game_type: game.game_type
+        }
+       res.json(errors.createSuccessResponse('',result));
+      } else throw new errors.InvalidOperationException('Game not found');
+    }  
+    else throw new errors.InvalidArgumentException('Wrong parameters');
+
+  } catch(e) {
+    console.log(e);
+    return res.json(errors.convertExceptionToResponse(e));
+  }
 
 });
 
-// Join pracice queue
+
+// Join practice queue
 app.get('/practice/join_queue', async (req, res) => {
   
   var username = req.query.username;
   var game_type = req.query.game_type;
 
   try {
-    if(username && game_type && globals.game_types.includes(game_type)) 
+    if(username && game_type && globals.GAME_TYPES.includes(game_type)) 
     {
       createUserIfNotExists(username);
       let opponent = await transactions.runTransactionWithRetry(atomicPracticePairing, Lobby, username, game_type);
@@ -85,7 +108,7 @@ app.get('/practice/join', async (req, res) => {
   var game_id = req.query.game_id;
 
   try {
-    if(game_id) {
+    if(game_id && mongoose.Types.ObjectId.isValid(game_id)) {
     
       let game = await Game.findById(game_id).exec();
 
@@ -133,14 +156,14 @@ app.get('/tournament/register', async function(req, res) {
   var username = req.query.username;
 
   try {
-    if(tournament_id && username) {
+    if(tournament_id && username && mongoose.Types.ObjectId.isValid(tournament_id)) {
 
 
       // If user doesn't exist, create it
       let user = await createUserIfNotExists(username);
 
       // Limit the number of tournament participants
-      let participant_limiter = String("participants."+(globals.max_tournament_players-1));
+      let participant_limiter = String("participants."+(globals.MAX_TOURNAMENT_PLAYERS-1));
 
       query = {
         _id:tournament_id,

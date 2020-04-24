@@ -4,9 +4,9 @@
 create /playmasters
 create /load_balance
 
-create -s /playmasters/p 192.168.1.100
-create -s /playmasters/p 192.168.1.101
-create -s /playmasters/p 192.168.1.102
+create -s /playmasters/p 192.168.1.1
+create -s /playmasters/p 192.168.1.2
+create -s /playmasters/p 192.168.1.3
 
 create /load_balance/p0000000000_400
 create /load_balance/p0000000001_200

@@ -7,7 +7,7 @@ var Schema = mongoose.Schema;
 var lobby = new Schema({
     game_type : {
         type: String,
-        enum : globals.game_types,
+        enum : globals.GAME_TYPES,
         required: true,
         unique: true
     },
@@ -17,7 +17,7 @@ var lobby = new Schema({
 var Lobby = mongoose.model('lobby', lobby);
 
 // Create a lobby for each game
-globals.game_types.forEach(type => {
+globals.GAME_TYPES.forEach(type => {
     let query = {'game_type':type};
 
     let options = {upsert: true, new: true, setDefaultsOnInsert: true};

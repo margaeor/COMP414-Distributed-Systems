@@ -34,7 +34,7 @@ async function createUserIfNotExists(username) {
   
     let user = await createUserIfNotExists(username);
   
-    return user.active_games.length < globals.max_games;
+    return user.active_games.length < globals.MAX_GAMES;
   
   }
   
@@ -137,15 +137,13 @@ async function createUserIfNotExists(username) {
           }
         ).exec();
         await ActiveGame.findByIdAndDelete(game._id);
-        throw new errors.InvalidOperationException('Game has ended');
+        return false;
       }
   }
   
   
   
   /**@TODO: Make function atomic
-   * @TODO: If some user cannot join game, return the other user to queue
-   * to queue.
    * Creates a game between 2 players (if possible)
    * and adds the game to the active game list 
    * of the players.
@@ -153,7 +151,7 @@ async function createUserIfNotExists(username) {
    */
   async function createGame(user1,user2,type) {
     
-    if(user1 && user2 && globals.game_types.includes(type)) {
+    if(user1 && user2 && globals.GAME_TYPES.includes(type)) {
         
         if(!canUserJoinNewGame(user1) || !canUserJoinNewGame(user2))
         {
@@ -167,6 +165,8 @@ async function createUserIfNotExists(username) {
         });
         
         let active_game = await resetActiveGameState(game);
+
+        if(!active_game) throw new errors.InvalidOperationException('Game has ended');
   
         return [game,active_game];
   

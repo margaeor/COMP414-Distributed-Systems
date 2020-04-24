@@ -26,6 +26,17 @@ const nodeExistsPromise = (...args) => {
   })
 }
 
+async function validateServerClaim(server_id,server_ip) {
+  try {
+    let node = '/playmasters/'+server_id;
+
+    return (await getValuePromise(node)).toString('utf8') == server_ip;
+  } catch(e) {
+    console.log(e);
+    return false;
+  }
+}
+
 async function isServerAvailable(server_id) {
   try {
     return await nodeExistsPromise('/playmasters/'+server_id);
@@ -42,7 +53,7 @@ async function getBestServer() {
 
   var counter = 0;
 
-  while(!server_ip && counter++ < globals.max_zookeeper_reattempts) {
+  while(!server_ip && counter++ < globals.MAX_ZOOKEEPER_REATTEMPTS) {
     try {
 
       children = await getChildrenPromise('/load_balance');
@@ -83,5 +94,6 @@ module.exports = {
     getChildren: getChildrenPromise,
     getValue: getValuePromise,
     getBestServer: getBestServer,
-    isServerAvailable: isServerAvailable
+    isServerAvailable: isServerAvailable,
+    validateServerClaim: validateServerClaim
 };

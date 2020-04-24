@@ -1,7 +1,7 @@
 const Globals = {
-    game_types : ['chess','tic-tac-toe'],
-    max_games : 2,
-    max_zookeeper_reattempts : 5,
-    max_tournament_players: 16
+    GAME_TYPES : ['chess','tic-tac-toe'],
+    MAX_GAMES : 2,
+    MAX_ZOOKEEPER_REATTEMPTS : 5,
+    MAX_TOURNAMENT_PLAYERS: 16
 };    
 module.exports = Globals;

@@ -6,18 +6,16 @@ var game = new mongoose.Schema({
     player1: {
         type: String, 
         ref: 'User',
-        required: true,
-        default: null
+        required: true
     },
     player2: {
         type: String, 
         ref: 'User',
-        required: true,
-        default: null
+        required: true
     },
     game_type : {
         type: String,
-        enum : globals.game_types,
+        enum : globals.GAME_TYPES,
         required: true
     },
     has_started: {

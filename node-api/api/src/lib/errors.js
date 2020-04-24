@@ -30,6 +30,14 @@ class InvalidOperationException extends Error {
     }
 }
 
+class AnauthorizedException extends Error {
+    constructor(message) {
+      super(message);
+      this.name = "AnauthorizedException";
+      this.response = createErrorResponse(message,401);
+    }
+}
+
 class InvalidArgumentException extends Error {
     constructor(message) {
       super(message);
@@ -46,5 +54,6 @@ module.exports = {
     createSuccessResponse: createSuccessResponse,
     InternalErrorException: InternalErrorException,
     InvalidOperationException: InvalidOperationException,
-    InvalidArgumentException: InvalidArgumentException
+    InvalidArgumentException: InvalidArgumentException,
+    AnauthorizedException: AnauthorizedException
 }
