@@ -183,13 +183,13 @@ app.get('/tournament/create', async (req, res) => {
   try {
     if(tournament_name) {
 
-      let tournament_round = await TournamentRound.create({});
+      //let tournament_round = await TournamentRound.create({});
 
-      if(!tournament_round) throw new errors.InternalErrorException('Cannot create');
+      //if(!tournament_round) throw new errors.InternalErrorException('Cannot create');
 
       let tournament =  await Tournament.create({
         name: tournament_name,
-        rounds: [tournament_round.id]
+        //rounds: [tournament_round.id]
       });
 
       res.json(errors.createSuccessResponse('Tournament created',tournament));
@@ -202,12 +202,55 @@ app.get('/tournament/create', async (req, res) => {
   }
 });
 
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+  }
+}
 
-async function atomicStartTournament(session, tournament) {
+async function atomicStartTournament(session, tournament_id) {
 
+  let tournament = await Tournament.findById(tournament_id).session(session);
   if(!tournament) throw errors.InvalidArgumentException('No such tournament');
+  if(tournament.has_started) throw new errors.InvalidOperationException('Tournament already started');
+  if(tournament.participants.length <= 4) throw errors.InvalidOperationException('Not enough players');
 
+  let participants = [...tournament.participants]; // copy array
+  shuffleArray(participants);
 
+  let alone = participants.length % 2 == 1 ? participants.pop() : null;
+   
+  let middle = Math.floor(participants.length / 2)
+
+  let first_group = participants.slice(0, middle);
+  let second_group = participants.slice(middle, participants.length);
+
+  console.log(alone);
+  console.log(first_group);
+  console.log(second_group);
+
+  if(first_group.length != second_group.length) throw new errors.InternalErrorException('Error occured');
+
+  let games_ids = [];
+  for (let i = 0; i < first_group.length; i++) {
+
+    let user1 = first_group[i];
+    let user2 = second_group[i];
+    Math.random() < 0.5 && ([user1,user2]=[user2,user1]);
+    
+    let game = await Game.create({
+      player1:user1,
+      player2:user2,
+      game_type:tournament.game_type
+    });
+
+    games_ids.push(game._id);
+  }
+
+  // let tournament_round = await TournamentRound.create({
+  //   round_number : tournament.rounds.length+1,
+  // });
 
 }
 
@@ -220,17 +263,11 @@ app.get('/tournament/start', async (req, res) => {
   try {
     if(id && mongoose.Types.ObjectId.isValid(id)) {
 
-      let tournament =  await Tournament.find({_id:id}).exec();
+      await transactions.runTransactionWithRetry(atomicStartTournament, mongoose, id);
 
-      if(tournament) {
-        
-        if(tournament.has_started) throw new errors.InvalidOperationException('Tournament already started');
-        
+      res.json(errors.createSuccessResponse('Tournament started'));
 
-
-        res.json(errors.createSuccessResponse('Tournament started',tournament));
-
-      } else throw new errors.InvalidArgumentException('No such tournament');
+      // } else throw new errors.InvalidArgumentException('No such tournament');
     }
     else throw new errors.InvalidArgumentException('Wrong parameters');
   } catch(e) {
@@ -252,34 +289,21 @@ app.get('/tournament/register', async function(req, res) {
       // If user doesn't exist, create it
       let user = await createUserIfNotExists(username);
 
-      let tournament = await Tournament.findById(tournament_id).exec();
-
-      if(!tournament) throw new errors.InvalidArgumentException('Tournament doesnt exist');
-
-      // Limit the number of tournament participants
-      let participant_limiter = String("participants."+(globals.MAX_TOURNAMENT_PLAYERS-1));
-
-      query = {
-        _id:tournament_id,
-        has_started:false,
-        has_ended:false
-      };
-      query[participant_limiter] = { "$exists": false };
-
-      //Try to join the tournament
-      let tournament = await Tournament
-        .findOneAndUpdate(
-          query,
-          {"$addToSet": {participants: user._id}},
-          {
-            new: true,
-            runValidators: true,
-            context: query
-          }
-        ).exec();
-
+      if(! (await canUserJoinNewGame(username))) 
+        throw new errors.InvalidOperationException('Maximum number of games exceeded');
       
+      let tournament = await Tournament.findById(tournament_id).exec();
       if(tournament) {
+
+        if(tournament.participants.indexOf(username) != -1) 
+          throw new errors.InvalidArgumentException('Already joined');
+
+        if(tournament.participants.length >= globals.MAX_TOURNAMENT_PLAYERS) 
+          throw new errors.InvalidArgumentException('No more players');
+
+        tournament.participants.push(username);
+        tournament.save();
+
         res.json(errors.createSuccessResponse('Registered tournament'));
       } else throw new errors.InvalidOperationException('Cannot register tournament');
 

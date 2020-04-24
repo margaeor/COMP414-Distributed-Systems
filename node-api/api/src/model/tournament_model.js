@@ -2,6 +2,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var User = require('./user_model.js');
 var Game = require('./game_model.js');
+var globals = require('../globals');
 
 var tournament_round = new mongoose.Schema({
   // tournament_id: {
@@ -54,14 +55,19 @@ var tournament = new mongoose.Schema({
     type: mongoose.Types.ObjectId,
     ref: 'tournament_round'
   }],
+  game_type: {
+    type: String,
+    enum : globals.GAME_TYPES,
+    required: true
+  },
   participants: {
-    type: [{ type: String, ref: 'User'}],
+    type: [{ type: String, ref: 'user'}]/*,
     validate: {
       validator: function (v) { //@TODO: remove validation
           return v.length <= 1
       },
       message: 'No more users'
-    }
+    }*/
   }
 });
 
@@ -72,6 +78,8 @@ function arrayLimit(val) {
   console.log("LENGTH IS "+val.length);
   return val.length <= 1;
 }
+
+TournamentRound.createCollection();
 
 module.exports = {
   Tournament:Tournament,
