@@ -11,6 +11,8 @@ const zookeeper = require('./zookeeper/functions.js');
 const globals = require('./globals.js');
 const transactions = require('./transactions.js');
 const errors = require('./lib/errors.js');
+const logger = require('./lib/logger.js');
+
 const {
   createUserIfNotExists,
   atomicPracticePairing,
@@ -27,7 +29,9 @@ const Lobby = require('./model/lobby_model.js');
 
 
 // View game info
-app.get('/playserver/getinfo', async (req, res) => {
+// @TODO: Should we allow access only to a specific
+// playmaster?
+app.get('/playmaster/getinfo', async (req, res) => {
   
   var game_id = req.query.game_id;
   var id = req.query.id;
@@ -36,29 +40,80 @@ app.get('/playserver/getinfo', async (req, res) => {
          req.connection.remoteAddress || 
          req.socket.remoteAddress || 
          req.connection.socket.remoteAddress;
+
   if (ip.substr(0, 7) == "::ffff:") {
     ip = ip.substr(7)
   }
-  console.log(ip);
+
   try {
+
     if(!(await zookeeper.validateServerClaim(id,ip))) throw new errors.AnauthorizedException('Access is denied');
+
     if(game_id && mongoose.Types.ObjectId.isValid(game_id)) {
     
       let game = await Game.findById(game_id).exec();
 
       if(game) {
+
         let result = {
           _id: game._id,
           opponents: [game.player1,game.player2],
           game_type: game.game_type
         }
-       res.json(errors.createSuccessResponse('',result));
-      } else throw new errors.InvalidOperationException('Game not found');
-    }  
-    else throw new errors.InvalidArgumentException('Wrong parameters');
 
+       res.json(errors.createSuccessResponse('',result));
+
+      } else throw new errors.InvalidOperationException('Game not found');
+
+    } else throw new errors.InvalidArgumentException('Wrong parameters');
   } catch(e) {
-    console.log(e);
+    logger.log(e);
+    return res.json(errors.convertExceptionToResponse(e));
+  }
+
+});
+
+
+// @TODO: Should we allow access only to a specific
+// playmaster?
+app.get('/playmaster/results', async (req, res) => {
+  
+  var game_id = req.query.game_id;
+  var score = req.query.score;
+  var id = req.query.id;
+
+  var ip = (req.headers['x-forwarded-for'] || '').split(',').pop() || 
+         req.connection.remoteAddress || 
+         req.socket.remoteAddress || 
+         req.connection.socket.remoteAddress;
+
+  if (ip.substr(0, 7) == "::ffff:") {
+    ip = ip.substr(7)
+  }
+
+  try {
+
+    if(!(await zookeeper.validateServerClaim(id,ip))) throw new errors.AnauthorizedException('Access is denied');
+
+    if(score && game_id && mongoose.Types.ObjectId.isValid(game_id)) {
+    
+      let game = await Game.findOneAndUpdate(
+        {_id:game_id,has_ended:false},
+        {has_ended:true,score:score},
+        {new:true})
+      .exec();
+
+      if(game) {
+
+        await resetActiveGameState(game);
+
+        res.json(errors.createSuccessResponse(''));
+
+      } else throw new errors.InvalidOperationException('Game not found');
+
+    } else throw new errors.InvalidArgumentException('Wrong parameters');
+  } catch(e) {
+    logger.log(e);
     return res.json(errors.convertExceptionToResponse(e));
   }
 
@@ -96,7 +151,7 @@ app.get('/practice/join_queue', async (req, res) => {
     }
     else throw new errors.InvalidArgumentException('Wrong parameters');
   } catch(e) {
-    console.log(e);
+    logger.log(e);
     return res.json(errors.convertExceptionToResponse(e));
   }
 });
@@ -121,7 +176,7 @@ app.get('/practice/join', async (req, res) => {
     else throw new errors.InvalidArgumentException('Wrong parameters');
 
   } catch(e) {
-    console.log(e);
+    logger.log(e);
     return res.json(errors.convertExceptionToResponse(e));
   }
 
@@ -144,7 +199,7 @@ app.get('/tournament/create', async (req, res) => {
     }
     else throw new errors.InvalidArgumentException('Wrong parameters');
   } catch(e) {
-    console.log(e);
+    logger.log(e);
     return res.json(errors.convertExceptionToResponse(e));
   }
 });
@@ -191,7 +246,7 @@ app.get('/tournament/register', async function(req, res) {
 
     } else throw new errors.InvalidArgumentException('Wrong parameters');
   } catch(e){
-    console.log(e);
+    logger.log(e);
     return res.json(errors.convertExceptionToResponse(e));
   }
 
@@ -205,7 +260,7 @@ app.get('/tournament/list', (req, res) => {
     });
 
   } catch(e){
-    console.log(e);
+    logger.log(e);
     return res.json(errors.convertExceptionToResponse(e));
   }
 

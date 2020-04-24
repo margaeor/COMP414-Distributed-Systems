@@ -129,14 +129,14 @@ async function createUserIfNotExists(username) {
         return active_game;
   
       } else {
+        await ActiveGame.findByIdAndDelete(game._id);
         await User.updateMany(
           {$or:[{_id:game.player1},{_id:game.player2}]},
-          {"$pullAll": {active_games: game._id}},
+          {"$pullAll": {active_games: [game._id]}},
           {
             runValidators: true
           }
         ).exec();
-        await ActiveGame.findByIdAndDelete(game._id);
         return false;
       }
   }
