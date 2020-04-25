@@ -2,7 +2,6 @@ import {
   SetPlayAction,
   SET_PLAY,
   UpdateHistoryAction,
-  UpdateMessageAction,
   UpdatePlayDataAction,
   UPDATE_HISTORY,
   UPDATE_PLAY_DATA,
@@ -11,11 +10,7 @@ import { NULL_PLAY_STATE, PlayState } from "../types";
 
 export default function game(
   state = NULL_PLAY_STATE,
-  action:
-    | SetPlayAction
-    | UpdatePlayDataAction
-    | UpdateMessageAction
-    | UpdateHistoryAction
+  action: SetPlayAction | UpdatePlayDataAction | UpdateHistoryAction
 ): PlayState {
   switch (action.type) {
     case SET_PLAY:

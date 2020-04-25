@@ -1,4 +1,4 @@
-import { Tournament, Game } from "../types";
+import { Game } from "../types";
 
 export const CREATE_TOURNAMENT = "CREATE_TOURNAMENT";
 export const CHANGE_PRIVILEGES = "CHANGE_PRIVILEGES";

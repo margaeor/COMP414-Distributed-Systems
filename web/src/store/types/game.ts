@@ -12,7 +12,6 @@ export interface Play {
   id: string;
   opponent: string;
   game: Game;
-  won: boolean;
   started: boolean;
 }
 
@@ -37,7 +36,6 @@ export const NULL_PLAY_STATE: PlayState = {
     id: "",
     opponent: "",
     game: Game.CHESS,
-    won: false,
     started: false,
   },
   step: PlayStep.ONGOING,

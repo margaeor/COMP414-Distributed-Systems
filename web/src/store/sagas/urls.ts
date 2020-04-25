@@ -2,7 +2,7 @@ import { History } from "history";
 import { select } from "redux-saga/effects";
 import { ChangeScreenAction } from "../actions";
 import { selectPlay } from "../selectors";
-import { LoaderStep, Play, ScreenState } from "../types";
+import { LoaderStep, ScreenState } from "../types";
 
 /**
  * Small task that updates the url as we move around the app
@@ -14,12 +14,13 @@ export function* updateUrl(
   if (loader != LoaderStep.INACTIVE) {
     history.push("/loading");
   } else {
+    let id;
     switch (screen) {
       case ScreenState.LOGIN:
         history.push("/login");
         break;
       case ScreenState.GAME:
-        const { id }: Play = yield select(selectPlay);
+        id = (yield select(selectPlay)).id;
         history.push("/game?id=" + id);
         break;
       case ScreenState.ADMINISTRATION:
@@ -41,13 +42,14 @@ export function* updateUrl(
 export function decodeUrl(
   history: History
 ): { screen: ScreenState; id?: string } {
+  let search, id;
   switch (history.location.pathname) {
     case "/login":
       return { screen: ScreenState.LOGIN };
     case "/game":
-      const search = history.location.search;
+      search = history.location.search;
       if (search.length < 4) return { screen: ScreenState.LOBBY };
-      const id = search.substr(3);
+      id = search.substr(3);
       return { screen: ScreenState.GAME, id };
     case "/administration":
       return { screen: ScreenState.ADMINISTRATION };

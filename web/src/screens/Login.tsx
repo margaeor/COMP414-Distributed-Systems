@@ -87,10 +87,11 @@ const Login = ({ loginSignUp, loginSubmit, loginForgot, error }: IProps) => {
               onChange={(e) => setEmail(e.target.value)}
             />
           )}
-          <label className="form__label">
+          <label className="form__label" htmlFor="answer">
             Who was your first (hot) Teacher?
           </label>
           <input
+            id="answer"
             className="form__input"
             type="text"
             placeholder="Answer"

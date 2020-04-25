@@ -38,7 +38,7 @@ const ValidatedChessboard = ({ game, color, makeMove }: IProps) => {
     // see if the move is legal
     // @ts-ignore ts(2351)
     const newGame: ChessInstance = new Chess(game.fen());
-    let move = newGame.move({
+    const move = newGame.move({
       from: sourceSquare,
       to: targetSquare,
       promotion: "q",
@@ -77,7 +77,7 @@ const ValidatedChessboard = ({ game, color, makeMove }: IProps) => {
 
     // @ts-ignore ts(2351)
     const newGame = new Chess(game.fen());
-    let move = newGame.move({
+    const move = newGame.move({
       from: promotion.from,
       to: promotion.to,
       promotion: p,
@@ -101,7 +101,7 @@ const ValidatedChessboard = ({ game, color, makeMove }: IProps) => {
               highlightPossibleMoves(game, hoverSquare, color, true)),
             ...styleActiveSquares(game, pieceSquare),
           },
-    [pieceSquare, hoverSquare, game]
+    [pieceSquare, hoverSquare, game, promotion.has, color]
   );
 
   // Update position when receiving new board
@@ -122,7 +122,7 @@ const ValidatedChessboard = ({ game, color, makeMove }: IProps) => {
         onDrop={({ sourceSquare, targetSquare }) =>
           movePiece(sourceSquare, targetSquare)
         }
-        onDragOverSquare={(s) => setHoverSquare("")}
+        onDragOverSquare={() => setHoverSquare("")}
         onMouseOverSquare={(s) => setHoverSquare(s)}
         lightSquareStyle={LIGHT_SQUARE_STYLE}
         darkSquareStyle={DARK_SQUARE_STYLE}
@@ -131,32 +131,32 @@ const ValidatedChessboard = ({ game, color, makeMove }: IProps) => {
         onSquareClick={onSquareClick}
       />
       <div className={"promotion-bar form" + (promotion.has ? "" : " hide")}>
-        <label className="form__label">Promotion</label>
+        <span className="form__label">Promotion</span>
         <button
           className="form__button"
           disabled={!promotion.has}
-          onClick={(e) => onPromotion("q")}
+          onClick={() => onPromotion("q")}
         >
           Queen
         </button>
         <button
           className="form__button"
           disabled={!promotion.has}
-          onClick={(e) => onPromotion("r")}
+          onClick={() => onPromotion("r")}
         >
           Rook
         </button>
         <button
           className="form__button"
           disabled={!promotion.has}
-          onClick={(e) => onPromotion("b")}
+          onClick={() => onPromotion("b")}
         >
           Bishop
         </button>
         <button
           className="form__button"
           disabled={!promotion.has}
-          onClick={(e) => onPromotion("n")}
+          onClick={() => onPromotion("n")}
         >
           Knight
         </button>

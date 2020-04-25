@@ -22,7 +22,7 @@ const Promotion = ({
         value={username}
         onChange={(e) => setUsername(e.target.value)}
       />
-      <label className="form__label">Permissions</label>
+      <span className="form__label">Permissions</span>
       <div className="form__check">
         <input
           id="admin"
@@ -45,7 +45,7 @@ const Promotion = ({
       <button
         className="form__submit"
         disabled={!isAdmin}
-        onClick={(e) => submitChange(username, admin, officer)}
+        onClick={() => submitChange(username, admin, officer)}
       >
         {isAdmin ? "Change Privileges" : "Not an Admin"}
       </button>

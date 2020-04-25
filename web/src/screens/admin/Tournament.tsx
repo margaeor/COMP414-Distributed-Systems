@@ -34,13 +34,13 @@ const Tournament = ({
         value={players}
         onChange={(e) => updatePlayers(e.target.value)}
       />
-      <label className="form__label">Game</label>
+      <span className="form__label">Game</span>
       <div className="form__check">
         <input
           id="chess"
           type="radio"
           checked={game === Game.CHESS}
-          onChange={(e) => setGame(Game.CHESS)}
+          onChange={() => setGame(Game.CHESS)}
         />
         <label htmlFor="chess">Chess</label>
       </div>
@@ -49,14 +49,14 @@ const Tournament = ({
           id="tictactoe"
           type="radio"
           checked={game === Game.TICTACTOE}
-          onChange={(e) => setGame(Game.TICTACTOE)}
+          onChange={() => setGame(Game.TICTACTOE)}
         />
         <label htmlFor="tictactoe">Tic Tac Toe</label>
       </div>
       <button
         className="form__submit"
         disabled={!isOfficer}
-        onClick={(e) => submitTournament(name, game, parseInt(players))}
+        onClick={() => submitTournament(name, game, parseInt(players))}
       >
         {isOfficer ? "Create Tournament" : "Not an Officer"}
       </button>

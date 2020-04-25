@@ -1,14 +1,9 @@
 import React from "react";
 import { connect } from "react-redux";
 import { joinGame, joinQuickPlay, joinTournament } from "../store/actions";
-import {
-  selectLobbyDataFetched,
-  selectOngoingPlays,
-  selectTournaments,
-} from "../store/selectors";
+import { selectOngoingPlays, selectTournaments } from "../store/selectors";
 import { Game, Play, State, Tournament } from "../store/types";
 interface IProps {
-  fetched: boolean;
   plays: Play[];
   tournaments: Tournament[];
   joinGame: typeof joinGame;
@@ -21,8 +16,8 @@ const Lobby: React.FunctionComponent<IProps> = (props) => {
     <div className="lobby">
       <div className="quickPlay">
         <span>Quick Play</span>
-        <button onClick={(e) => props.joinQuickPlay(Game.CHESS)}>Chess</button>
-        <button onClick={(e) => props.joinQuickPlay(Game.TICTACTOE)}>
+        <button onClick={() => props.joinQuickPlay(Game.CHESS)}>Chess</button>
+        <button onClick={() => props.joinQuickPlay(Game.TICTACTOE)}>
           Tic Tac Toe
         </button>
       </div>
@@ -32,7 +27,7 @@ const Lobby: React.FunctionComponent<IProps> = (props) => {
           {props.tournaments.map((t) => (
             <li key={t.id}>
               <span>{`${t.players}/${t.maxPlayers} ${t.name}`}</span>
-              <button onClick={(e) => props.joinTournament(t.id)}>Join</button>
+              <button onClick={() => props.joinTournament(t.id)}>Join</button>
             </li>
           ))}
         </ul>
@@ -45,7 +40,7 @@ const Lobby: React.FunctionComponent<IProps> = (props) => {
               <span>{`Opponent: ${p.opponent} ${
                 p.started ? "Started" : ""
               }`}</span>
-              <button onClick={(e) => props.joinGame(p.id)}>Join</button>
+              <button onClick={() => props.joinGame(p.id)}>Join</button>
             </li>
           ))}
         </ul>
@@ -56,7 +51,6 @@ const Lobby: React.FunctionComponent<IProps> = (props) => {
 
 const mapStateToProps = (state: State) => {
   return {
-    fetched: selectLobbyDataFetched(state),
     plays: selectOngoingPlays(state),
     tournaments: selectTournaments(state),
   };
