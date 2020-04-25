@@ -13,35 +13,37 @@ const Promotion = ({
   const [admin, setAdmin] = useState(false);
 
   return (
-    <div className="promotion">
-      <span className="header">Change User Privileges</span>
+    <div className="promotion form">
+      <span className="form__header">Change User Privileges</span>
       <input
+        className="form__input form__input--first"
         type="text"
         placeholder="Username"
         value={username}
         onChange={(e) => setUsername(e.target.value)}
       />
-      <ul className="roles">
-        <li>
-          <input
-            id="admin"
-            type="checkbox"
-            checked={admin}
-            onChange={(e) => setAdmin(e.target.checked)}
-          />
-          <label htmlFor="admin">Admin</label>
-        </li>
-        <li>
-          <input
-            id="officer"
-            type="checkbox"
-            checked={officer}
-            onChange={(e) => setOfficer(e.target.checked)}
-          />
-          <label htmlFor="officer">Officer</label>
-        </li>
-      </ul>
+      <label className="form__label">Permissions</label>
+      <div className="form__check">
+        <input
+          id="admin"
+          type="checkbox"
+          checked={admin}
+          onChange={(e) => setAdmin(e.target.checked)}
+        />
+        <label htmlFor="admin">Admin</label>
+      </div>
+      <div className="form__check">
+        <input
+          id="officer"
+          type="checkbox"
+          checked={officer}
+          onChange={(e) => setOfficer(e.target.checked)}
+        />
+        <label htmlFor="officer">Officer</label>
+      </div>
+      <div className="form__glue"></div>
       <button
+        className="form__submit"
         disabled={!isAdmin}
         onClick={(e) => submitChange(username, admin, officer)}
       >

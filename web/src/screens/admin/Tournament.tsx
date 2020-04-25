@@ -18,41 +18,43 @@ const Tournament = ({
   };
 
   return (
-    <div className="tournamentCreation">
-      <span className="header">Create Tournament</span>
+    <div className="tournamentCreation form">
+      <span className="form__header">Create Tournament</span>
       <input
+        className="form__input form__input--first"
         type="text"
         placeholder="Name"
         value={name}
         onChange={(e) => setName(e.target.value)}
       />
       <input
+        className="form__input"
         type="text"
         placeholder="Max Players"
         value={players}
         onChange={(e) => updatePlayers(e.target.value)}
       />
-      <ul className="games">
-        <li>
-          <input
-            id="chess"
-            type="radio"
-            checked={game === Game.CHESS}
-            onChange={(e) => setGame(Game.CHESS)}
-          />
-          <label htmlFor="chess">Chess</label>
-        </li>
-        <li>
-          <input
-            id="tictactoe"
-            type="radio"
-            checked={game === Game.TICTACTOE}
-            onChange={(e) => setGame(Game.TICTACTOE)}
-          />
-          <label htmlFor="tictactoe">Tic Tac Toe</label>
-        </li>
-      </ul>
+      <label className="form__label">Game</label>
+      <div className="form__check">
+        <input
+          id="chess"
+          type="radio"
+          checked={game === Game.CHESS}
+          onChange={(e) => setGame(Game.CHESS)}
+        />
+        <label htmlFor="chess">Chess</label>
+      </div>
+      <div className="form__check">
+        <input
+          id="tictactoe"
+          type="radio"
+          checked={game === Game.TICTACTOE}
+          onChange={(e) => setGame(Game.TICTACTOE)}
+        />
+        <label htmlFor="tictactoe">Tic Tac Toe</label>
+      </div>
       <button
+        className="form__submit"
         disabled={!isOfficer}
         onClick={(e) => submitTournament(name, game, parseInt(players))}
       >

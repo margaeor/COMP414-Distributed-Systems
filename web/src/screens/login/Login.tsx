@@ -23,6 +23,7 @@ const Login = ({ loginSignUp, loginSubmit, loginForgot, error }: IProps) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [answer, setAnswer] = useState("");
+  const [email, setEmail] = useState("");
 
   const submit = () => {
     switch (type) {
@@ -39,20 +40,22 @@ const Login = ({ loginSignUp, loginSubmit, loginForgot, error }: IProps) => {
   };
 
   return (
-    <div className="login">
-      <span className="header">
+    <div className="login form">
+      <span className="form__header">
         {type == LoginType.LOGIN && "Sign In"}
         {type == LoginType.FORGOT && "Forgot Password"}
         {type == LoginType.SIGN_UP && "Sign Up"}
       </span>
 
       <input
+        className="form__input form__input--first"
         type="text"
         placeholder="Username"
         value={username}
         onChange={(e) => setUsername(e.target.value)}
       />
       <input
+        className="form__input"
         type="password"
         placeholder={type == LoginType.LOGIN ? "Password" : "New Password"}
         value={password}
@@ -60,7 +63,7 @@ const Login = ({ loginSignUp, loginSubmit, loginForgot, error }: IProps) => {
       />
 
       {type == LoginType.LOGIN ? (
-        <div className="actionButtons">
+        <div className="form__dual-buttons">
           <button onClick={() => setType(LoginType.FORGOT)}>
             Forgot Password
           </button>
@@ -68,19 +71,38 @@ const Login = ({ loginSignUp, loginSubmit, loginForgot, error }: IProps) => {
         </div>
       ) : (
         <>
-          <span>Who was your first (hot) School Teacher?</span>
+          {type == LoginType.SIGN_UP && (
+            <input
+              className="form__input"
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          )}
+          <label className="form__label">
+            Who was your first (hot) Teacher?
+          </label>
           <input
+            className="form__input"
             type="text"
             placeholder="Answer"
             value={answer}
             onChange={(e) => setAnswer(e.target.value)}
           />
-          <button onClick={() => setType(LoginType.LOGIN)}>Go Back</button>
+          <button
+            className="form__button"
+            onClick={() => setType(LoginType.LOGIN)}
+          >
+            Go Back
+          </button>
         </>
       )}
 
       {error !== "" && <span className="error">{error}</span>}
-      <button onClick={submit}>Submit</button>
+      <button className="form__submit" onClick={submit}>
+        Submit
+      </button>
     </div>
   );
 };

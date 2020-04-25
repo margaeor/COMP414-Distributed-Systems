@@ -1,18 +1,6 @@
-.promotion,
-.tournamentCreation {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 20px;
-}
-
-.promotion button,
-.tournamentCreation button {
-  justify-self: flex-end;
-}
-
 .administration {
+  width: 100%;
   display: flex;
   flex-direction: row;
-  width: 100%;
-  justify-content: space-evenly;
+  justify-content: space-around;
 }

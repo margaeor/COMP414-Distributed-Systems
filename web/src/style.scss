@@ -1,3 +1,86 @@
-h1 {
-  color: tomato;
+@import "bourbon";
+
+body {
+  font-family: $font-stack-system;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+
+  &__header {
+    align-self: center;
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  @mixin input {
+    border: 1px solid #515151;
+    border-bottom: 0px;
+    padding: 0.4rem 0.6rem;
+  }
+
+  &__input {
+    @include input;
+    font-size: 0.9rem;
+    padding-left: 1rem;
+
+    &--first {
+      padding-top: 0.5rem;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+    }
+  }
+
+  &__label {
+    @include input;
+    text-align: center;
+    // font-size: 1.1em;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  &__check {
+    @include input;
+    display: flex;
+    flex-direction: row;
+    justify-content: start;
+
+    input {
+      margin-right: 0.5rem;
+    }
+  }
+
+  &__dual-buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: stretch;
+
+    button {
+      @include input;
+      flex-grow: 1;
+    }
+
+    button:first-child {
+      border-right: 0;
+    }
+  }
+
+  &__glue {
+    @include input;
+    flex: 1;
+  }
+
+  &__button {
+    @include input;
+  }
+
+  &__submit {
+    @include input;
+
+    border: 1px solid #515151;
+    padding-bottom: 0.5rem;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+  }
 }
