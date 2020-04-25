@@ -64,10 +64,18 @@ const Login = ({ loginSignUp, loginSubmit, loginForgot, error }: IProps) => {
 
       {type == LoginType.LOGIN ? (
         <div className="form__dual-buttons">
-          <button onClick={() => setType(LoginType.FORGOT)}>
+          <button
+            className="form__button"
+            onClick={() => setType(LoginType.FORGOT)}
+          >
             Forgot Password
           </button>
-          <button onClick={() => setType(LoginType.SIGN_UP)}>Sign Up</button>
+          <button
+            className="form__button"
+            onClick={() => setType(LoginType.SIGN_UP)}
+          >
+            Sign Up
+          </button>
         </div>
       ) : (
         <>

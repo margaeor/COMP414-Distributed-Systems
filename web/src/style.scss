@@ -1,12 +1,28 @@
 @import "bourbon";
+@import "_variables.scss";
+@import "_buttons.scss";
 
 body {
   font-family: $font-stack-system;
+  background-color: $color-background;
+  color: $color-text-light;
 }
 
 .form {
   display: flex;
   flex-direction: column;
+
+  @mixin input {
+    border: 0;
+    padding: 0.4rem 0.6rem;
+  }
+
+  $top-margin: 5px;
+
+  @mixin colored-input {
+    background-color: $color-primary;
+    color: $color-text-light;
+  }
 
   &__header {
     align-self: center;
@@ -14,16 +30,12 @@ body {
     margin-bottom: 0.75rem;
   }
 
-  @mixin input {
-    border: 1px solid #515151;
-    border-bottom: 0px;
-    padding: 0.4rem 0.6rem;
-  }
-
   &__input {
     @include input;
+    @include colored-input;
     font-size: 0.9rem;
     padding-left: 1rem;
+    margin-top: $top-margin;
 
     &--first {
       padding-top: 0.5rem;
@@ -34,6 +46,8 @@ body {
 
   &__label {
     @include input;
+    @include colored-input;
+    margin-top: $top-margin;
     text-align: center;
     // font-size: 1.1em;
     overflow: hidden;
@@ -42,6 +56,8 @@ body {
 
   &__check {
     @include input;
+    @include colored-input;
+
     display: flex;
     flex-direction: row;
     justify-content: start;
@@ -57,28 +73,33 @@ body {
     justify-content: stretch;
 
     button {
-      @include input;
       flex-grow: 1;
     }
 
     button:first-child {
-      border-right: 0;
+      margin-right: $top-margin;
     }
   }
 
   &__glue {
     @include input;
+    @include colored-input;
     flex: 1;
   }
 
   &__button {
     @include input;
+    @extend %base-button;
+    @extend %button-primary;
+    margin-top: $top-margin;
   }
 
   &__submit {
     @include input;
+    @extend %base-button;
+    @extend %button-accent;
+    margin-top: $top-margin + 1px;
 
-    border: 1px solid #515151;
     padding-bottom: 0.5rem;
     border-bottom-left-radius: 10px;
     border-bottom-right-radius: 10px;

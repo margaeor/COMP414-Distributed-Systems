@@ -47,7 +47,7 @@ const Promotion = ({
         disabled={!isAdmin}
         onClick={(e) => submitChange(username, admin, officer)}
       >
-        Submit
+        {isAdmin ? "Change Privileges" : "Not an Admin"}
       </button>
     </div>
   );
