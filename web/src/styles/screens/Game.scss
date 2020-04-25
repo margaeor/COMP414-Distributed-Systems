@@ -1,0 +1,39 @@
+.game {
+  display: flex;
+  flex-direction: row;
+}
+
+.chat {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
+  margin-right: $top-margin;
+
+  &__history {
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    resize: none;
+    flex-grow: 1;
+
+    @include input;
+    @include colored-input;
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: row;
+    justify-content: stretch;
+
+    &__input {
+      @include text-input;
+      border-bottom-left-radius: 5px;
+    }
+
+    &__submit {
+      @extend %base-button;
+      @include button-accent;
+      border-bottom-right-radius: 5px;
+    }
+  }
+}

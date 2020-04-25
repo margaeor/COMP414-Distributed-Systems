@@ -1,0 +1,23 @@
+.chess {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
+.promotion-bar {
+  position: absolute;
+  right: 0;
+}
+
+// .promotion-bar {
+//   display: flex;
+//   flex-direction: column;
+//   justify-content: flex-start;
+
+//   button {
+//     @extend %base-button;
+//     @extend %button-accent;
+//     padding: 0.3rem 0.5rem;
+//     margin-top: $top-margin;
+//   }
+// }

@@ -1,9 +1,8 @@
 import React, { useState } from "react";
-import "./Login.scss";
 import { connect } from "react-redux";
-import { State } from "../../store/types";
-import { loginSubmit, loginForgot, loginSignUp } from "../../store/actions";
-import { selectError } from "../../store/selectors";
+import { loginForgot, loginSignUp, loginSubmit } from "../store/actions";
+import { selectError } from "../store/selectors";
+import { State } from "../store/types";
 
 interface IProps {
   loginSubmit: typeof loginSubmit;

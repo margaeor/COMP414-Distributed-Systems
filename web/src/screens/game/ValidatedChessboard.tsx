@@ -12,7 +12,6 @@ import {
   LIGHT_SQUARE_STYLE,
   DARK_SQUARE_STYLE,
 } from "./ChessboardStyle";
-import "./ValidatedChessboard.scss";
 
 interface IProps {
   game: ChessInstance;
@@ -109,7 +108,7 @@ const ValidatedChessboard = ({ game, color, makeMove }: IProps) => {
   }
 
   return (
-    <div>
+    <div className="chess">
       <Chessboard
         width={600}
         transitionDuration={300}
@@ -126,14 +125,35 @@ const ValidatedChessboard = ({ game, color, makeMove }: IProps) => {
         dropSquareStyle={DROP_SQUARE_STYLE}
         onSquareClick={onSquareClick}
       />
-      <div
-        className="promotionBar"
-        style={{ visibility: promotion.has ? "visible" : "hidden" }}
-      >
-        <button onClick={(e) => onPromotion("q")}>Queen</button>
-        <button onClick={(e) => onPromotion("r")}>Rook</button>
-        <button onClick={(e) => onPromotion("b")}>Bishop</button>
-        <button onClick={(e) => onPromotion("n")}>Knight</button>
+      <div className="promotion-bar form">
+        <button
+          className="form__button"
+          disabled={!promotion.has}
+          onClick={(e) => onPromotion("q")}
+        >
+          Queen
+        </button>
+        <button
+          className="form__button"
+          disabled={!promotion.has}
+          onClick={(e) => onPromotion("r")}
+        >
+          Rook
+        </button>
+        <button
+          className="form__button"
+          disabled={!promotion.has}
+          onClick={(e) => onPromotion("b")}
+        >
+          Bishop
+        </button>
+        <button
+          className="form__button"
+          disabled={!promotion.has}
+          onClick={(e) => onPromotion("n")}
+        >
+          Knight
+        </button>
       </div>
     </div>
   );

@@ -1,13 +1,12 @@
 import React from "react";
 import { connect } from "react-redux";
-import { joinGame, joinQuickPlay, joinTournament } from "../../store/actions";
+import { joinGame, joinQuickPlay, joinTournament } from "../store/actions";
 import {
   selectLobbyDataFetched,
   selectOngoingPlays,
   selectTournaments,
-} from "../../store/selectors";
-import { Game, Play, State, Tournament } from "../../store/types";
-import "./Lobby.scss";
+} from "../store/selectors";
+import { Game, Play, State, Tournament } from "../store/types";
 interface IProps {
   fetched: boolean;
   plays: Play[];

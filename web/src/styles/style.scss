@@ -3,6 +3,14 @@
 @import "_buttons.scss";
 @import "_forms.scss";
 
+@import "./screens/Administration.scss";
+@import "./screens/Game.scss";
+@import "./screens/Header.scss";
+@import "./screens/Lobby.scss";
+@import "./screens/Login.scss";
+@import "./screens/Routes.scss";
+@import "./screens/ValidatedChessboard.scss";
+
 body {
   font-family: $font-stack-system;
   background-color: $color-background;

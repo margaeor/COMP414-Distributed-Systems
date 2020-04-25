@@ -2,14 +2,13 @@ import React from "react";
 import { connect } from "react-redux";
 
 import { ScreenState, LoaderStep, State } from "../store/types";
-import Login from "./login/Login";
-import Lobby from "./lobby/Lobby";
+import Login from "./Login";
+import Lobby from "./Lobby";
 import Game from "./game/Game";
 import Loader from "./Loader";
 import { selectScreen, selectLoader } from "../store/selectors";
-import Header from "./common/Header";
+import Header from "./Header";
 
-import "./Routes.scss";
 import Administration from "./admin/Administration";
 
 const Routes = ({

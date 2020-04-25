@@ -3,7 +3,6 @@ import { connect } from "react-redux";
 import { sendMessage } from "../../store/actions";
 import { selectGameData, selectHistory } from "../../store/selectors";
 import { State } from "../../store/types";
-import "./Game.scss";
 import ValidatedChessboard from "./ValidatedChessboard";
 
 interface IProps {
@@ -23,15 +22,18 @@ const Game = ({ history, sendMessage }: IProps) => {
   return (
     <div className="game">
       <div className="chat">
-        <textarea id="history" readOnly value={history} />
-        <div className="form">
+        <textarea className="chat__history" readOnly value={history} />
+        <div className="chat__form">
           <input
-            id="chatBox"
+            className="chat__form__input"
             value={message}
+            placeholder={"Message..."}
             onChange={(e) => setMessage(e.target.value)}
             onKeyPress={(e) => e.key === "Enter" && submitMessage()}
           />
-          <button onClick={submitMessage}>Send</button>
+          <button className="chat__form__submit" onClick={submitMessage}>
+            Send
+          </button>
         </div>
       </div>
       <ValidatedChessboard />
