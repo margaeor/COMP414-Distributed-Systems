@@ -42,13 +42,23 @@ const mapStateToProps = (state: State) => {
 
 const ConnectedRoutes = connect(mapStateToProps)(Routes);
 
-const Wrapper = () => {
+const Wrapper = ({
+  screen,
+  loader,
+}: {
+  screen: ScreenState;
+  loader: LoaderStep;
+}) => {
   return (
     <div className="container">
-      <Header />
+      {screen == ScreenState.LOGIN || loader !== LoaderStep.INACTIVE ? (
+        <div className="logo" />
+      ) : (
+        <Header />
+      )}
       <ConnectedRoutes />
     </div>
   );
 };
 
-export default Wrapper;
+export default connect(mapStateToProps)(Wrapper);
