@@ -1,18 +1,29 @@
 import { ChessInstance, Square } from "chess.js";
+// @ts-ignore
+import colors from "./ChessboardStyle.scss";
 
-const ACTIVE_SQUARE_STYLE = { backgroundColor: "rgba(255, 255, 0, 0.4)" };
+const ACTIVE_SQUARE_STYLE = { backgroundColor: colors.activeSquare };
 export const DROP_SQUARE_STYLE = {
-  boxShadow: "inset 0 0 1px 4px rgb(255, 255, 0)",
+  boxShadow: "inset 0 0 1px 4px" + colors.activeSquare,
 };
 const POSSIBLE_SQUARE_STYLE = {
-  background: "radial-gradient(circle, #fffc00 36%, transparent 40%)",
+  background:
+    "radial-gradient(circle, " +
+    colors.possibleSquare +
+    " 36%, transparent 40%)",
   borderRadius: "50%",
 };
 
-export const BOARD_STYLE = {
-  borderRadius: "5px",
-  boxShadow: `0 5px 15px rgba(0, 0, 0, 0.5)`,
+const ACTIVE_SQUARE_POSSIBLE_STYLE = {
+  background:
+    "radial-gradient(circle, " +
+    colors.activeSquarePossible +
+    " 36%, transparent 40%)",
+  borderRadius: "50%",
 };
+
+export const DARK_SQUARE_STYLE = { backgroundColor: colors.darkSquare };
+export const LIGHT_SQUARE_STYLE = { backgroundColor: colors.lightSquare };
 
 export const styleActiveSquares = (
   chess: ChessInstance,
@@ -43,7 +54,8 @@ export const styleDropSquare = (square: Square) => {
 export const highlightPossibleMoves = (
   chess: ChessInstance,
   square: Square,
-  color: "b" | "w"
+  color: "b" | "w",
+  hover: boolean
 ) => {
   const possibleSquares = chess
     .moves({
@@ -56,7 +68,7 @@ export const highlightPossibleMoves = (
   return possibleSquares.reduce((a, c) => {
     return {
       ...a,
-      ...{ [c]: POSSIBLE_SQUARE_STYLE },
+      ...{ [c]: hover ? POSSIBLE_SQUARE_STYLE : ACTIVE_SQUARE_POSSIBLE_STYLE },
     };
   }, {});
 };

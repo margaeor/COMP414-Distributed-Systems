@@ -6,10 +6,11 @@ import { makeMove } from "../../store/actions";
 import { selectGameData } from "../../store/selectors";
 import { State } from "../../store/types";
 import {
-  BOARD_STYLE,
   DROP_SQUARE_STYLE,
   highlightPossibleMoves,
   styleActiveSquares,
+  LIGHT_SQUARE_STYLE,
+  DARK_SQUARE_STYLE,
 } from "./ChessboardStyle";
 import "./ValidatedChessboard.scss";
 
@@ -91,8 +92,10 @@ const ValidatedChessboard = ({ game, color, makeMove }: IProps) => {
   // Memoize squares
   const squareStyles = useMemo(
     () => ({
-      ...(pieceSquare && highlightPossibleMoves(game, pieceSquare, color)),
-      ...(hoverSquare && highlightPossibleMoves(game, hoverSquare, color)),
+      ...(pieceSquare &&
+        highlightPossibleMoves(game, pieceSquare, color, false)),
+      ...(hoverSquare &&
+        highlightPossibleMoves(game, hoverSquare, color, true)),
       ...styleActiveSquares(game, pieceSquare),
     }),
     [pieceSquare, hoverSquare, game]
@@ -117,7 +120,8 @@ const ValidatedChessboard = ({ game, color, makeMove }: IProps) => {
         }
         onDragOverSquare={(s) => setHoverSquare("")}
         onMouseOverSquare={(s) => setHoverSquare(s)}
-        boardStyle={BOARD_STYLE}
+        lightSquareStyle={LIGHT_SQUARE_STYLE}
+        darkSquareStyle={DARK_SQUARE_STYLE}
         squareStyles={squareStyles}
         dropSquareStyle={DROP_SQUARE_STYLE}
         onSquareClick={onSquareClick}

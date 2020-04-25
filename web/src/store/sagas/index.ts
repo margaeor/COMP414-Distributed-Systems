@@ -15,7 +15,7 @@ function* mainSaga(previousScreen: ScreenState, id?: string) {
 
   const token = yield* getAccessToken();
 
-  yield* administration();
+  // yield* administration();
   switch (previousScreen) {
     default:
       const play: Play = yield* lobby(token);
