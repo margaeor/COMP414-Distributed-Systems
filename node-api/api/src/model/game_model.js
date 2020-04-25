@@ -60,6 +60,8 @@ server_ip: {
 
 var ActiveGame = mongoose.model('active_game', active_game);
 
+Game.createCollection();
+ActiveGame.createCollection();
 
 module.exports = {
     Game,

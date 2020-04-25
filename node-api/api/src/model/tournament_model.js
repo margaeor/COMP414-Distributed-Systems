@@ -80,6 +80,7 @@ function arrayLimit(val) {
 }
 
 TournamentRound.createCollection();
+Tournament.createCollection();
 
 module.exports = {
   Tournament:Tournament,

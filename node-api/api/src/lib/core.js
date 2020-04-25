@@ -137,13 +137,13 @@ async function atomicEndGame(session, game_id, score) {
    * hasn't finished
    * @throws Exception on error
    */
-  async function resetActiveGameState(game) {
+  async function resetActiveGameState(session,game) {
   
       if(!game) throw new errors.InvalidArgumentException('Game does not exist');
   
       if(!game.has_ended) {
         
-        let active_game = await ActiveGame.findById(game._id).exec();
+        let active_game = await ActiveGame.findById(game._id).session(session);
         if(active_game && (await zookeeper.isServerAvailable(active_game.server_id))) {
           await User.updateMany(
             {$or:[{_id:game.player1},{_id:game.player2}]},
@@ -151,7 +151,7 @@ async function atomicEndGame(session, game_id, score) {
             {
               runValidators: true
             }
-          ).exec();
+          ).session(session);
           return active_game;
         } else {
           
@@ -162,7 +162,7 @@ async function atomicEndGame(session, game_id, score) {
             _id:game._id,
             server_id:server.id,
             server_ip:server.ip
-          },{upsert:true,new:true});
+          },{upsert:true,new:true}).session(session);
           
           await User.updateMany(
             {$or:[{_id:game.player1},{_id:game.player2}]},
@@ -170,19 +170,19 @@ async function atomicEndGame(session, game_id, score) {
             {
               runValidators: true
             }
-          ).exec();
+          ).session(session);
         }
         return active_game;
   
       } else {
-        await ActiveGame.findByIdAndDelete(game._id);
+        await ActiveGame.findByIdAndDelete(game._id).session(session);
         await User.updateMany(
           {$or:[{_id:game.player1},{_id:game.player2}]},
           {"$pullAll": {active_games: [game._id]}},
           {
             runValidators: true
           }
-        ).exec();
+        ).session(session);
         return false;
       }
   }
@@ -195,7 +195,7 @@ async function atomicEndGame(session, game_id, score) {
    * of the players.
    * @returns [game,active_game] on success and false on failure
    */
-  async function createGame(user1,user2,type) {
+  async function createGame(session,user1,user2,type) {
     
     if(user1 && user2 && globals.GAME_TYPES.includes(type)) {
         
@@ -203,18 +203,19 @@ async function atomicEndGame(session, game_id, score) {
         {
           throw new errors.InvalidOperationException("Maximum number of active games exceeded");
         }
-  
-        let game = await Game.create({
+        console.log(user1,user2,type);
+        let game = await Game.create([{
           player1:user1,
           player2:user2,
           game_type:type
-        });
+        }],{session});
         
-        let active_game = await resetActiveGameState(game);
+        if(!Array.isArray(game)) throw new errors.InternalErrorException("Could not create game");
+        let active_game = await resetActiveGameState(session,game[0]);
 
         if(!active_game) throw new errors.InvalidOperationException('Game has ended');
   
-        return [game,active_game];
+        return [game[0],active_game];
   
     } else throw new errors.InvalidArgumentException("Wrong arguments");
   }

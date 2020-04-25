@@ -130,7 +130,7 @@ app.get('/practice/join_queue', async (req, res) => {
           throw new errors.InvalidOperationException('User already in queue');
         } else {
           createUserIfNotExists(opponent);
-          let result = await createGame(username,opponent,game_type);
+          let result = await transactions.runTransactionWithRetry(createGame, mongoose, username, opponent, game_type);
           if(result && result.length == 2 && result[1]) {
             let active_game = result[1];
             res.json(errors.createSuccessResponse('Game created',active_game));
@@ -226,11 +226,10 @@ async function atomicStartTournament(session, tournament_id) {
   let first_group = participants.slice(0, middle);
   let second_group = participants.slice(middle, participants.length);
 
-  console.log(alone);
-  console.log(first_group);
-  console.log(second_group);
 
   if(first_group.length != second_group.length) throw new errors.InternalErrorException('Error occured');
+
+
 
   let games_ids = [];
   for (let i = 0; i < first_group.length; i++) {
@@ -239,18 +238,33 @@ async function atomicStartTournament(session, tournament_id) {
     let user2 = second_group[i];
     Math.random() < 0.5 && ([user1,user2]=[user2,user1]);
     
-    let game = await Game.create({
+    let game = (await Game.create([{
       player1:user1,
       player2:user2,
       game_type:tournament.game_type
-    });
+    }],{session:session}))[0];
 
+    let active_game = await resetActiveGameState(session,game);
     games_ids.push(game._id);
   }
 
-  // let tournament_round = await TournamentRound.create({
-  //   round_number : tournament.rounds.length+1,
-  // });
+
+  let tournament_round = (await TournamentRound.create([{
+    round_number: 1,
+    games:games_ids,
+    queue: (alone ? [alone] : [])
+  }],{session:session}))[0];
+
+  console.log(tournament_round);
+
+  tournament.has_started = true;
+  tournament.rounds.push(tournament_round._id);
+
+  await Tournament.findByIdAndUpdate(tournament_id,
+    {
+      has_started:true,
+      rounds:[tournament_round._id]
+    }).session(session);
 
 }
 
