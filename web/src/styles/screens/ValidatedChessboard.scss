@@ -5,8 +5,16 @@
 }
 
 .promotion-bar {
-  position: absolute;
+  position: relative;
   right: 0;
+
+  label {
+    margin-top: 0;
+  }
+
+  &.hide {
+    visibility: hidden;
+  }
 }
 
 // .promotion-bar {

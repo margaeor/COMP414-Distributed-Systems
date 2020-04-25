@@ -22,6 +22,11 @@ const ACTIVE_SQUARE_POSSIBLE_STYLE = {
   borderRadius: "50%",
 };
 
+export const BOARD_STYLE = {
+  borderRadius: "5px",
+  overflow: "hidden",
+};
+
 export const DARK_SQUARE_STYLE = { backgroundColor: colors.darkSquare };
 export const LIGHT_SQUARE_STYLE = { backgroundColor: colors.lightSquare };
 

@@ -11,6 +11,7 @@ import {
   styleActiveSquares,
   LIGHT_SQUARE_STYLE,
   DARK_SQUARE_STYLE,
+  BOARD_STYLE,
 } from "./ChessboardStyle";
 
 interface IProps {
@@ -90,13 +91,16 @@ const ValidatedChessboard = ({ game, color, makeMove }: IProps) => {
 
   // Memoize squares
   const squareStyles = useMemo(
-    () => ({
-      ...(pieceSquare &&
-        highlightPossibleMoves(game, pieceSquare, color, false)),
-      ...(hoverSquare &&
-        highlightPossibleMoves(game, hoverSquare, color, true)),
-      ...styleActiveSquares(game, pieceSquare),
-    }),
+    () =>
+      promotion.has
+        ? {}
+        : {
+            ...(pieceSquare &&
+              highlightPossibleMoves(game, pieceSquare, color, false)),
+            ...(hoverSquare &&
+              highlightPossibleMoves(game, hoverSquare, color, true)),
+            ...styleActiveSquares(game, pieceSquare),
+          },
     [pieceSquare, hoverSquare, game]
   );
 
@@ -114,6 +118,7 @@ const ValidatedChessboard = ({ game, color, makeMove }: IProps) => {
         transitionDuration={300}
         position={position}
         orientation={color === "w" ? "white" : "black"}
+        boardStyle={BOARD_STYLE}
         onDrop={({ sourceSquare, targetSquare }) =>
           movePiece(sourceSquare, targetSquare)
         }
@@ -125,7 +130,8 @@ const ValidatedChessboard = ({ game, color, makeMove }: IProps) => {
         dropSquareStyle={DROP_SQUARE_STYLE}
         onSquareClick={onSquareClick}
       />
-      <div className="promotion-bar form">
+      <div className={"promotion-bar form" + (promotion.has ? "" : " hide")}>
+        <label className="form__label">Promotion</label>
         <button
           className="form__button"
           disabled={!promotion.has}
