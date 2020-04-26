@@ -214,22 +214,27 @@ async function atomicStartTournament(session, tournament_id) {
   let tournament = await Tournament.findById(tournament_id).session(session);
   if(!tournament) throw errors.InvalidArgumentException('No such tournament');
   if(tournament.has_started) throw new errors.InvalidOperationException('Tournament already started');
-  if(tournament.participants.length <= 4) throw errors.InvalidOperationException('Not enough players');
+  if(tournament.participants.length < 4) throw new errors.InvalidOperationException('Not enough players');
 
   let participants = [...tournament.participants]; // copy array
   shuffleArray(participants);
 
-  let alone = participants.length % 2 == 1 ? participants.pop() : null;
+  let num_to_skip_round = (1 << 32 - Math.clz32(participants.length-1))-participants.length;
    
-  let middle = Math.floor(participants.length / 2)
+  let middle = Math.floor((participants.length-num_to_skip_round) / 2)
 
   let first_group = participants.slice(0, middle);
-  let second_group = participants.slice(middle, participants.length);
+  let second_group = participants.slice(middle, participants.length-num_to_skip_round);
 
-
+  let skippers = participants.slice(participants.length-num_to_skip_round, participants.length);
+  
   if(first_group.length != second_group.length) throw new errors.InternalErrorException('Error occured');
 
-
+  let tournament_round = (await TournamentRound.create([{
+    round_number: 1,
+    num_games_left: first_group.length,
+    queue: [...skippers]
+  }],{session:session}))[0];
 
   let games_ids = [];
   for (let i = 0; i < first_group.length; i++) {
@@ -241,28 +246,20 @@ async function atomicStartTournament(session, tournament_id) {
     let game = (await Game.create([{
       player1:user1,
       player2:user2,
-      game_type:tournament.game_type
+      game_type:tournament.game_type,
+      tournament_id: tournament._id,
+      round_id: tournament_round._id
     }],{session:session}))[0];
 
     let active_game = await resetActiveGameState(session,game);
-    games_ids.push(game._id);
+    tournament_round.games.push(game._id);
   }
 
-
-  let tournament_round = (await TournamentRound.create([{
-    round_number: 1,
-    games:games_ids,
-    queue: (alone ? [alone] : [])
-  }],{session:session}))[0];
-
-  console.log(tournament_round);
-
-  tournament.has_started = true;
-  tournament.rounds.push(tournament_round._id);
+  await tournament_round.save({session});
 
   await Tournament.findByIdAndUpdate(tournament_id,
     {
-      has_started:true,
+      //has_started:true, @TODO remove comment
       rounds:[tournament_round._id]
     }).session(session);
 

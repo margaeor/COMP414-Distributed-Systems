@@ -28,6 +28,16 @@ var game = new mongoose.Schema({
       required: true,
       default: false
     },
+    tournament_id: {
+        type: Schema.Types.ObjectId,
+        ref: 'tournament',
+        default: null
+    },
+    round_id: {
+        type: Schema.Types.ObjectId,
+        ref: 'tournament_round',
+        default: null
+    },
     score: {
         type: Number,
         default: null

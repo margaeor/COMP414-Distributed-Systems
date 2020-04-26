@@ -14,6 +14,10 @@ var tournament_round = new mongoose.Schema({
     default: 0,
     required: true
   },
+  num_games_left: {
+    type: Number,
+    required:true
+  },
   games: [{
     type: Schema.Types.ObjectId,
     ref: 'game'

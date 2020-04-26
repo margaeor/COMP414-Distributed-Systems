@@ -3,7 +3,7 @@ const errors = require('./errors.js');
 const zookeeper = require('../zookeeper/functions.js');
 
 const User = require('../model/user_model.js');
-const Tournament = require('../model/tournament_model.js');
+const {Tournament,TournamentRound} = require('../model/tournament_model.js');
 const {Game, ActiveGame} = require('../model/game_model.js');
 const Lobby = require('../model/lobby_model.js');
 
@@ -75,7 +75,96 @@ async function createUserIfNotExists(username) {
       return other_user;
     });
   }
+
+async function atomicCreateNextRound(session, tournament, round_users, round_number) {
+
+  // let tournament = await Tournament.findById(tournament_id).session(session);
+  // if(!tournament) throw errors.InvalidArgumentException('No such tournament');
+  // if(tournament.has_started) throw new errors.InvalidOperationException('Tournament already started');
+  // if(tournament.participants.length <= 4) throw errors.InvalidOperationException('Not enough players');
+
+  let participants = [...round_users]; // copy array
+  if(round_number == 1) shuffleArray(participants);
+
+  let alone = participants.length % 2 == 1 ? participants.pop() : null;
+    
+  let middle = Math.floor(participants.length / 2)
+
+  let first_group = participants.slice(0, middle);
+  let second_group = participants.slice(middle, participants.length);
+
+
+  if(first_group.length != second_group.length) throw new errors.InternalErrorException('Error occured');
+
+
+  let tournament_round = (await TournamentRound.create([{
+    round_number: round_number,
+    num_games_left: first_group.length,
+    queue: (alone ? [alone] : [])
+  }],{session:session}))[0];
+
+  let games_ids = [];
+  for (let i = 0; i < first_group.length; i++) {
+
+    let user1 = first_group[i];
+    let user2 = second_group[i];
+    Math.random() < 0.5 && ([user1,user2]=[user2,user1]);
+    
+    let game = (await Game.create([{
+      player1:user1,
+      player2:user2,
+      game_type:tournament.game_type,
+      tournament_id: tournament._id,
+      round_id: tournament_round._id
+    }],{session:session}))[0];
+
+    let active_game = await resetActiveGameState(session,game);
+    tournament_round.games.push(game._id);
+  }
+
+  return await tournament_round.save({session});
+
+}
+
+async function atomicEndTournamentGame(session, game, score) {
+
+  if(!game.tournament_id) return;
+
+  let tournament = await Tournament.findById(game.tournament_id).session(session);
   
+  if(!tournament) throw new errors.InternalErrorException('No such tournament');
+
+  let last_round = await TournamentRound.findById(tournament.rounds.slice(-1)[0]).session(session);
+
+  if(!last_round) throw new errors.InternalErrorException('No round exist');
+  if(!last_round._id.equals(game.round_id)) throw new errors.InternalErrorException('Game refers to past round');
+
+  last_round.num_games_left--;
+  
+  console.log("before",last_round);
+
+  if(score == 1 || score == 0) last_round.queue.push(game.player1);
+  if(score == -1|| score == 0) last_round.queue.push(game.player2);
+  await last_round.save({session});
+
+  console.log("after",last_round);
+
+
+  let new_round = await atomicCreateNextRound(session,tournament,last_round.queue,last_round.round_number+1);
+
+  console.log(new_round);
+
+  if( last_round.num_games_left <= 0) {
+    // Round finished  
+    if(last_round.length > globals.NUM_OF_TOURNAMENT_WINNERS) {
+      
+    }
+  }
+
+  throw "SHIT EXCEPTION";
+
+}
+
   /**
  * Ends the game and records the scores
  * atomicaly (must be called inside a transaction)
@@ -87,7 +176,7 @@ async function atomicEndGame(session, game_id, score) {
   
     let game = await Game.findOneAndUpdate(
       {_id:game_id,has_ended:false},
-      {has_ended:true,score:score},
+      {has_ended:false,score:score},//@TODO fix has_ended
       {new:true})
     .session(session);
     if(!game) throw new errors.InvalidArgumentException('Game not found');
@@ -96,31 +185,35 @@ async function atomicEndGame(session, game_id, score) {
     createUserIfNotExists(game.player1);
     createUserIfNotExists(game.player2);
 
-    let user1 = await User.findByIdAndUpdate(game.player1,
-        {"$addToSet": {past_games: game._id}},{new:true,upsert:true})
-        .session(session);
-    let user2 = await User.findByIdAndUpdate(game.player2,
-        {"$addToSet": {past_games: game._id}},{new:true,upsert:true})
-        .session(session);
-    if(game && user1 && user2) {
-      await ActiveGame.findByIdAndDelete(game._id).session(session);
-      user1.total_games += 1;
-      user2.total_games += 1;
-      if(game.score == 0) {
-        user1.total_ties +=1;
-        user2.total_ties +=1;
-      } else if(game.score == 1) {
-        user1.total_wins +=1;
-        user2.total_losses +=1;
-      } else if(game.score == -1) {
-        user1.total_losses +=1;
-        user2.total_wins +=1;
-      } else throw new errors.InvalidArgumentException('Wrong score value');
-      user1.past_games.indexOf(game_id) === -1 && user1.past_games.push(game_id);
-      user2.past_games.indexOf(game_id) === -1 && user2.past_games.push(game_id);
-      await user1.save({ session });
-      await user2.save({ session });
-    } else throw new errors.InvalidArgumentException('Invalid fields');
+    if(game.tournament_id) await atomicEndTournamentGame(session,game,score);
+    else {
+      throw 'SHIT';
+      let user1 = await User.findByIdAndUpdate(game.player1,
+          {"$addToSet": {past_games: game._id}},{new:true,upsert:true})
+          .session(session);
+      let user2 = await User.findByIdAndUpdate(game.player2,
+          {"$addToSet": {past_games: game._id}},{new:true,upsert:true})
+          .session(session);
+      if(game && user1 && user2) {
+        await ActiveGame.findByIdAndDelete(game._id).session(session);
+        user1.total_games += 1;
+        user2.total_games += 1;
+        if(game.score == 0) {
+          user1.total_ties +=1;
+          user2.total_ties +=1;
+        } else if(game.score == 1) {
+          user1.total_wins +=1;
+          user2.total_losses +=1;
+        } else if(game.score == -1) {
+          user1.total_losses +=1;
+          user2.total_wins +=1;
+        } else throw new errors.InvalidArgumentException('Wrong score value');
+        user1.past_games.indexOf(game_id) === -1 && user1.past_games.push(game_id);
+        user2.past_games.indexOf(game_id) === -1 && user2.past_games.push(game_id);
+        await user1.save({ session });
+        await user2.save({ session });
+      } else throw new errors.InvalidArgumentException('Invalid fields');
+    }
   }
   
   
@@ -224,6 +317,7 @@ async function atomicEndGame(session, game_id, score) {
   module.exports = {
       createUserIfNotExists: createUserIfNotExists,
       atomicPracticePairing: atomicPracticePairing,
+      atomicEndTournamentGame: atomicEndTournamentGame,
       atomicEndGame: atomicEndGame,
       resetActiveGameState: resetActiveGameState,
       createGame: createGame
