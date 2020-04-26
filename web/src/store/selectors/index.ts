@@ -22,3 +22,7 @@ export function selectMessage({ message }: State): string {
 export function selectUser({ user }: State) {
   return user;
 }
+
+export function selectIsAuthorized({ user: { admin, officer } }: State) {
+  return admin || officer;
+}

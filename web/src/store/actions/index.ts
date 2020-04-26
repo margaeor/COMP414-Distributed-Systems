@@ -7,7 +7,6 @@ export * from "./login";
 export * from "./loader";
 
 export const CHANGE_SCREEN = "CHANGE_SCREEN";
-export const LOGOUT = "LOGOUT";
 export const SET_USER = "SET_USER";
 export const UPDATE_ERROR = "UPDATE_ERROR";
 export const UPDATE_MESSAGE = "UPDATE_MESSAGE";
@@ -55,12 +54,6 @@ export function changeScreen(
     type: CHANGE_SCREEN,
     screen,
     loader,
-  };
-}
-
-export function logout() {
-  return {
-    type: LOGOUT,
   };
 }
 
