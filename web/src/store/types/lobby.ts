@@ -10,6 +10,7 @@ export interface Tournament {
   id: string;
   name: string;
   game: Game;
+  joined: boolean;
   players: number;
   maxPlayers: number;
 }

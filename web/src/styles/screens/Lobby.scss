@@ -1,46 +1,104 @@
 .lobby {
-  max-width: 800px;
-  width: 100%;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-evenly;
-}
+  align-self: stretch;
 
-.lobby .quickPlay {
   display: flex;
   flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+
+  &__header {
+    border-right: 2px solid $color-accent;
+    align-self: stretch;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    background-color: $color-primary;
+    border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
+
+    &__label {
+      padding: 0.2rem 0.6rem 0.3rem 0.7rem;
+      border-top-left-radius: 5px;
+      background-color: $color-accent;
+      color: $color-text-dark;
+    }
+
+    &__game {
+      padding: 0.2rem 0;
+      width: 10rem;
+      border-right: 2px solid $color-accent;
+      @extend %base-button;
+      @include button-color($color-primary-light);
+    }
+  }
 }
 
-.lobby .quickPlay * {
-  margin-bottom: 20px;
-}
-
-.lobby .tournamentPlay {
-  display: flex;
-  flex-direction: column;
-}
-
-.lobby .currentPlays {
-  display: flex;
-  flex-direction: column;
-}
-
-.lobby .tournamentList li {
+.player-info {
+  flex: 1;
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: stretch;
+  align-items: stretch;
+  max-height: 70vh;
+
+  // background-color: $color-primary;
+  border: 2px solid $color-accent;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+
+  .player-info__col:last-of-type {
+    border: none;
+  }
+
+  &__col {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    border-right: 2px solid $color-accent;
+
+    &__label {
+      padding: 0.4rem 0;
+      text-align: center;
+      font-size: 1.1rem;
+      background-color: $color-primary;
+      border-bottom-left-radius: 5px;
+      border-bottom-right-radius: 5px;
+      border-bottom: 2px solid $color-accent;
+    }
+
+    &__list {
+      list-style-type: none;
+      overflow-y: auto;
+      margin: 0.3rem 0;
+      padding: 0 0.6rem;
+
+      @include scrollbars(10px, $color-primary, $color-accent);
+    }
+  }
 }
 
-.lobby .tournamentList button {
-  margin-left: 5px;
-}
+.score-node {
+  padding: 0.3rem 0;
 
-.lobby .playList li {
   display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-}
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: start;
 
-.lobby .playList button {
-  margin-left: 5px;
+  &__icon {
+    height: 1rem;
+    padding-right: 0.2rem;
+  }
+
+  &__name,
+  &__tertiary {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__name {
+    color: $color-accent;
+  }
 }

@@ -13,7 +13,6 @@ export default function* joinFakeGame() {
       game: Game.CHESS,
       opponent: "john",
       started: false,
-      won: false,
     })
   );
 }

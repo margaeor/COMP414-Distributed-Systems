@@ -53,6 +53,9 @@
     "webpack-dev-server": "^3.10.3"
   },
   "dependencies": {
+    "@mdi/font": "^5.1.45",
+    "@mdi/js": "^5.1.45",
+    "@mdi/react": "^1.4.0",
     "bourbon": "^7.0.0",
     "chess.js": "^0.10.3",
     "chessboardjsx": "^2.4.2",
