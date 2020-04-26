@@ -38,10 +38,20 @@
   }
 
   &__button {
-    padding: 0.5rem 0.5rem;
+    padding: 0.5rem 0.5rem 0.5rem 3.5rem;
     border-top: 5px solid $color-primary-dark;
     @extend %base-button;
     @include button-primary;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+
+    &__icon {
+      height: 1.5rem;
+      margin-right: 0.3rem;
+    }
   }
 
   &__button:last-of-type {

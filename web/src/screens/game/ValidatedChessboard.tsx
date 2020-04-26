@@ -13,6 +13,13 @@ import {
   DARK_SQUARE_STYLE,
   BOARD_STYLE,
 } from "./ChessboardStyle";
+import Icon from "@mdi/react";
+import {
+  mdiChessQueen,
+  mdiChessKnight,
+  mdiChessBishop,
+  mdiChessRook,
+} from "@mdi/js";
 
 interface IProps {
   game: ChessInstance;
@@ -113,7 +120,6 @@ const ValidatedChessboard = ({ game, color, makeMove, exitGame }: IProps) => {
   }
 
   const showOverlay = promotion.has || game.game_over();
-  console.log(game.game_over());
 
   return (
     <div className="chess">
@@ -147,24 +153,37 @@ const ValidatedChessboard = ({ game, color, makeMove, exitGame }: IProps) => {
             className="promotion-bar__button"
             onClick={() => onPromotion("q")}
           >
+            <Icon
+              className="promotion-bar__button__icon"
+              path={mdiChessQueen}
+            />
             Queen
           </button>
           <button
             className="promotion-bar__button"
             onClick={() => onPromotion("r")}
           >
+            <Icon className="promotion-bar__button__icon" path={mdiChessRook} />
             Rook
           </button>
           <button
             className="promotion-bar__button"
             onClick={() => onPromotion("b")}
           >
+            <Icon
+              className="promotion-bar__button__icon"
+              path={mdiChessBishop}
+            />
             Bishop
           </button>
           <button
             className="promotion-bar__button"
             onClick={() => onPromotion("n")}
           >
+            <Icon
+              className="promotion-bar__button__icon"
+              path={mdiChessKnight}
+            />
             Knight
           </button>
         </div>
