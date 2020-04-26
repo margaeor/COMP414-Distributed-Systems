@@ -80,6 +80,13 @@ async function createUserIfNotExists(username) {
     });
   }
 
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
 async function atomicCreateNextRound(session, tournament, winners, losers, round_number) {
 
 
@@ -108,6 +115,7 @@ async function atomicCreateNextRound(session, tournament, winners, losers, round
   let tournament_round = (await TournamentRound.create([{
     round_number: round_number,
     num_games_left: first_group.length,
+    is_final: (winners.length == 2 && losers.length == 2),
     winners: [...skippers],
     losers: []
   }],{session:session}))[0];
@@ -146,6 +154,7 @@ async function atomicEndTournamentGame(session, game, score) {
   let last_round = await TournamentRound.findById(tournament.rounds.slice(-1)[0]).session(session);
 
   if(!last_round) throw new errors.InternalErrorException('No round exist');
+  //console.log(tournament.rounds);
   if(!last_round._id.equals(game.round_id)) throw new errors.InternalErrorException('Game refers to past round');
 
   
@@ -162,7 +171,8 @@ async function atomicEndTournamentGame(session, game, score) {
     [new_game.player1,new_game.player2] = [new_game.player2,new_game.player1];
 
     // Signify game as unfinished
-    new_game.has_finished = false;
+    new_game.has_ended = false;
+    new_game.score = null;
     await new_game.save({session});
     
     last_round.games.push(new_game);
@@ -173,16 +183,39 @@ async function atomicEndTournamentGame(session, game, score) {
     
     // Reduce counter only if there is no tie
     last_round.num_games_left--;
-    if(score == 1) last_round.winners.push(game.player1);
-    if(score == -1) last_round.winners.push(game.player2);
+    if(score == 1) {
+      last_round.winners.push(game.player1);
+      last_round.losers.push(game.player2);
+    } else if(score == -1) {
+      last_round.winners.push(game.player2);
+      last_round.losers.push(game.player1);
+    }
+    
 
     if( last_round.num_games_left <= 0) {
       // Round finished  
-      if(last_round.length >= 4) {
+      if(!last_round.is_final) {
         // Next round
-        atomicCreateNextRound(session,tournament,last_round.winners);
+        let new_round = await atomicCreateNextRound(session,
+          tournament,last_round.winners,
+          last_round.losers,
+          last_round.round_number+1
+        );
+
+        tournament.rounds.push(new_round._id);
+        await tournament.save({session});
       } else {
         // Announce winners
+        let previous_round = await TournamentRound.findById(tournament.rounds.slice(-2)[0]).session(session);
+
+        let leaderboard = [
+          last_round.winners.filter(x => !previous_round.losers.includes(x))[0],
+          last_round.losers.filter(x => !previous_round.losers.includes(x))[0],
+          last_round.winners.filter(x => !previous_round.winners.includes(x))[0],
+          last_round.losers.filter(x => !previous_round.winners.includes(x))[0]
+        ];
+
+        console.log('WINNERS ARE ',leaderboard);
 
       }
 
@@ -193,7 +226,9 @@ async function atomicEndTournamentGame(session, game, score) {
   
   await last_round.save({session});
 
-  console.log("after",last_round);
+  
+
+  //console.log("after",last_round);
 
 
   //let new_round = await atomicCreateNextRound(session,tournament,last_round.queue,last_round.round_number+1);
@@ -202,7 +237,7 @@ async function atomicEndTournamentGame(session, game, score) {
 
   
 
-  throw "SHIT EXCEPTION";
+  //throw "SHIT EXCEPTION";
 
 }
 
@@ -217,7 +252,7 @@ async function atomicEndGame(session, game_id, score) {
   
     let game = await Game.findOneAndUpdate(
       {_id:game_id,has_ended:false},
-      {has_ended:true,score:score},//@TODO fix has_ended
+      {has_ended:false,score:score},//@TODO fix has_ended
       {new:true})
     .session(session);
     if(!game) throw new errors.InvalidArgumentException('Game not found');

@@ -30,6 +30,11 @@ var tournament_round = new mongoose.Schema({
     type: String,
     ref: 'user'
   }],
+  is_final: {
+    type: Boolean,
+    required: true,
+    default: false
+  },
   date_created: {
     type: Date,
     default: Date.now
