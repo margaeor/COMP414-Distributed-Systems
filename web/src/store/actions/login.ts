@@ -1,12 +1,6 @@
-export const UPDATE_ERROR = "UPDATE_ERROR";
 export const SUBMIT_LOGIN = "SUBMIT_LOGIN";
 export const FORGOT_PASSWORD = "FORGOT_PASSWORD";
 export const SIGN_UP = "SIGN_UP";
-
-export interface UpdateLoginErrorAction {
-  type: typeof UPDATE_ERROR;
-  error: string;
-}
 
 export interface LoginSubmitAction {
   type: typeof SUBMIT_LOGIN;
@@ -26,13 +20,6 @@ export interface LoginSignUpAction {
   username: string;
   password: string;
   answer: string;
-}
-
-export function updateLoginError(error: string): UpdateLoginErrorAction {
-  return {
-    type: UPDATE_ERROR,
-    error,
-  };
 }
 
 export function loginSubmit(

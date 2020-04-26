@@ -2,10 +2,8 @@ import React from "react";
 import { render } from "react-dom";
 import { Provider } from "react-redux";
 import Routes from "./screens/Routes";
-
-import "./styles/style.scss";
-
 import store from "./store";
+import "./styles/style.scss";
 
 const App = () => {
   return (

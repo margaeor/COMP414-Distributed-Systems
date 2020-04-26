@@ -38,9 +38,8 @@
   //   outline: 1px solid $color-light;
   // }
 
-  &:hover,
-  &:focus {
-    background: lighten($color, 5);
+  &:hover {
+    background: lighten($color, 10);
   }
 }
 

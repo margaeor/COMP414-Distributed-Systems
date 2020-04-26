@@ -13,7 +13,7 @@ import {
   LoginSubmitAction,
   LoginForgotAction,
   LoginSignUpAction,
-  updateLoginError,
+  updateError,
 } from "../actions";
 import { ScreenState, LoaderStep } from "../types";
 
@@ -50,7 +50,7 @@ function* login() {
       }
       return yield call(renewAccessToken);
     } catch (e) {
-      updateLoginError(e.toString());
+      updateError(e.toString());
     }
   }
 }

@@ -35,6 +35,7 @@ export const NULL_USER = {
 export interface State {
   screen: ScreenState;
   loader: LoaderStep;
+  message: string;
   error: string;
   user: User;
   lobby: LobbyState;

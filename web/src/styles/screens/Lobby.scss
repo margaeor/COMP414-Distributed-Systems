@@ -1,7 +1,7 @@
 $lobby-width: 800px;
 
 .lobby {
-  width: $lobby-width;
+  max-width: $lobby-width;
   align-self: stretch;
 
   display: flex;

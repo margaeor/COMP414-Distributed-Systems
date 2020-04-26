@@ -3,7 +3,6 @@ import { Play, PlayStep } from "../types";
 export const SET_PLAY = "SET_PLAY";
 export const UPDATE_PLAY_DATA = "UPDATE_PLAY_DATA";
 export const MAKE_MOVE = "MAKE_MOVE";
-export const UPDATE_MESSAGE = "UPDATE_MESSAGE";
 export const UPDATE_HISTORY = "UPDATE_HISTORY";
 export const SEND_MESSAGE = "SEND_MESSAGE";
 
