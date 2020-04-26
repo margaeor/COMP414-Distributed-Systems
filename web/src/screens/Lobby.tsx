@@ -6,15 +6,17 @@ import {
   mdiChessPawn,
   mdiChessRook,
   mdiPound,
+  mdiGamepadSquare,
 } from "@mdi/js";
 import Icon from "@mdi/react";
-import React from "react";
+import React, { useMemo } from "react";
 import { connect } from "react-redux";
 import { joinGame, joinQuickPlay, joinTournament } from "../store/actions";
 import {
   selectOngoingPlays,
   selectScores,
   selectTournaments,
+  selectUser,
 } from "../store/selectors";
 import {
   FinishedPracticePlay,
@@ -25,9 +27,12 @@ import {
   ResultType,
   State,
   Tournament,
+  User,
+  isPlay,
 } from "../store/types";
 
 interface IProps {
+  user: User;
   plays: Play[];
   tournaments: Tournament[];
   scores: (FinishedTournament | FinishedPracticePlay)[];
@@ -157,6 +162,14 @@ const PlayJoin = ({ p, join }: { p: Play; join: typeof joinGame }) => {
 };
 
 const Lobby: React.FunctionComponent<IProps> = (props) => {
+  const calcStats = useMemo(() => {
+    const s = props.scores.filter((p) => isPlay(p)) as FinishedPracticePlay[];
+    const w = s.filter((p) => p.result === ResultType.WON).length;
+    const l = s.filter((p) => p.result === ResultType.LOST).length;
+    const d = s.filter((p) => p.result === ResultType.DRAW).length;
+    return "W: " + w + " L: " + l + " D: " + d;
+  }, [props.scores]);
+
   return (
     <div className="lobby">
       <div className="lobby__header">
@@ -173,6 +186,12 @@ const Lobby: React.FunctionComponent<IProps> = (props) => {
         >
           Tic Tac Toe
         </button>
+
+        <div className="user-panel">
+          <span className="user-panel__username">{props.user.username}</span>
+          <Icon path={mdiGamepadSquare} className="user-panel__icon" />
+          <span className="user-panel__stats">{calcStats}</span>
+        </div>
       </div>
 
       <div className="player-info">
@@ -207,6 +226,7 @@ const Lobby: React.FunctionComponent<IProps> = (props) => {
 
 const mapStateToProps = (state: State) => {
   return {
+    user: selectUser(state),
     scores: selectScores(state),
     plays: selectOngoingPlays(state),
     tournaments: selectTournaments(state),

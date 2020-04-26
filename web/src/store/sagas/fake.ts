@@ -1,6 +1,12 @@
 import Chess from "chess.js";
 import { put, take, call } from "redux-saga/effects";
-import { MakeMoveAction, MAKE_MOVE, setPlay, updatePlayData } from "../actions";
+import {
+  MakeMoveAction,
+  MAKE_MOVE,
+  setPlay,
+  updatePlayData,
+  setUser,
+} from "../actions";
 import { Game, PlayStep } from "../types";
 import { sleep } from "./utils";
 
@@ -13,6 +19,15 @@ export default function* joinFakeGame() {
       game: Game.CHESS,
       opponent: "john",
       started: false,
+    })
+  );
+
+  yield put(
+    setUser({
+      username: "bobby",
+      officer: true,
+      admin: false,
+      email: "bob@gmail.com",
     })
   );
 }

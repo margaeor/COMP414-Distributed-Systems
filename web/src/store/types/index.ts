@@ -22,12 +22,14 @@ export interface User {
   username: string;
   officer: boolean;
   admin: boolean;
+  email: string;
 }
 
 export const NULL_USER = {
   username: "",
   officer: false,
   admin: false,
+  email: "",
 };
 
 export interface State {
