@@ -3,16 +3,16 @@ import { Dispatch } from "redux";
 import { takeLatest } from "redux-saga/effects";
 import { ChangeScreenAction, CHANGE_SCREEN } from "../actions";
 import { Game, ScreenState } from "../types";
-import joinFakeGame from "./fake";
+import joinFakeGame from "./api/fake/fake";
 import game from "./game";
 import { decodeUrl, updateUrl } from "./urls";
+import getAccessToken from "./login";
 
 function* mainSaga(previousScreen: ScreenState, id?: string) {
   yield* joinFakeGame();
 
-  // const token = yield* getAccessToken();
+  const token = yield* getAccessToken();
 
-  // yield* administration();
   switch (previousScreen) {
     default:
       // const play: Play = yield* lobby(token);
@@ -31,7 +31,7 @@ export default function* rootSaga(dispatch: Dispatch) {
     updateUrl(history, a as ChangeScreenAction)
   );
 
-  const { screen, id } = decodeUrl(history);
+  const { screen, id } = decodeUrl(history.location);
 
   while (1) {
     yield* mainSaga(screen, id);

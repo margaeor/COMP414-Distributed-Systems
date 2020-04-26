@@ -38,14 +38,14 @@ export default function* lobby(token: string) {
         // Exit to join game
         yield put(changeScreen(ScreenState.LOGIN, LoaderStep.LOADING));
         yield cancel(fetchHandler);
-        return yield call(joinPlay, token, act.id);
+        return act;
       case JOIN_TOURNAMENT:
         yield call(joinTournament, token, act.id);
         yield* fetchLobby(token);
         break;
       case JOIN_QUICK_PLAY:
         yield call(joinQuickGame, token, act.game);
-        yield* fetchLobby(token);
+        yield* act;
         break;
     }
   }

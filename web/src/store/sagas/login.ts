@@ -14,8 +14,12 @@ import {
   LoginForgotAction,
   LoginSignUpAction,
   updateError,
+  startLoading,
+  loadingFailed,
+  RETRY_LOADING,
 } from "../actions";
 import { ScreenState, LoaderStep } from "../types";
+import { ConnectionError } from "./api/errors";
 
 function* login() {
   while (1) {
@@ -56,12 +60,18 @@ function* login() {
 }
 
 export default function* getAccessToken() {
-  for (let i = 0; i < 4; i++) {
+  while (1) {
+    yield put(startLoading("Logging in..."));
     try {
       return yield call(renewAccessToken);
     } catch (e) {
-      console.log(e.toString());
+      // Only complete loop for connection errors
+      if (!(e instanceof ConnectionError)) break;
+      console.error(e.toString());
     }
+
+    yield put(loadingFailed("Connection Error"));
+    yield take(RETRY_LOADING);
   }
   return yield* login();
 }

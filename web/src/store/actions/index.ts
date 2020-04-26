@@ -10,6 +10,13 @@ export const CHANGE_SCREEN = "CHANGE_SCREEN";
 export const SET_USER = "SET_USER";
 export const UPDATE_ERROR = "UPDATE_ERROR";
 export const UPDATE_MESSAGE = "UPDATE_MESSAGE";
+export const NOTIFY_URL_CHANGE = "NOTIFY_URL_CHANGE";
+
+export interface NotifyUrlChangeAction {
+  type: typeof NOTIFY_URL_CHANGE;
+  screen: ScreenState;
+  id?: string;
+}
 
 export interface ChangeScreenAction {
   type: typeof CHANGE_SCREEN;
@@ -54,6 +61,17 @@ export function changeScreen(
     type: CHANGE_SCREEN,
     screen,
     loader,
+  };
+}
+
+export function notifyUrlChange(
+  screen: ScreenState,
+  id?: string
+): NotifyUrlChangeAction {
+  return {
+    type: NOTIFY_URL_CHANGE,
+    screen,
+    id,
   };
 }
 

@@ -1,8 +1,9 @@
-import { History } from "history";
+import { History, Location } from "history";
 import { select } from "redux-saga/effects";
-import { ChangeScreenAction } from "../actions";
+import { ChangeScreenAction, notifyUrlChange } from "../actions";
 import { selectPlay } from "../selectors";
 import { LoaderStep, ScreenState } from "../types";
+import { Dispatch } from "redux";
 
 /**
  * Small task that updates the url as we move around the app
@@ -40,14 +41,14 @@ export function* updateUrl(
  * Simple function that returns the previous state from the url
  */
 export function decodeUrl(
-  history: History
+  location: Location
 ): { screen: ScreenState; id?: string } {
   let search, id;
-  switch (history.location.pathname) {
+  switch (location.pathname) {
     case "/login":
       return { screen: ScreenState.LOGIN };
     case "/game":
-      search = history.location.search;
+      search = location.search;
       if (search.length < 4) return { screen: ScreenState.LOBBY };
       id = search.substr(3);
       return { screen: ScreenState.GAME, id };
@@ -58,4 +59,11 @@ export function decodeUrl(
     default:
       return { screen: ScreenState.LOBBY };
   }
+}
+
+export function* urlListener(history: History, dispatch: Dispatch) {
+  history.listen((location, action) => {
+    const { screen, id } = decodeUrl(location);
+    dispatch(notifyUrlChange(screen, id));
+  });
 }

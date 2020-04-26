@@ -1,10 +1,10 @@
-import { mdiLoading } from "@mdi/js";
+import { mdiAlertCircleOutline, mdiLoading } from "@mdi/js";
 import Icon from "@mdi/react";
 import React from "react";
+import { connect } from "react-redux";
 import { retry } from "../store/actions";
 import { selectError, selectLoader, selectMessage } from "../store/selectors";
-import { State, LoaderStep } from "../store/types";
-import { connect } from "react-redux";
+import { LoaderStep, State } from "../store/types";
 
 interface IProps {
   step: LoaderStep;
@@ -16,10 +16,14 @@ interface IProps {
 const Loader = ({ step, error, message, retry }: IProps) => {
   return (
     <div className="loader">
-      <Icon path={mdiLoading} spin={true} className="loader__icon" />
+      {step === LoaderStep.FAILED ? (
+        <Icon path={mdiAlertCircleOutline} className="loader__icon" />
+      ) : (
+        <Icon path={mdiLoading} spin={true} className="loader__icon" />
+      )}
       <div className="loader__text">
         <span className="loader__text__normal">{message}</span>
-        {step == LoaderStep.FAILED && (
+        {step === LoaderStep.FAILED && (
           <>
             <span className="loader__text__error">{error}</span>
             <button className="loader__text__retry" onClick={retry}>

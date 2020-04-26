@@ -1,4 +1,5 @@
 import getAccessToken from "../login";
+import { ConnectionError, RefreshTokenError } from "./errors";
 
 const REFRESH_NAME = "refresh";
 const REFRESH_DAYS = 30;
@@ -7,7 +8,8 @@ function setCookie(cname: string, cvalue: string, exdays: number) {
   var d = new Date();
   d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000);
   var expires = "expires=" + d.toUTCString();
-  document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+  document.cookie =
+    cname + "=" + cvalue + ";" + expires + ";path=/;sameSite=secure";
 }
 
 function getCookie(cname: string) {
@@ -62,7 +64,7 @@ export async function changePassword(
 
 export async function renewAccessToken(): Promise<string> {
   // Todo: implement the api call
-  await new Promise((r) => setTimeout(r, 100));
-  if (getRefreshToken() === "") throw new Error("poopie");
+  await new Promise((r) => setTimeout(r, 200));
+  if (getRefreshToken() === "") throw new RefreshTokenError("poopie");
   return "abc";
 }

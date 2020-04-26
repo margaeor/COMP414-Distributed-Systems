@@ -6,9 +6,9 @@ import {
   setPlay,
   updatePlayData,
   setUser,
-} from "../actions";
-import { Game, PlayStep } from "../types";
-import { sleep } from "./utils";
+} from "../../../actions";
+import { Game, PlayStep } from "../../../types";
+import { sleep } from "../../utils";
 
 export default function* joinFakeGame() {
   document.cookie = "refresh=; SameSite=Strict";
