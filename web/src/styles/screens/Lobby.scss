@@ -1,4 +1,7 @@
+$lobby-width: 800px;
+
 .lobby {
+  width: $lobby-width;
   align-self: stretch;
 
   display: flex;
@@ -111,6 +114,13 @@
     @include button-accent;
     border-radius: 5px;
     margin-top: 8px;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .lobby {
+    width: 100%;
+    min-width: 0;
   }
 }
 
