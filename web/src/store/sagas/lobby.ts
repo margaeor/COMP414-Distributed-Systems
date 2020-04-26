@@ -44,7 +44,7 @@ export default function* lobby(token: string) {
         yield* fetchLobby(token);
         break;
       case JOIN_QUICK_PLAY:
-        yield call(joinQuickGame, token, act.id);
+        yield call(joinQuickGame, token, act.game);
         yield* fetchLobby(token);
         break;
     }

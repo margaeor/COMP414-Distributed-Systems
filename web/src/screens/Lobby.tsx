@@ -1,10 +1,20 @@
+import {
+  mdiAccount,
+  mdiChessBishop,
+  mdiChessKing,
+  mdiChessKnight,
+  mdiChessPawn,
+  mdiChessRook,
+  mdiPound,
+} from "@mdi/js";
+import Icon from "@mdi/react";
 import React from "react";
 import { connect } from "react-redux";
 import { joinGame, joinQuickPlay, joinTournament } from "../store/actions";
 import {
   selectOngoingPlays,
-  selectTournaments,
   selectScores,
+  selectTournaments,
 } from "../store/selectors";
 import {
   FinishedPracticePlay,
@@ -12,20 +22,10 @@ import {
   Game,
   isTournament,
   Play,
+  ResultType,
   State,
   Tournament,
-  ResultType,
 } from "../store/types";
-import Icon from "@mdi/react";
-import {
-  mdiChessPawn,
-  mdiPound,
-  mdiChessKing,
-  mdiChessKnight,
-  mdiChessBishop,
-  mdiChessRook,
-  mdiAccount,
-} from "@mdi/js";
 
 interface IProps {
   plays: Play[];
@@ -64,31 +64,31 @@ const Score = ({ sr }: { sr: FinishedTournament | FinishedPracticePlay }) => {
   };
 
   return isTournament(sr) ? (
-    <li className="score-node">
-      <span className="score-node__name">{sr.name}</span>
-      <span className="score-node__tertiary">
+    <li className="list-node">
+      <span className="list-node__name">{sr.name}</span>
+      <span className="list-node__tertiary">
         {sr.game == Game.CHESS && (
-          <Icon path={pickChessTour(sr)} className="score-node__icon" />
+          <Icon path={pickChessTour(sr)} className="list-node__icon" />
         )}
         {sr.game == Game.TICTACTOE && (
-          <Icon path={mdiPound} className="score-node__icon" />
+          <Icon path={mdiPound} className="list-node__icon" />
         )}
         {sr.ranking} in
         {sr.game == Game.CHESS ? " Chess " : ""}
         {sr.game == Game.TICTACTOE ? " Tic Tac Toe " : ""}
-        <Icon path={mdiAccount} className="score-node__icon" />
+        <Icon path={mdiAccount} className="list-node__icon" />
         {sr.players}/{sr.maxPlayers}
       </span>
     </li>
   ) : (
-    <li className="score-node">
-      <span className="score-node__name">Quick Play with: {sr.opponent}</span>
-      <span className="score-node__tertiary">
+    <li className="list-node">
+      <span className="list-node__name">Play with: {sr.opponent}</span>
+      <span className="list-node__tertiary">
         {sr.game == Game.CHESS && (
-          <Icon path={pickChessPractice(sr)} className="score-node__icon" />
+          <Icon path={pickChessPractice(sr)} className="list-node__icon" />
         )}
         {sr.game == Game.TICTACTOE && (
-          <Icon path={mdiPound} className="score-node__icon" />
+          <Icon path={mdiPound} className="list-node__icon" />
         )}
         {sr.result == ResultType.WON ? "Won" : ""}
         {sr.result == ResultType.LOST ? "Lost" : ""}
@@ -96,6 +96,62 @@ const Score = ({ sr }: { sr: FinishedTournament | FinishedPracticePlay }) => {
         {sr.game == Game.CHESS ? " Chess " : ""}
         {sr.game == Game.TICTACTOE ? " Tic Tac Toe " : ""}
       </span>
+    </li>
+  );
+};
+
+const TournamentJoin = ({
+  t,
+  join,
+}: {
+  t: Tournament;
+  join: typeof joinTournament;
+}) => {
+  return (
+    <li className="list-node">
+      <span className="list-node__name">{t.name}</span>
+      <span className="list-node__tertiary">
+        {t.game == Game.CHESS && (
+          <Icon path={mdiChessPawn} className="list-node__icon" />
+        )}
+        {t.game == Game.TICTACTOE && (
+          <Icon path={mdiPound} className="list-node__icon" />
+        )}
+        {t.game == Game.CHESS ? " Chess " : ""}
+        {t.game == Game.TICTACTOE ? " Tic Tac Toe " : ""}
+        <Icon path={mdiAccount} className="list-node__icon" />
+        {t.players}/{t.maxPlayers}
+      </span>
+      <button
+        className={"list-node__button"}
+        onClick={() => join(t.id)}
+        disabled={t.joined}
+      >
+        {t.joined ? "Already Joined" : "Join"}
+      </button>
+    </li>
+  );
+};
+
+const PlayJoin = ({ p, join }: { p: Play; join: typeof joinGame }) => {
+  return (
+    <li className="list-node">
+      <span className="list-node__name">
+        {p.started ? "Resume" : "Play"} with {p.opponent}
+      </span>
+      <span className="list-node__tertiary">
+        {p.game == Game.CHESS && (
+          <Icon path={mdiChessPawn} className="list-node__icon" />
+        )}
+        {p.game == Game.TICTACTOE && (
+          <Icon path={mdiPound} className="list-node__icon" />
+        )}
+        {p.game == Game.CHESS ? " Chess " : ""}
+        {p.game == Game.TICTACTOE ? " Tic Tac Toe " : ""}
+      </span>
+      <button className={"list-node__button"} onClick={() => join(p.id)}>
+        {p.started ? "Continue" : "Join"}
+      </button>
     </li>
   );
 };
@@ -132,10 +188,7 @@ const Lobby: React.FunctionComponent<IProps> = (props) => {
           <span className="player-info__col__label">Tournaments</span>
           <ul className="player-info__col__list">
             {props.tournaments.map((t) => (
-              <li key={t.id}>
-                <span>{`${t.players}/${t.maxPlayers} ${t.name}`}</span>
-                <button onClick={() => props.joinTournament(t.id)}>Join</button>
-              </li>
+              <TournamentJoin key={t.id} t={t} join={props.joinTournament} />
             ))}
           </ul>
         </div>
@@ -143,12 +196,7 @@ const Lobby: React.FunctionComponent<IProps> = (props) => {
           <span className="player-info__col__label">Ongoing Matches</span>
           <ul className="player-info__col__list">
             {props.plays.map((p) => (
-              <li key={p.id}>
-                <span>{`Opponent: ${p.opponent} ${
-                  p.started ? "Started" : ""
-                }`}</span>
-                <button onClick={() => props.joinGame(p.id)}>Join</button>
-              </li>
+              <PlayJoin key={p.id} p={p} join={props.joinGame} />
             ))}
           </ul>
         </div>

@@ -83,7 +83,7 @@ export async function fetchLobbyData(token: string): Promise<LobbyState> {
         id: "1234",
         game: Game.CHESS,
         opponent: "vetIO",
-        started: false,
+        started: true,
       },
       {
         id: "aaaa",
@@ -95,7 +95,7 @@ export async function fetchLobbyData(token: string): Promise<LobbyState> {
         id: "2345",
         game: Game.CHESS,
         opponent: "juicy",
-        started: false,
+        started: true,
       },
       {
         id: "3456",

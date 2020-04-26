@@ -78,7 +78,7 @@
   }
 }
 
-.score-node {
+.list-node {
   padding: 0.3rem 0;
 
   display: flex;
@@ -100,5 +100,12 @@
 
   &__name {
     color: $color-accent;
+  }
+
+  &__button {
+    @extend %base-button;
+    @include button-accent;
+    border-radius: 5px;
+    margin-top: 8px;
   }
 }
