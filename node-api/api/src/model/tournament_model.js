@@ -22,7 +22,11 @@ var tournament_round = new mongoose.Schema({
     type: Schema.Types.ObjectId,
     ref: 'game'
   }],
-  queue: [{
+  winners: [{
+    type: String,
+    ref: 'user'
+  }],
+  losers: [{
     type: String,
     ref: 'user'
   }],

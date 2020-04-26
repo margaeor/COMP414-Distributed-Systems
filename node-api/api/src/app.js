@@ -233,7 +233,8 @@ async function atomicStartTournament(session, tournament_id) {
   let tournament_round = (await TournamentRound.create([{
     round_number: 1,
     num_games_left: first_group.length,
-    queue: [...skippers]
+    winners: [...skippers],
+    losers: []
   }],{session:session}))[0];
 
   let games_ids = [];
@@ -259,7 +260,7 @@ async function atomicStartTournament(session, tournament_id) {
 
   await Tournament.findByIdAndUpdate(tournament_id,
     {
-      //has_started:true, @TODO remove comment
+      has_started:true, //@TODO remove comment
       rounds:[tournament_round._id]
     }).session(session);
 

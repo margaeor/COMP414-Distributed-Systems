@@ -1,11 +1,15 @@
 const globals = require('../globals.js');
 const errors = require('./errors.js');
 const zookeeper = require('../zookeeper/functions.js');
+const mongoose = require('mongoose');
+const assert = require('assert');
+const _ = require('lodash');
 
 const User = require('../model/user_model.js');
 const {Tournament,TournamentRound} = require('../model/tournament_model.js');
 const {Game, ActiveGame} = require('../model/game_model.js');
 const Lobby = require('../model/lobby_model.js');
+
 
 /**
  * Creates a user by username if the user
@@ -76,23 +80,27 @@ async function createUserIfNotExists(username) {
     });
   }
 
-async function atomicCreateNextRound(session, tournament, round_users, round_number) {
+async function atomicCreateNextRound(session, tournament, winners, losers, round_number) {
 
-  // let tournament = await Tournament.findById(tournament_id).session(session);
-  // if(!tournament) throw errors.InvalidArgumentException('No such tournament');
-  // if(tournament.has_started) throw new errors.InvalidOperationException('Tournament already started');
-  // if(tournament.participants.length <= 4) throw errors.InvalidOperationException('Not enough players');
 
-  let participants = [...round_users]; // copy array
-  if(round_number == 1) shuffleArray(participants);
+  let participants = [...winners]; // copy array
+  shuffleArray(participants);
 
-  let alone = participants.length % 2 == 1 ? participants.pop() : null;
-    
-  let middle = Math.floor(participants.length / 2)
+  let num_to_skip_round = (1 << 32 - Math.clz32(participants.length-1))-participants.length;
+   
+  let middle = Math.floor((participants.length-num_to_skip_round) / 2)
 
   let first_group = participants.slice(0, middle);
-  let second_group = participants.slice(middle, participants.length);
+  let second_group = participants.slice(middle, participants.length-num_to_skip_round);
 
+  let skippers = participants.slice(participants.length-num_to_skip_round, participants.length);
+
+  if(winners.length == 2 && losers.length == 2) {
+    assert(skippers.length == 0);
+
+    first_group.push(losers[0]);
+    second_group.push(losers[1]);
+  }
 
   if(first_group.length != second_group.length) throw new errors.InternalErrorException('Error occured');
 
@@ -100,7 +108,8 @@ async function atomicCreateNextRound(session, tournament, round_users, round_num
   let tournament_round = (await TournamentRound.create([{
     round_number: round_number,
     num_games_left: first_group.length,
-    queue: (alone ? [alone] : [])
+    winners: [...skippers],
+    losers: []
   }],{session:session}))[0];
 
   let games_ids = [];
@@ -139,27 +148,59 @@ async function atomicEndTournamentGame(session, game, score) {
   if(!last_round) throw new errors.InternalErrorException('No round exist');
   if(!last_round._id.equals(game.round_id)) throw new errors.InternalErrorException('Game refers to past round');
 
-  last_round.num_games_left--;
   
-  console.log("before",last_round);
+  
+  await resetActiveGameState(session,game);
 
-  if(score == 1 || score == 0) last_round.queue.push(game.player1);
-  if(score == -1|| score == 0) last_round.queue.push(game.player2);
+  if(score == 0) {
+    let new_game = _.cloneDeep(game);
+
+    new_game._doc._id = mongoose.Types.ObjectId();
+    new_game.isNew = true;
+
+    // Swap colors
+    [new_game.player1,new_game.player2] = [new_game.player2,new_game.player1];
+
+    // Signify game as unfinished
+    new_game.has_finished = false;
+    await new_game.save({session});
+    
+    last_round.games.push(new_game);
+
+    await resetActiveGameState(session,new_game);
+
+  } else {
+    
+    // Reduce counter only if there is no tie
+    last_round.num_games_left--;
+    if(score == 1) last_round.winners.push(game.player1);
+    if(score == -1) last_round.winners.push(game.player2);
+
+    if( last_round.num_games_left <= 0) {
+      // Round finished  
+      if(last_round.length >= 4) {
+        // Next round
+        atomicCreateNextRound(session,tournament,last_round.winners);
+      } else {
+        // Announce winners
+
+      }
+
+    }
+    
+  }
+
+  
   await last_round.save({session});
 
   console.log("after",last_round);
 
 
-  let new_round = await atomicCreateNextRound(session,tournament,last_round.queue,last_round.round_number+1);
+  //let new_round = await atomicCreateNextRound(session,tournament,last_round.queue,last_round.round_number+1);
 
-  console.log(new_round);
+  //console.log(new_round);
 
-  if( last_round.num_games_left <= 0) {
-    // Round finished  
-    if(last_round.length > globals.NUM_OF_TOURNAMENT_WINNERS) {
-      
-    }
-  }
+  
 
   throw "SHIT EXCEPTION";
 
@@ -176,7 +217,7 @@ async function atomicEndGame(session, game_id, score) {
   
     let game = await Game.findOneAndUpdate(
       {_id:game_id,has_ended:false},
-      {has_ended:false,score:score},//@TODO fix has_ended
+      {has_ended:true,score:score},//@TODO fix has_ended
       {new:true})
     .session(session);
     if(!game) throw new errors.InvalidArgumentException('Game not found');

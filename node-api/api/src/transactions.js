@@ -1,5 +1,5 @@
 const MongoError = require('mongodb').MongoError;
-const MAX_WITH_TRANSACTION_TIMEOUT = 120000;
+const MAX_WITH_TRANSACTION_TIMEOUT = 10000;
 
 function hasNotTimedOut(startTime, max) {
     return Date.now() - startTime < max;
