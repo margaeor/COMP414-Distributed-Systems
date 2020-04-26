@@ -34,11 +34,12 @@ export default function* joinFakeGame() {
 
 export function* generateFens() {
   const gen_fen = (fen: string, move: string = "") =>
-    put(updatePlayData(PlayStep.ONGOING, fen + ";" + move + ";w"));
+    put(updatePlayData(PlayStep.ONGOING, fen + ";" + move + ";b"));
 
   // @ts-ignore ts(2351)
   const game = new Chess(
-    "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+    // "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+    "rnb1k2r/ppppQppp/3P4/8/8/8/PPPPP1PP/RNB1KBNR b KQkq - 0 1"
   );
   yield gen_fen(game.fen());
 

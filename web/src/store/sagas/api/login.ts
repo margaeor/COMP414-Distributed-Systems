@@ -62,7 +62,7 @@ export async function changePassword(
 
 export async function renewAccessToken(): Promise<string> {
   // Todo: implement the api call
-  await new Promise((r) => setTimeout(r, 10000));
+  await new Promise((r) => setTimeout(r, 100));
   if (getRefreshToken() === "") throw new Error("poopie");
   return "abc";
 }

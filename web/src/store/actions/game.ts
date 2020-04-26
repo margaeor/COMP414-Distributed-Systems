@@ -5,6 +5,7 @@ export const UPDATE_PLAY_DATA = "UPDATE_PLAY_DATA";
 export const MAKE_MOVE = "MAKE_MOVE";
 export const UPDATE_HISTORY = "UPDATE_HISTORY";
 export const SEND_MESSAGE = "SEND_MESSAGE";
+export const EXIT_GAME = "EXIT_GAME";
 
 export interface SetPlayAction {
   type: typeof SET_PLAY;
@@ -68,5 +69,11 @@ export function sendMessage(message: string) {
   return {
     type: SEND_MESSAGE,
     message: message,
+  };
+}
+
+export function exitGame() {
+  return {
+    type: EXIT_GAME,
   };
 }

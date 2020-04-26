@@ -2,7 +2,7 @@ import Chess, { ChessInstance, Square } from "chess.js";
 import Chessboard from "chessboardjsx";
 import React, { useMemo, useState } from "react";
 import { connect } from "react-redux";
-import { makeMove } from "../../store/actions";
+import { makeMove, exitGame } from "../../store/actions";
 import { selectGameData } from "../../store/selectors";
 import { State } from "../../store/types";
 import {
@@ -18,9 +18,10 @@ interface IProps {
   game: ChessInstance;
   color: "b" | "w";
   makeMove: (board: string) => void;
+  exitGame: typeof exitGame;
 }
 
-const ValidatedChessboard = ({ game, color, makeMove }: IProps) => {
+const ValidatedChessboard = ({ game, color, makeMove, exitGame }: IProps) => {
   const NO_PROMOTION = {
     has: false,
     from: "e1" as Square,
@@ -111,6 +112,9 @@ const ValidatedChessboard = ({ game, color, makeMove }: IProps) => {
     setPromotion(NO_PROMOTION);
   }
 
+  const showOverlay = promotion.has || game.game_over();
+  console.log(game.game_over());
+
   return (
     <div className="chess">
       <Chessboard
@@ -130,36 +134,73 @@ const ValidatedChessboard = ({ game, color, makeMove }: IProps) => {
         dropSquareStyle={DROP_SQUARE_STYLE}
         onSquareClick={onSquareClick}
       />
-      <div className={"promotion-bar form" + (promotion.has ? "" : " hide")}>
-        <span className="form__label">Promotion</span>
-        <button
-          className="form__button"
-          disabled={!promotion.has}
-          onClick={() => onPromotion("q")}
+      <div
+        className="chess__overlay"
+        style={{ visibility: showOverlay ? "visible" : "hidden" }}
+      >
+        <div
+          className={"promotion-bar"}
+          style={{ display: promotion.has ? "flex" : "none" }}
         >
-          Queen
-        </button>
-        <button
-          className="form__button"
-          disabled={!promotion.has}
-          onClick={() => onPromotion("r")}
+          <span className="promotion-bar__header">Promotion</span>
+          <button
+            className="promotion-bar__button"
+            onClick={() => onPromotion("q")}
+          >
+            Queen
+          </button>
+          <button
+            className="promotion-bar__button"
+            onClick={() => onPromotion("r")}
+          >
+            Rook
+          </button>
+          <button
+            className="promotion-bar__button"
+            onClick={() => onPromotion("b")}
+          >
+            Bishop
+          </button>
+          <button
+            className="promotion-bar__button"
+            onClick={() => onPromotion("n")}
+          >
+            Knight
+          </button>
+        </div>
+        <div
+          className="game-over"
+          style={{ display: game.game_over() ? "flex" : "none" }}
         >
-          Rook
-        </button>
-        <button
-          className="form__button"
-          disabled={!promotion.has}
-          onClick={() => onPromotion("b")}
-        >
-          Bishop
-        </button>
-        <button
-          className="form__button"
-          disabled={!promotion.has}
-          onClick={() => onPromotion("n")}
-        >
-          Knight
-        </button>
+          <span className="game-over__header">Game Over</span>
+          <span
+            className={`game-over__result ${
+              game.in_checkmate()
+                ? game.turn() == color
+                  ? "game-over__result--lost"
+                  : "game-over__result--won"
+                : ""
+            }`}
+          >
+            {game.in_checkmate()
+              ? game.turn() == color
+                ? "You Lost!"
+                : "You Won!"
+              : "Draw!"}
+          </span>
+          <span className="game-over__reason">
+            {game.in_checkmate() ? "Checkmate" : ""}
+            {game.in_stalemate() ? "Stalemate" : ""}
+            {game.in_threefold_repetition() ? "Threefold Repetition" : ""}
+            {game.insufficient_material() ? "Insufficient Material" : ""}
+            {game.in_draw() && !game.insufficient_material()
+              ? "50-Move Rule"
+              : ""}
+          </span>
+          <button className="game-over__button" onClick={exitGame}>
+            Exit
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -184,7 +225,7 @@ const mapStateToProps = (state: State) => {
   };
 };
 
-const mapDispatchToProps = { makeMove };
+const mapDispatchToProps = { makeMove, exitGame };
 
 export default connect(
   mapStateToProps,

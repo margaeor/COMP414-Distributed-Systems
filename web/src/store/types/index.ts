@@ -13,9 +13,9 @@ export enum ScreenState {
 }
 
 export enum LoaderStep {
-  INACTIVE = 0,
-  LOADING = 1,
-  FAILED = 2,
+  INACTIVE = 1,
+  LOADING = 2,
+  FAILED = 3,
 }
 
 export interface User {
