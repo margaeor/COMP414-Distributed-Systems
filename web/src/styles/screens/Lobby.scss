@@ -68,6 +68,11 @@
     }
 
     &__list {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: stretch;
+
       list-style-type: none;
       overflow-y: auto;
       margin: 0.3rem 0;
@@ -80,7 +85,6 @@
 
 .list-node {
   padding: 0.3rem 0;
-
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -132,4 +136,16 @@
   &__stats {
     padding: 0.2rem 1rem 0 0;
   }
+}
+
+.scores {
+  max-width: 30%;
+}
+
+.tournaments {
+  max-width: 40%;
+}
+
+.plays {
+  max-width: 30%;
 }

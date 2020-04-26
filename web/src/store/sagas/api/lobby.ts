@@ -44,7 +44,7 @@ export async function fetchLobbyData(token: string): Promise<LobbyState> {
       {
         id: "5463",
         game: Game.CHESS,
-        name: "NFC: Recruitment Rounds IV",
+        name: "Chess Championships Round XIaadfsasdfsadfasdfasdf",
         players: 10,
         maxPlayers: 23,
         joined: true,
@@ -94,6 +94,7 @@ export async function fetchLobbyData(token: string): Promise<LobbyState> {
       {
         id: "2345",
         game: Game.CHESS,
+        name: "NFC: Recruitment Rounds IV",
         opponent: "juicy",
         started: true,
       },

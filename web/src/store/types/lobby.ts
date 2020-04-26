@@ -1,4 +1,4 @@
-import { Game, Play } from "./game";
+import { Game, Play, TournamentPlay } from "./game";
 
 export enum ResultType {
   DRAW = 0,
@@ -38,7 +38,7 @@ export function isPlay(
 
 export interface LobbyState {
   tournaments: Tournament[];
-  ongoingPlays: Play[];
+  ongoingPlays: (Play | TournamentPlay)[];
   scores: (FinishedTournament | FinishedPracticePlay)[];
 }
 

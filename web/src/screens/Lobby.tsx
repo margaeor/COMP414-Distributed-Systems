@@ -29,6 +29,8 @@ import {
   Tournament,
   User,
   isPlay,
+  TournamentPlay,
+  isTournamentPlay,
 } from "../store/types";
 
 interface IProps {
@@ -138,7 +140,13 @@ const TournamentJoin = ({
   );
 };
 
-const PlayJoin = ({ p, join }: { p: Play; join: typeof joinGame }) => {
+const PlayJoin = ({
+  p,
+  join,
+}: {
+  p: Play | TournamentPlay;
+  join: typeof joinGame;
+}) => {
   return (
     <li className="list-node">
       <span className="list-node__name">
@@ -151,8 +159,9 @@ const PlayJoin = ({ p, join }: { p: Play; join: typeof joinGame }) => {
         {p.game == Game.TICTACTOE && (
           <Icon path={mdiPound} className="list-node__icon" />
         )}
-        {p.game == Game.CHESS ? " Chess " : ""}
-        {p.game == Game.TICTACTOE ? " Tic Tac Toe " : ""}
+        {p.game == Game.CHESS ? " Chess" : ""}
+        {p.game == Game.TICTACTOE ? " Tic Tac Toe" : ""}
+        {isTournamentPlay(p) ? `, ${p.name}` : ""}
       </span>
       <button className={"list-node__button"} onClick={() => join(p.id)}>
         {p.started ? "Continue" : "Join"}
