@@ -43,8 +43,7 @@ var tournament_round = new mongoose.Schema({
 var tournament = new mongoose.Schema({
   name: {
     type: String,
-    required: true,
-    unique: true
+    required: true
   },
   date_created: {
     type: Date,

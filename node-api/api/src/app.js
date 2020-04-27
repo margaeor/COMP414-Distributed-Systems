@@ -144,7 +144,7 @@ app.get('/practice/join_queue', async (req, res) => {
 
 
 // Join existing practice game
-app.get('/practice/join', async (req, res) => {
+app.get('/practice/join_game', async (req, res) => {
   
   let game_id = req.query.game_id;
   let jwt = req.query.jwt;
@@ -155,7 +155,8 @@ app.get('/practice/join', async (req, res) => {
     
       let game = await Game.findById(game_id).exec();
 
-      let active_game = await resetActiveGameState(game);
+      if(username !== game.player1 && username !== game.player2) throw new errors.AnauthorizedException('Access is denied');
+      let active_game = await transactions.runTransactionWithRetry(resetActiveGameState, mongoose, game);
       
       if(active_game) {
         res.json(errors.createSuccessResponse('',active_game));
@@ -176,6 +177,7 @@ app.get('/tournament/create', async (req, res) => {
 
   let jwt = req.query.jwt;
   let tournament_name = req.query.name;
+  let game_type = req.query.game_type;
   try {
 
     let username = authenticateUser(jwt, 'official');
@@ -183,7 +185,8 @@ app.get('/tournament/create', async (req, res) => {
     if(tournament_name) {
 
       let tournament =  await Tournament.create({
-        name: tournament_name
+        name: tournament_name,
+        game_type: game_type
       });
 
       res.json(errors.createSuccessResponse('Tournament created',tournament));
