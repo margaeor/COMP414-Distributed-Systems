@@ -1,4 +1,6 @@
-import React, { useState, Suspense } from "react";
+import { mdiSwordCross } from "@mdi/js";
+import Icon from "@mdi/react";
+import React, { useState } from "react";
 import { connect } from "react-redux";
 import { sendMessage } from "../../store/actions";
 import {
@@ -7,9 +9,9 @@ import {
   selectPlay,
   selectUser,
 } from "../../store/selectors";
-import { State, Play, isTournamentPlay, User } from "../../store/types";
-import Icon from "@mdi/react";
-import { mdiLoading, mdiSwordCross } from "@mdi/js";
+import { isTournamentPlay, Play, State, User } from "../../store/types";
+import ValidatedChessboard from "./chess/ValidatedChessboard";
+import ChessGame from "./chess";
 
 interface IProps {
   user: User;
@@ -28,7 +30,7 @@ const Game = ({ user, play, history, sendMessage }: IProps) => {
   };
 
   // Dynamic import (code splitting)
-  const ValidatedChessboard = React.lazy(() => import("./ValidatedChessboard"));
+  // const ValidatedChessboard = React.lazy(() => import("./ValidatedChessboard"));
 
   return (
     <div className="game">
@@ -61,7 +63,7 @@ const Game = ({ user, play, history, sendMessage }: IProps) => {
           </button>
         </div>
       </div>
-      <ValidatedChessboard />
+      <ChessGame />
     </div>
   );
 };

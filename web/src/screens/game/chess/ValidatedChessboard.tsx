@@ -1,34 +1,40 @@
+import {
+  mdiChessBishop,
+  mdiChessKnight,
+  mdiChessQueen,
+  mdiChessRook,
+} from "@mdi/js";
+import Icon from "@mdi/react";
 import Chess, { ChessInstance, Square } from "chess.js";
 import Chessboard from "chessboardjsx";
 import React, { useMemo, useState } from "react";
-import { connect } from "react-redux";
-import { makeMove, exitGame } from "../../store/actions";
-import { selectGameData } from "../../store/selectors";
-import { State } from "../../store/types";
+import { exitGame } from "../../../store/actions";
+import { selectGameData } from "../../../store/selectors";
+import { State } from "../../../store/types";
 import {
+  BOARD_STYLE,
+  DARK_SQUARE_STYLE,
   DROP_SQUARE_STYLE,
   highlightPossibleMoves,
-  styleActiveSquares,
   LIGHT_SQUARE_STYLE,
-  DARK_SQUARE_STYLE,
-  BOARD_STYLE,
+  styleActiveSquares,
 } from "./ChessboardStyle";
-import Icon from "@mdi/react";
-import {
-  mdiChessQueen,
-  mdiChessKnight,
-  mdiChessBishop,
-  mdiChessRook,
-} from "@mdi/js";
 
 interface IProps {
-  game: ChessInstance;
+  board: string;
+  move: string;
   color: "b" | "w";
   makeMove: (board: string) => void;
   exitGame: typeof exitGame;
 }
 
-const ValidatedChessboard = ({ game, color, makeMove, exitGame }: IProps) => {
+const ValidatedChessboard = ({
+  board,
+  move,
+  color,
+  makeMove,
+  exitGame,
+}: IProps) => {
   const NO_PROMOTION = {
     has: false,
     from: "e1" as Square,
@@ -41,6 +47,14 @@ const ValidatedChessboard = ({ game, color, makeMove, exitGame }: IProps) => {
 
   const [position, setPosition] = useState("");
   const [serverPosition, setServerPosition] = useState("");
+
+  // Recreate board from received data
+  const game = useMemo(() => {
+    // @ts-ignore ts(2351)
+    const tmp = new Chess(board);
+    if (move != "") tmp.move(move);
+    return tmp;
+  }, [board, move]);
 
   const movePiece = (sourceSquare: Square, targetSquare: Square) => {
     // see if the move is legal
@@ -225,28 +239,4 @@ const ValidatedChessboard = ({ game, color, makeMove, exitGame }: IProps) => {
   );
 };
 
-const mapStateToProps = (state: State) => {
-  const dataString = selectGameData(state);
-  const data = dataString.split(";");
-
-  const board = data[0];
-  const move = data[1];
-  const color = data[2] as "b" | "w";
-
-  // Recreate board from received data
-  // @ts-ignore ts(2351)
-  const game = new Chess(board);
-  if (move != "") game.move(move);
-
-  return {
-    game,
-    color,
-  };
-};
-
-const mapDispatchToProps = { makeMove, exitGame };
-
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(ValidatedChessboard);
+export default ValidatedChessboard;
