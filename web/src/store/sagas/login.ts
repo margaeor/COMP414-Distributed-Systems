@@ -19,6 +19,7 @@ import {
   renewAccessToken,
   renewRefreshToken,
   signUp,
+  requestLogout,
 } from "./api/login";
 import { callApi, sleep } from "./utils";
 
@@ -68,9 +69,13 @@ function* login() {
   }
 }
 
-export default function* getAccessToken() {
+export function* logout() {
+  yield* callApi("Logging out...", call(requestLogout));
+}
+
+export function* getAccessToken() {
   while (1) {
-    yield put(startLoading("Logging in..."));
+    yield put(startLoading("Loading..."));
     try {
       return yield call(renewAccessToken);
     } catch (e) {

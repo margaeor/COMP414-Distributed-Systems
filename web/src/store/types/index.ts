@@ -10,6 +10,7 @@ export enum ScreenState {
   GAME = 3,
   LEADERBOARDS = 4,
   ADMINISTRATION = 5,
+  LOGOUT = 6,
 }
 
 export enum LoaderStep {

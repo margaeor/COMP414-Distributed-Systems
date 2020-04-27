@@ -1,5 +1,6 @@
 import getAccessToken from "../login";
 import { ConnectionError, RefreshTokenError } from "./errors";
+import { sleep } from "./utils";
 
 const REFRESH_NAME = "refresh";
 const REFRESH_DAYS = 30;
@@ -44,6 +45,7 @@ export async function checkRefreshToken(): Promise<boolean> {
 export async function renewRefreshToken(username: string, password: string) {
   // TODO: Implement this call
   setRefreshToken("abc");
+  await sleep(200);
 }
 
 export async function signUp(
@@ -52,6 +54,7 @@ export async function signUp(
   answer: string
 ) {
   // TODO: Implement this call
+  await sleep(200);
 }
 
 export async function changePassword(
@@ -60,11 +63,17 @@ export async function changePassword(
   answer: string
 ) {
   // TODO: Implement this call
+  await sleep(200);
 }
 
 export async function renewAccessToken(): Promise<string> {
   // Todo: implement the api call
-  await new Promise((r) => setTimeout(r, 200));
+  await sleep(200);
   if (getRefreshToken() === "") throw new RefreshTokenError("poopie");
   return "abc";
+}
+
+export async function requestLogout() {
+  await sleep(200);
+  setRefreshToken("");
 }

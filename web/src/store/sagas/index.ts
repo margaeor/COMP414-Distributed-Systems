@@ -7,7 +7,7 @@ import { AccessTokenError } from "./api/errors";
 import joinFakeGame from "./api/fake/fake";
 import game from "./game";
 import lobby from "./lobby";
-import getAccessToken from "./login";
+import { getAccessToken, logout } from "./login";
 import { decodeUrl, navHandler, updateUrlHandler, urlListener } from "./urls";
 
 function* mainSaga(token: string, screen: ScreenState, id?: string) {
@@ -15,7 +15,6 @@ function* mainSaga(token: string, screen: ScreenState, id?: string) {
 
   switch (screen) {
     case ScreenState.ADMINISTRATION:
-      console.log("admin");
       yield* administration(token);
       return { screen: ScreenState.LOBBY };
     case ScreenState.GAME:
@@ -59,6 +58,12 @@ export default function* rootSaga(dispatch: Dispatch) {
       } else if (nav) {
         screen = nav.screen;
         if (screen === ScreenState.GAME) id = nav.id;
+      }
+
+      if (screen == ScreenState.LOGOUT) {
+        yield* logout();
+        screen = ScreenState.LOGIN;
+        throw new AccessTokenError("User logged out");
       }
     } catch (e) {
       if (e instanceof AccessTokenError) {

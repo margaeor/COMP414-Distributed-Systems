@@ -38,6 +38,9 @@ export function* updateUrl(history: History) {
     case ScreenState.LEADERBOARDS:
       history.push("/leaderboards");
       break;
+    case ScreenState.LOGOUT:
+      history.push("/logout");
+      break;
     default:
       history.push("/");
       break;
@@ -45,11 +48,7 @@ export function* updateUrl(history: History) {
 }
 
 export function* updateUrlHandler(history: History) {
-  return yield takeLatest(
-    [CHANGE_SCREEN, START_LOADING, STOP_LOADING, LOADING_FAILED],
-    updateUrl,
-    history
-  );
+  return yield takeLatest(CHANGE_SCREEN, updateUrl, history);
 }
 
 /**
@@ -71,6 +70,8 @@ export function decodeUrl(
       return { screen: ScreenState.ADMINISTRATION };
     case "/leaderboards":
       return { screen: ScreenState.LEADERBOARDS };
+    case "/logout":
+      return { screen: ScreenState.LOGOUT };
     default:
       return { screen: ScreenState.LOBBY };
   }
@@ -110,8 +111,7 @@ export function* navHandler(inGame: boolean) {
     case GO_LEADERBOARD:
       return { screen: ScreenState.LEADERBOARDS };
     case LOGOUT:
-      // TODO: Fill in
-      return { screen: ScreenState.LOBBY };
+      return { screen: ScreenState.LOGOUT };
     case NOTIFY_URL_CHANGE:
       return { screen: act.screen, id: act.id };
   }
