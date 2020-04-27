@@ -1,17 +1,24 @@
 import React, { useState, Suspense } from "react";
 import { connect } from "react-redux";
 import { sendMessage } from "../../store/actions";
-import { selectGameData, selectHistory } from "../../store/selectors";
-import { State } from "../../store/types";
+import {
+  selectGameData,
+  selectHistory,
+  selectPlay,
+  selectUser,
+} from "../../store/selectors";
+import { State, Play, isTournamentPlay, User } from "../../store/types";
 import Icon from "@mdi/react";
-import { mdiLoading } from "@mdi/js";
+import { mdiLoading, mdiSwordCross } from "@mdi/js";
 
 interface IProps {
+  user: User;
+  play: Play;
   history: string;
   sendMessage: typeof sendMessage;
 }
 
-const Game = ({ history, sendMessage }: IProps) => {
+const Game = ({ user, play, history, sendMessage }: IProps) => {
   const [message, setMessage] = useState("");
 
   const submitMessage = () => {
@@ -26,6 +33,20 @@ const Game = ({ history, sendMessage }: IProps) => {
   return (
     <div className="game">
       <div className="chat">
+        <div className="play-info">
+          <span className="play-info__title">
+            {isTournamentPlay(play) ? play.name : "Practice Play"}
+          </span>
+          <div className="play-info__players">
+            <span className="play-info__players__you">
+              {user.username} (You)
+            </span>
+            <Icon path={mdiSwordCross} className="play-info__players__vs" />
+            <span className="play-info__players__opponent">
+              {play.opponent}
+            </span>
+          </div>
+        </div>
         <textarea className="chat__history" readOnly value={history} />
         <div className="chat__form">
           <input
@@ -47,6 +68,8 @@ const Game = ({ history, sendMessage }: IProps) => {
 
 const mapStateToProps = (state: State) => {
   return {
+    user: selectUser(state),
+    play: selectPlay(state),
     board: selectGameData(state),
     history: selectHistory(state),
   };

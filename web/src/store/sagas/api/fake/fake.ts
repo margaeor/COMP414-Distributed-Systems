@@ -11,8 +11,6 @@ import { Game, PlayStep } from "../../../types";
 import { sleep } from "../../utils";
 
 export default function* joinFakeGame() {
-  document.cookie = "refresh=; SameSite=Strict";
-
   yield put(
     setPlay({
       id: "1234",
