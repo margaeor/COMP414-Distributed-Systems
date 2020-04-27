@@ -55,7 +55,7 @@ var Game = mongoose.model('game', game);
 var active_game = new mongoose.Schema({
 _id: {
     type: Schema.Types.ObjectId, 
-    ref: 'Game',
+    ref: 'game',
     required: true
 },
 server_id: {

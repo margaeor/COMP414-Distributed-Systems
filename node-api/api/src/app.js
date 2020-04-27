@@ -16,6 +16,7 @@ const logger = require('./lib/logger.js');
 const {
   createUserIfNotExists,
   atomicPracticePairing,
+  atomicStartTournament,
   atomicEndGame,
   resetActiveGameState,
   createGame
@@ -183,13 +184,8 @@ app.get('/tournament/create', async (req, res) => {
   try {
     if(tournament_name) {
 
-      //let tournament_round = await TournamentRound.create({});
-
-      //if(!tournament_round) throw new errors.InternalErrorException('Cannot create');
-
       let tournament =  await Tournament.create({
-        name: tournament_name,
-        //rounds: [tournament_round.id]
+        name: tournament_name
       });
 
       res.json(errors.createSuccessResponse('Tournament created',tournament));
@@ -202,69 +198,7 @@ app.get('/tournament/create', async (req, res) => {
   }
 });
 
-function shuffleArray(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
-  }
-}
 
-async function atomicStartTournament(session, tournament_id) {
-
-  let tournament = await Tournament.findById(tournament_id).session(session);
-  if(!tournament) throw errors.InvalidArgumentException('No such tournament');
-  if(tournament.has_started) throw new errors.InvalidOperationException('Tournament already started');
-  if(tournament.participants.length < 4) throw new errors.InvalidOperationException('Not enough players');
-
-  let participants = [...tournament.participants]; // copy array
-  shuffleArray(participants);
-
-  let num_to_skip_round = (1 << 32 - Math.clz32(participants.length-1))-participants.length;
-   
-  let middle = Math.floor((participants.length-num_to_skip_round) / 2)
-
-  let first_group = participants.slice(0, middle);
-  let second_group = participants.slice(middle, participants.length-num_to_skip_round);
-
-  let skippers = participants.slice(participants.length-num_to_skip_round, participants.length);
-  
-  if(first_group.length != second_group.length) throw new errors.InternalErrorException('Error occured');
-
-  let tournament_round = (await TournamentRound.create([{
-    round_number: 1,
-    num_games_left: first_group.length,
-    winners: [...skippers],
-    losers: []
-  }],{session:session}))[0];
-
-  let games_ids = [];
-  for (let i = 0; i < first_group.length; i++) {
-
-    let user1 = first_group[i];
-    let user2 = second_group[i];
-    Math.random() < 0.5 && ([user1,user2]=[user2,user1]);
-    
-    let game = (await Game.create([{
-      player1:user1,
-      player2:user2,
-      game_type:tournament.game_type,
-      tournament_id: tournament._id,
-      round_id: tournament_round._id
-    }],{session:session}))[0];
-
-    let active_game = await resetActiveGameState(session,game);
-    tournament_round.games.push(game._id);
-  }
-
-  await tournament_round.save({session});
-
-  await Tournament.findByIdAndUpdate(tournament_id,
-    {
-      has_started:true, //@TODO remove comment
-      rounds:[tournament_round._id]
-    }).session(session);
-
-}
 
 
 
@@ -279,7 +213,6 @@ app.get('/tournament/start', async (req, res) => {
 
       res.json(errors.createSuccessResponse('Tournament started'));
 
-      // } else throw new errors.InvalidArgumentException('No such tournament');
     }
     else throw new errors.InvalidArgumentException('Wrong parameters');
   } catch(e) {
@@ -342,8 +275,69 @@ app.get('/tournament/list', (req, res) => {
 });
 
 
+app.get('/tournament/info', async function(req, res) {
+  
+  var tournament_id = req.query.id;
+  var username = req.query.username;
+
+  try {
+    if(tournament_id && mongoose.Types.ObjectId.isValid(tournament_id)) {
 
 
+      // If user doesn't exist, create it
+      let user = await createUserIfNotExists(username);
+
+      let tournament = await Tournament.findById(tournament_id).
+        populate({
+          path:'rounds',
+          populate: {
+            path: 'games',
+            select: { 
+              'player1': 1,
+              'player2':1,
+              'score':1,
+              '_id': 0
+            },
+          }
+        }).
+        exec();
+      if(tournament) {
+        res.json(errors.createSuccessResponse('',tournament));
+      } else throw new errors.InvalidOperationException('Cannot register tournament');
+
+    } else throw new errors.InvalidArgumentException('Wrong parameters');
+  } catch(e){
+    logger.log(e);
+    return res.json(errors.convertExceptionToResponse(e));
+  }
+
+});
+
+
+app.get('/user/stats', async function(req, res) {
+  
+  var username = req.query.username;
+
+  try {
+    if(username) {
+
+
+      // If user doesn't exist, create it
+      let user = await User.findById(username).select(
+        {"total_games":1,"total_wins":1,"total_losses":1,"total_ties":1}
+      ).exec();
+
+      if(user) {
+        res.json(errors.createSuccessResponse('',user));
+      } else throw new errors.InvalidOperationException('User not found');
+
+    } else throw new errors.InvalidArgumentException('Wrong parameters');
+  } catch(e){
+    logger.log(e);
+    return res.json(errors.convertExceptionToResponse(e));
+  }
+
+});
 
 
 console.log(`Running on http://${HOST}:${PORT}`);

@@ -87,6 +87,23 @@ function shuffleArray(array) {
   }
 }
 
+  /** 
+   * Atomically creates a new tournament
+   * round. In the first round, it instantly
+   * passes some users to the next round
+   * in order to ensure that nobody will
+   * skip a round after the second round.
+   * In the last round, in order to determine
+   * 1st,2nd,3rd and 4th place, it pairs
+   * the 2 winners with one another and
+   * the 2 losers with one another.
+   * @param {Session} session 
+   * @param {Tournament} tournament 
+   * @param {Array} winners 
+   * @param {Array} losers 
+   * @param {Integer} round_number the number of the new round 
+   * @returns {TournamentRound} the round created
+   */
 async function atomicCreateNextRound(session, tournament, winners, losers, round_number) {
 
 
@@ -125,6 +142,8 @@ async function atomicCreateNextRound(session, tournament, winners, losers, round
 
     let user1 = first_group[i];
     let user2 = second_group[i];
+
+    // Random colors
     Math.random() < 0.5 && ([user1,user2]=[user2,user1]);
     
     let game = (await Game.create([{
@@ -184,11 +203,11 @@ async function atomicEndTournamentGame(session, game, score) {
     // Reduce counter only if there is no tie
     last_round.num_games_left--;
     if(score == 1) {
-      last_round.winners.push(game.player1);
-      last_round.losers.push(game.player2);
+      last_round.winners = _.union(last_round.winners, [game.player1]);
+      last_round.losers = _.union(last_round.losers, [game.player2]);
     } else if(score == -1) {
-      last_round.winners.push(game.player2);
-      last_round.losers.push(game.player1);
+      last_round.winners = _.union(last_round.winners, [game.player2]);
+      last_round.losers = _.union(last_round.losers, [game.player1]);
     }
     
 
@@ -254,6 +273,29 @@ async function atomicEndTournamentGame(session, game, score) {
 
 }
 
+/**
+ * Atomically start a tournament if it hasn't started
+ * @param {*} session 
+ * @param {*} tournament_id 
+ */
+async function atomicStartTournament(session, tournament_id) {
+
+  let tournament = await Tournament.findById(tournament_id).session(session);
+  if(!tournament) throw errors.InvalidArgumentException('No such tournament');
+  if(tournament.has_started) throw new errors.InvalidOperationException('Tournament already started');
+  if(tournament.participants.length < 4) throw new errors.InvalidOperationException('Not enough players');
+
+
+  let tournament_round = await atomicCreateNextRound(session, tournament, tournament.participants, [], 1)
+
+  await Tournament.findByIdAndUpdate(tournament_id,
+    {
+      has_started:true,
+      rounds:[tournament_round._id]
+    }).session(session);
+
+}
+
   /**
  * Ends the game and records the scores
  * atomicaly (must be called inside a transaction)
@@ -276,7 +318,7 @@ async function atomicEndGame(session, game_id, score) {
 
     if(game.tournament_id) await atomicEndTournamentGame(session,game,score);
     else {
-      throw 'SHIT';
+      // If the game is a normal game, update stats
       let user1 = await User.findByIdAndUpdate(game.player1,
           {"$addToSet": {past_games: game._id}},{new:true,upsert:true})
           .session(session);
@@ -406,6 +448,7 @@ async function atomicEndGame(session, game_id, score) {
   module.exports = {
       createUserIfNotExists: createUserIfNotExists,
       atomicPracticePairing: atomicPracticePairing,
+      atomicStartTournament: atomicStartTournament,
       atomicEndTournamentGame: atomicEndTournamentGame,
       atomicEndGame: atomicEndGame,
       resetActiveGameState: resetActiveGameState,
