@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import { connect } from "react-redux";
 import { sendMessage } from "../../store/actions";
 import { selectGameData, selectHistory } from "../../store/selectors";
 import { State } from "../../store/types";
-import ValidatedChessboard from "./ValidatedChessboard";
+import Icon from "@mdi/react";
+import { mdiLoading } from "@mdi/js";
 
 interface IProps {
   history: string;
@@ -18,6 +19,9 @@ const Game = ({ history, sendMessage }: IProps) => {
     sendMessage(message);
     setMessage("");
   };
+
+  // Dynamic import (code splitting)
+  const ValidatedChessboard = React.lazy(() => import("./ValidatedChessboard"));
 
   return (
     <div className="game">

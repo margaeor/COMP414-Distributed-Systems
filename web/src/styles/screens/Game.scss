@@ -1,6 +1,10 @@
 .game {
   display: flex;
   flex-direction: row;
+
+  &__loader {
+    height: 40px;
+  }
 }
 
 .chat {

@@ -9,6 +9,7 @@ module.exports = {
   entry: "./src/App.tsx",
   output: {
     filename: "bundle.[hash:8].js",
+    chunkFilename: "[name].[hash:8].js",
     path: path.resolve(__dirname, "dist"),
   },
   devServer: {
@@ -28,7 +29,7 @@ module.exports = {
       minify: true,
     }),
     new Dotenv(),
-    new FaviconsWebpackPlugin("art/export/favicon.png"),
+    new FaviconsWebpackPlugin("./src/favicon.png"),
   ],
   module: {
     rules: [

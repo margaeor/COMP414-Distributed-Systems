@@ -22,7 +22,9 @@ const Loader = ({ step, error, message, retry }: IProps) => {
         <Icon path={mdiLoading} spin={true} className="loader__icon" />
       )}
       <div className="loader__text">
-        <span className="loader__text__normal">{message}</span>
+        <span className="loader__text__normal">
+          {message ? message : "Loading..."}
+        </span>
         {step === LoaderStep.FAILED && (
           <>
             <span className="loader__text__error">{error}</span>

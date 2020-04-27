@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { connect } from "react-redux";
 
 import { ScreenState, LoaderStep, State } from "../store/types";
@@ -49,14 +49,25 @@ const Wrapper = ({
   screen: ScreenState;
   loader: LoaderStep;
 }) => {
+  const Logo = () => <div className="logo" />;
+
   return (
     <div className="container">
-      {screen == ScreenState.LOGIN || loader !== LoaderStep.INACTIVE ? (
-        <div className="logo" />
-      ) : (
-        <Header />
-      )}
-      <ConnectedRoutes />
+      <Suspense
+        fallback={
+          <>
+            <Logo />
+            <Loader />
+          </>
+        }
+      >
+        {screen == ScreenState.LOGIN || loader !== LoaderStep.INACTIVE ? (
+          <Logo />
+        ) : (
+          <Header />
+        )}
+        <ConnectedRoutes />
+      </Suspense>
     </div>
   );
 };
