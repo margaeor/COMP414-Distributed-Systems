@@ -29,7 +29,14 @@ module.exports = {
       minify: true,
     }),
     new Dotenv(),
-    new FaviconsWebpackPlugin("./src/favicon.png"),
+    new FaviconsWebpackPlugin({
+      logo: "./src/favicon.png",
+      favicons: {
+        icons: {
+          appleStartup: false,
+        },
+      },
+    }),
   ],
   module: {
     rules: [
