@@ -264,14 +264,29 @@ app.get('/tournament/register', async function(req, res) {
 
 app.get('/tournament/list', (req, res) => {
   
+  // Mode can be 'active', 'future' or 'past'
+  let mode = req.query.mode;
   let jwt = req.query.jwt;
-
+  let page = req.query.page;
   try{
     
     authenticateUser(jwt);
 
-    Tournament.find().select('-participants').lean().exec(function (err, users) {
-        return res.json(errors.createSuccessResponse('',users));
+    if(!mode || ['active','future','past'].indexOf(mode) == -1) 
+      throw new errors.InvalidArgumentException("Wrong parameters")
+
+    var has_started = (mode === 'active' || mode === 'past');
+    var has_ended = (mode === 'active' || mode === 'future');
+
+    Tournament.paginate({
+        has_started: has_started,
+        has_ended: has_ended
+    }, {
+      page:page,
+      limit:globals.PAGINATION_LIMIT,
+      lean:true,
+    }).then(function(result) {
+      return res.json(errors.createSuccessResponse('',result));
     });
 
   } catch(e){
@@ -296,6 +311,10 @@ app.get('/tournament/info', async function(req, res) {
       let tournament = await Tournament.findById(tournament_id).
         populate({
           path:'rounds',
+          select: {
+            'date_created':1,
+            'games':1
+          },
           populate: {
             path: 'games',
             select: { 
@@ -347,6 +366,49 @@ app.get('/user/stats', async function(req, res) {
 
 });
 
+app.get('/me/match_history', async function(req, res) {
+  
+  let jwt = req.query.jwt;
+  try {
+
+    let username = authenticateUser(jwt);
+
+    if(username) {
+
+      let user = await User.findById(username).select(
+        {"past_games":1}
+      ).
+      populate({
+        path: 'past_games',
+        select: {
+          'has_ended': 1,
+          'tournament_id':1,
+          'date_created': 1,
+          'score' : 1,
+          'player1': 1,
+          'player2': 1
+        },
+        populate: {
+          path: 'tournament_id',
+          select: {
+            'name': 1,
+            'date_created': 1
+          }
+        }
+      }).
+      exec();
+
+      if(user) {
+        res.json(errors.createSuccessResponse('',user['past_games']));
+      } else throw new errors.InvalidOperationException('User not found');
+
+    } else throw new errors.InvalidArgumentException('Wrong parameters');
+  } catch(e){
+    logger.log(e);
+    return res.json(errors.convertExceptionToResponse(e));
+  }
+
+});
 
 app.get('/me/active_games', async function(req, res) {
   
@@ -360,11 +422,27 @@ app.get('/me/active_games', async function(req, res) {
       let user = await User.findById(username).select(
         {"active_games":1}
       ).
-      populate('active_games').
+      populate({
+        path: 'active_games',
+        select: {
+          'has_ended': 1,
+          'tournament_id': 1,
+          'date_created': 1,
+          'player1': 1,
+          'player2': 1
+        },
+        populate: {
+          path: 'tournament_id',
+          select: {
+            'name': 1,
+            'date_created': 1
+          }
+        }
+      }).
       exec();
 
       if(user) {
-        res.json(errors.createSuccessResponse('',user));
+        res.json(errors.createSuccessResponse('',user['active_games']));
       } else throw new errors.InvalidOperationException('User not found');
 
     } else throw new errors.InvalidArgumentException('Wrong parameters');

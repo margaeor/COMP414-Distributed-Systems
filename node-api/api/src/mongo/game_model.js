@@ -1,6 +1,7 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var globals = require('../lib/globals.js');
+var mongoosePaginate = require('mongoose-paginate-v2');
 
 var game = new mongoose.Schema({
     player1: {
@@ -49,13 +50,14 @@ var game = new mongoose.Schema({
     }
   });
 
+game.plugin(mongoosePaginate);
 var Game = mongoose.model('game', game);
 
 
 var active_game = new mongoose.Schema({
 _id: {
     type: Schema.Types.ObjectId, 
-    ref: 'game',
+    //ref: 'game',
     required: true
 },
 server_id: {

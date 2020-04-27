@@ -3,6 +3,7 @@ var Schema = mongoose.Schema;
 var User = require('./user_model.js');
 var Game = require('./game_model.js');
 var globals = require('../lib/globals');
+var mongoosePaginate = require('mongoose-paginate-v2');
 
 var tournament_round = new mongoose.Schema({
   // tournament_id: {
@@ -91,6 +92,9 @@ var tournament = new mongoose.Schema({
     }*/
   }
 });
+
+// Add pagination
+tournament.plugin(mongoosePaginate);
 
 var TournamentRound = mongoose.model('tournament_round', tournament_round);
 var Tournament = mongoose.model('tournament', tournament);
