@@ -57,7 +57,7 @@ const Wrapper = ({
         fallback={
           <>
             <Logo />
-            <Loader />
+            <Loader forcedMessage={"Downloading..."} />
           </>
         }
       >

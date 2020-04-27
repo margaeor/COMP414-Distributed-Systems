@@ -10,10 +10,11 @@ interface IProps {
   step: LoaderStep;
   error: string;
   message: string;
+  forcedMessage?: string;
   retry: typeof retry;
 }
 
-const Loader = ({ step, error, message, retry }: IProps) => {
+const Loader = ({ step, error, message, forcedMessage, retry }: IProps) => {
   return (
     <div className="loader">
       {step === LoaderStep.FAILED ? (
@@ -23,7 +24,7 @@ const Loader = ({ step, error, message, retry }: IProps) => {
       )}
       <div className="loader__text">
         <span className="loader__text__normal">
-          {message ? message : "Loading..."}
+          {forcedMessage ? forcedMessage : message}
         </span>
         {step === LoaderStep.FAILED && (
           <>
