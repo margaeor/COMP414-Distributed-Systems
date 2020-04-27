@@ -4,6 +4,7 @@ import {
   RETRY_LOADING,
   startLoading,
   updateError,
+  stopLoading,
 } from "../actions";
 import { AccessTokenError, ConnectionError } from "./api/errors";
 
@@ -12,10 +13,13 @@ export function* sleep(ms: number) {
 }
 
 export function* callApi(message: string, effect: CallEffect) {
+  let eff;
   while (1) {
     yield put(startLoading(message));
     try {
-      return yield effect;
+      eff = yield effect;
+      yield put(stopLoading());
+      return eff;
     } catch (e) {
       if (e instanceof ConnectionError) {
         yield put(loadingFailed("Connection Error"));

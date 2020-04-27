@@ -1,12 +1,12 @@
 import React from "react";
+import { connect } from "react-redux";
 import {
+  goAdmin,
   goHome,
   goLeaderboard,
-  goAdmin,
   logout,
 } from "../store/actions/header";
-import { connect } from "react-redux";
-import { selectLoader, selectIsAuthorized } from "../store/selectors";
+import { selectIsAuthorized } from "../store/selectors";
 import { State } from "../store/types";
 
 interface IProps {
@@ -38,14 +38,14 @@ const Header = ({
         <li className="nav__item">
           <button
             className="nav__item__button"
-            onClick={goAdmin}
+            onClick={goLeaderboard}
             disabled={!authorized}
           >
             Leaderboards
           </button>
         </li>
         <li className="nav__item">
-          <button className="nav__item__button" onClick={goLeaderboard}>
+          <button className="nav__item__button" onClick={goAdmin}>
             Admin
           </button>
         </li>

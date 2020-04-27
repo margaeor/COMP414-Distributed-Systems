@@ -1,45 +1,55 @@
 import { History, Location } from "history";
-import { select, take } from "redux-saga/effects";
+import { Dispatch } from "redux";
+import { select, take, takeLatest } from "redux-saga/effects";
 import {
-  ChangeScreenAction,
+  CHANGE_SCREEN,
+  LOADING_FAILED,
   notifyUrlChange,
   NOTIFY_URL_CHANGE,
+  START_LOADING,
+  STOP_LOADING,
 } from "../actions";
-import { selectPlay } from "../selectors";
-import { LoaderStep, ScreenState } from "../types";
-import { Dispatch } from "redux";
-import { GO_HOME, GO_ADMIN, GO_LEADERBOARD, LOGOUT } from "../actions/header";
+import { GO_ADMIN, GO_HOME, GO_LEADERBOARD, LOGOUT } from "../actions/header";
+import { selectPlay, selectScreen } from "../selectors";
+import { ScreenState } from "../types";
 
 /**
  * Small task that updates the url as we move around the app
  */
-export function* updateUrl(
-  history: History,
-  { screen, loader }: ChangeScreenAction
-) {
-  if (loader != LoaderStep.INACTIVE) {
-    history.push("/loading");
-  } else {
-    let id;
-    switch (screen) {
-      case ScreenState.LOGIN:
-        history.push("/login");
-        break;
-      case ScreenState.GAME:
-        id = (yield select(selectPlay)).id;
-        history.push("/game?id=" + id);
-        break;
-      case ScreenState.ADMINISTRATION:
-        history.push("/administration");
-        break;
-      case ScreenState.LEADERBOARDS:
-        history.push("/leaderboards");
-        break;
-      default:
-        history.push("/");
-        break;
-    }
+export function* updateUrl(history: History) {
+  // Run a check on if the URL is already correct (the user pressed back)
+  // to prevent overwriting it.
+  const { screen: currScreen } = decodeUrl(history.location);
+  const screen = yield select(selectScreen);
+  if (screen === currScreen) return;
+
+  let id;
+  switch (screen) {
+    case ScreenState.LOGIN:
+      history.push("/login");
+      break;
+    case ScreenState.GAME:
+      id = (yield select(selectPlay)).id;
+      history.push("/game?id=" + id);
+      break;
+    case ScreenState.ADMINISTRATION:
+      history.push("/administration");
+      break;
+    case ScreenState.LEADERBOARDS:
+      history.push("/leaderboards");
+      break;
+    default:
+      history.push("/");
+      break;
   }
+}
+
+export function* updateUrlHandler(history: History) {
+  return yield takeLatest(
+    [CHANGE_SCREEN, START_LOADING, STOP_LOADING, LOADING_FAILED],
+    updateUrl,
+    history
+  );
 }
 
 /**
@@ -94,14 +104,14 @@ export function* navHandler(inGame: boolean) {
 
   switch (act.type) {
     case GO_HOME:
-      return ScreenState.LOBBY;
+      return { screen: ScreenState.LOBBY };
     case GO_ADMIN:
-      return ScreenState.ADMINISTRATION;
+      return { screen: ScreenState.ADMINISTRATION };
     case GO_LEADERBOARD:
-      return ScreenState.LEADERBOARDS;
+      return { screen: ScreenState.LEADERBOARDS };
     case LOGOUT:
       // TODO: Fill in
-      return ScreenState.LOBBY;
+      return { screen: ScreenState.LOBBY };
     case NOTIFY_URL_CHANGE:
       return { screen: act.screen, id: act.id };
   }

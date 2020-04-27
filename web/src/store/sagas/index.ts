@@ -1,20 +1,23 @@
 import { createBrowserHistory } from "history";
 import { Dispatch } from "redux";
-import { takeLatest, race, call } from "redux-saga/effects";
-import { ChangeScreenAction, CHANGE_SCREEN } from "../actions";
+import { call, cancel, race } from "redux-saga/effects";
 import { ScreenState } from "../types";
+import administration from "./administration";
+import { AccessTokenError } from "./api/errors";
 import joinFakeGame from "./api/fake/fake";
 import game from "./game";
 import lobby from "./lobby";
 import getAccessToken from "./login";
-import { decodeUrl, updateUrl, urlListener, navHandler } from "./urls";
-import { AccessTokenError } from "./api/errors";
+import { decodeUrl, navHandler, updateUrlHandler, urlListener } from "./urls";
 
 function* mainSaga(token: string, screen: ScreenState, id?: string) {
   yield* joinFakeGame();
-  let act;
 
   switch (screen) {
+    case ScreenState.ADMINISTRATION:
+      console.log("admin");
+      yield* administration(token);
+      return { screen: ScreenState.LOBBY };
     case ScreenState.GAME:
       if (id) {
         yield* game(token, id);
@@ -33,15 +36,14 @@ function* mainSaga(token: string, screen: ScreenState, id?: string) {
 function* setupUrls(dispatch: Dispatch) {
   const history = createBrowserHistory();
   const listener = urlListener(history, dispatch);
-  yield takeLatest(CHANGE_SCREEN, (a) =>
-    updateUrl(history, a as ChangeScreenAction)
-  );
+  const handler = yield* updateUrlHandler(history);
   const { screen, id } = decodeUrl(history.location);
-  return { screen, id, listener };
+
+  return { screen, id, handler, listener };
 }
 
 export default function* rootSaga(dispatch: Dispatch) {
-  let { listener, screen, id } = yield* setupUrls(dispatch);
+  let { listener, handler, screen, id } = yield* setupUrls(dispatch);
   let token = yield* getAccessToken();
 
   while (1) {
@@ -66,4 +68,5 @@ export default function* rootSaga(dispatch: Dispatch) {
   }
 
   listener();
+  yield cancel(handler);
 }
