@@ -6,10 +6,6 @@ var globals = require('../lib/globals');
 var mongoosePaginate = require('mongoose-paginate-v2');
 
 var tournament_round = new mongoose.Schema({
-  // tournament_id: {
-  //   type: mongoose.Types.ObjectId,
-  //   required: true
-  // },
   round_number: {
     type: Number,
     default: 0,

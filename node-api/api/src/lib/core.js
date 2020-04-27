@@ -43,7 +43,7 @@ async function createUserIfNotExists(username) {
   
   }
   
-  /** @TODO remove functional comments
+  /**
    * Performs an atomic matchmaking of user.
    * First it checks the queue. If the queue is
    * empty, the user is added to the queue.
@@ -64,7 +64,7 @@ async function createUserIfNotExists(username) {
   
     return Lobby.findOne({ game_type: game_type }).session(session)
     .then( async (lobby) => {
-      //await new Promise(r => setTimeout(r, 8000));
+      
       if(lobby.queue.length == 0) {
         lobby.queue.push(username);
       } else {
@@ -302,7 +302,7 @@ async function atomicEndGame(session, game_id, score) {
   
     let game = await Game.findOneAndUpdate(
       {_id:game_id,has_ended:false},
-      {has_ended:false,score:score},//@TODO fix has_ended
+      {has_ended:true,score:score},
       {new:true})
     .session(session);
     if(!game) throw new errors.InvalidArgumentException('Game not found');
@@ -412,7 +412,7 @@ async function atomicEndGame(session, game_id, score) {
   
   
   
-  /**@TODO: Make function atomic
+  /**
    * Creates a game between 2 players (if possible)
    * and adds the game to the active game list 
    * of the players.
