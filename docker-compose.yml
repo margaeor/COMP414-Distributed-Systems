@@ -21,6 +21,21 @@ services:
       - backend
     container_name: auth
   
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest  
+    depends_on:
+      - auth-db
+    networks:
+      - frontend
+      - backend
+    ports:
+      - "8081:80"
+    container_name: phpmyadmin
+    environment:
+      PMA_HOST: auth-db
+      PMA_USER: root
+      PMA_PASSWORD: "${DB_ROOT_PASSWORD}"
+  # Authentication database
   auth-db:
     build:
       context: './auth-db/'
@@ -48,6 +63,8 @@ services:
     container_name: api
     restart: always
     build: ./node-api/api
+    environment: 
+      JWT_PUBLIC_KEY: "${AUTH_PUBLIC}"
     volumes:
         - ./node-api/api/src:/usr/src/app
     ports:
@@ -57,16 +74,8 @@ services:
       - zookeeper
     networks:
       - backend
-  # mongo:
-  #   container_name: mongo
-  #   image: mongo
-  #   networks:
-  #     - backend
-  #   #volumes:
-  #     #- ./node-api/mongo/data:/data/db
-  #   ports:
-  #     - "27017:27017"
 
+  # Mongodb replica set for api
   mongodb-primary:
     image: 'bitnami/mongodb:latest'
     environment:
@@ -112,49 +121,6 @@ services:
       - MONGODB_REPLICA_SET_KEY=replicasetkey123
     container_name: mongodb-arbiter
 
-  # api:
-  #   build: 
-  #     context: './api/'
-  #     dockerfile: Dockerfile.web
-  #   ports:
-  #     - "8079:8080"
-  #   environment: 
-  #     DB_HOST: "auth-db"
-  #     DB_NAME: "${DB_NAME}"
-  #     DB_USERNAME: "${DB_USERNAME}"
-  #     DB_PASSWORD: "${DB_PASSWORD}"
-  #     AUTH_ISSUER: "${AUTH_ISSUER}"
-  #     AUTH_PUBLIC: "${AUTH_PUBLIC}"
-  #   volumes:
-  #     - ./api/src/:/var/www/html/:rw
-  #   networks:
-  #     - backend
-  #   container_name: api
-  # api-db:
-  #   build:
-  #     context: './api-db/'
-  #     dockerfile: Dockerfile.web
-  #     args:
-  #       MYSQL_VERSION: ${MYSQL_VERSION}
-  #   restart: always
-  #   ports:
-  #     - "3307:3306"
-  #   volumes:
-  #     - ./api-db/db_init:/docker-entrypoint-initdb.d
-  #     #- data:/var/lib/mysql
-  #   networks:
-  #     - backend
-  #   environment:
-  #     MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
-  #     MYSQL_DATABASE: "${DB_NAME}"
-  #     MYSQL_USER: "${DB_USERNAME}"
-  #     MYSQL_PASSWORD: "${DB_PASSWORD}"
-  #     MYSQL_INITDB_SKIP_TZINFO: "yes"
-  #   container_name: api-db
-  # redis:
-  #   build: ./api/redis
-  #   container_name: redis
-
   # Others
   zookeeper:
     image: 'bitnami/zookeeper:latest'
@@ -168,20 +134,6 @@ services:
     container_name: zookeeper
     #command: /opt/zoo/scripts/init_script.sh
   
-  # phpmyadmin:
-  #   image: phpmyadmin/phpmyadmin:latest  
-  #   depends_on:
-  #     - api-db
-  #   networks:
-  #     - frontend
-  #     - backend
-  #   ports:
-  #     - "8081:80"
-  #   container_name: phpmyadmin
-  #   environment:
-  #     PMA_HOST: api-db
-  #     PMA_USER: root
-  #     PMA_PASSWORD: "${DB_ROOT_PASSWORD}"
 
 networks:
   frontend:

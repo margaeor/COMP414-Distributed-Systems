@@ -1,6 +1,6 @@
 
 const client = require('./connect');
-const globals = require('../globals.js');
+const globals = require('../lib/globals.js');
 
 const getChildrenPromise = (...args) => {
     return new Promise((resolve, reject) => {

@@ -148,7 +148,7 @@ class Auth {
                 "role" => $user['role']
         ));
 
-        $jwt = JWT::encode($token, $secret_key);
+        $jwt = JWT::encode($token, $secret_key, $this->config['algorithm']);
         
 
         $refresh_token = bin2hex(openssl_random_pseudo_bytes(32));

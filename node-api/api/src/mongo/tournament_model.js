@@ -2,7 +2,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var User = require('./user_model.js');
 var Game = require('./game_model.js');
-var globals = require('../globals');
+var globals = require('../lib/globals');
 
 var tournament_round = new mongoose.Schema({
   // tournament_id: {

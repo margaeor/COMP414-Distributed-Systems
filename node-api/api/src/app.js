@@ -6,13 +6,14 @@ const HOST = '0.0.0.0';
 const express = require('express');
 const mongoose = require('mongoose');
 const app = express();
-const connect = require('./connect.js');
+const connect = require('./mongo/connect.js');
 const zookeeper = require('./zookeeper/functions.js');
-const globals = require('./globals.js');
-const transactions = require('./transactions.js');
+const globals = require('./lib/globals.js');
+const transactions = require('./lib/transactions.js');
 const errors = require('./lib/errors.js');
 const logger = require('./lib/logger.js');
 const util = require('./lib/util.js');
+const {authenticateUser} = require('./lib/auth.js');
 
 const {
   createUserIfNotExists,
@@ -24,10 +25,10 @@ const {
 } = require('./lib/core.js');
 
 
-const User = require('./model/user_model.js');
-const {Tournament,TournamentRound} = require('./model/tournament_model.js');
-const {Game, ActiveGame} = require('./model/game_model.js');
-const Lobby = require('./model/lobby_model.js');
+const User = require('./mongo/user_model.js');
+const {Tournament,TournamentRound} = require('./mongo/tournament_model.js');
+const {Game, ActiveGame} = require('./mongo/game_model.js');
+const Lobby = require('./mongo/lobby_model.js');
 
 
 
@@ -36,8 +37,8 @@ const Lobby = require('./model/lobby_model.js');
 // playmaster?
 app.get('/playmaster/getinfo', async (req, res) => {
   
-  var game_id = req.query.game_id;
-  var id = req.query.id;
+  let game_id = req.query.game_id;
+  let id = req.query.id;
 
   let ip = util.findIpFromRequest(req);
 
@@ -75,9 +76,9 @@ app.get('/playmaster/getinfo', async (req, res) => {
 // playmaster?
 app.get('/playmaster/results', async (req, res) => {
   
-  var game_id = req.query.game_id;
-  var score = req.query.score;
-  var id = req.query.id;
+  let game_id = req.query.game_id;
+  let score = req.query.score;
+  let id = req.query.id;
 
   let ip = util.findIpFromRequest(req);
 
@@ -104,10 +105,14 @@ app.get('/playmaster/results', async (req, res) => {
 // Join practice queue
 app.get('/practice/join_queue', async (req, res) => {
   
-  var username = req.query.username;
-  var game_type = req.query.game_type;
+  //let username = req.query.username;
+  let game_type = req.query.game_type;
+  let jwt = req.query.jwt;
 
   try {
+
+    let username = authenticateUser(jwt);
+
     if(username && game_type && globals.GAME_TYPES.includes(game_type)) 
     {
       createUserIfNotExists(username);
@@ -141,14 +146,16 @@ app.get('/practice/join_queue', async (req, res) => {
 // Join existing practice game
 app.get('/practice/join', async (req, res) => {
   
-  var game_id = req.query.game_id;
-
+  let game_id = req.query.game_id;
+  let jwt = req.query.jwt;
   try {
+
+    let username = authenticateUser(jwt);
     if(game_id && mongoose.Types.ObjectId.isValid(game_id)) {
     
       let game = await Game.findById(game_id).exec();
 
-      var active_game = await resetActiveGameState(game);
+      let active_game = await resetActiveGameState(game);
       
       if(active_game) {
         res.json(errors.createSuccessResponse('',active_game));
@@ -167,8 +174,12 @@ app.get('/practice/join', async (req, res) => {
 //Create new tournament
 app.get('/tournament/create', async (req, res) => {
 
-  var tournament_name = req.query.name;
+  let jwt = req.query.jwt;
+  let tournament_name = req.query.name;
   try {
+
+    let username = authenticateUser(jwt, 'official');
+
     if(tournament_name) {
 
       let tournament =  await Tournament.create({
@@ -192,8 +203,11 @@ app.get('/tournament/create', async (req, res) => {
 //Start tournament
 app.get('/tournament/start', async (req, res) => {
 
-  var id = req.query.id;
+  let id = req.query.id;
+  let jwt = req.query.jwt;
+
   try {
+    let username = authenticateUser(jwt, 'official');
     if(id && mongoose.Types.ObjectId.isValid(id)) {
 
       await transactions.runTransactionWithRetry(atomicStartTournament, mongoose, id);
@@ -211,10 +225,11 @@ app.get('/tournament/start', async (req, res) => {
 // Register to tournament
 app.get('/tournament/register', async function(req, res) {
   
-  var tournament_id = req.query.id;
-  var username = req.query.username;
+  let tournament_id = req.query.id;
+  let jwt = req.query.jwt;
 
   try {
+    let username = authenticateUser(jwt);
     if(tournament_id && username && mongoose.Types.ObjectId.isValid(tournament_id)) {
 
 
@@ -248,8 +263,13 @@ app.get('/tournament/register', async function(req, res) {
 });
 
 app.get('/tournament/list', (req, res) => {
+  
+  let jwt = req.query.jwt;
 
   try{
+    
+    authenticateUser(jwt);
+
     Tournament.find().select('-participants').lean().exec(function (err, users) {
         return res.json(errors.createSuccessResponse('',users));
     });
@@ -264,15 +284,14 @@ app.get('/tournament/list', (req, res) => {
 
 app.get('/tournament/info', async function(req, res) {
   
-  var tournament_id = req.query.id;
-  var username = req.query.username;
+  let tournament_id = req.query.id;
+  let jwt = req.query.jwt;
 
   try {
+    
+    authenticateUser(jwt);
+
     if(tournament_id && mongoose.Types.ObjectId.isValid(tournament_id)) {
-
-
-      // If user doesn't exist, create it
-      let user = await createUserIfNotExists(username);
 
       let tournament = await Tournament.findById(tournament_id).
         populate({
@@ -303,16 +322,46 @@ app.get('/tournament/info', async function(req, res) {
 
 app.get('/user/stats', async function(req, res) {
   
-  var username = req.query.username;
-
+  let username = req.query.username;
+  let jwt = req.query.jwt;
   try {
-    if(username) {
 
+    authenticateUser(jwt);
+
+    if(username) {
 
       // If user doesn't exist, create it
       let user = await User.findById(username).select(
         {"total_games":1,"total_wins":1,"total_losses":1,"total_ties":1, "rating":1}
       ).exec();
+
+      if(user) {
+        res.json(errors.createSuccessResponse('',user));
+      } else throw new errors.InvalidOperationException('User not found');
+
+    } else throw new errors.InvalidArgumentException('Wrong parameters');
+  } catch(e){
+    logger.log(e);
+    return res.json(errors.convertExceptionToResponse(e));
+  }
+
+});
+
+
+app.get('/me/active_games', async function(req, res) {
+  
+  let jwt = req.query.jwt;
+  try {
+
+    let username = authenticateUser(jwt);
+
+    if(username) {
+
+      let user = await User.findById(username).select(
+        {"active_games":1}
+      ).
+      populate('active_games').
+      exec();
 
       if(user) {
         res.json(errors.createSuccessResponse('',user));

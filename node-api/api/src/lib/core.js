@@ -1,4 +1,4 @@
-const globals = require('../globals.js');
+const globals = require('./globals.js');
 const errors = require('./errors.js');
 const elo = require('./elo.js');
 const zookeeper = require('../zookeeper/functions.js');
@@ -6,10 +6,10 @@ const mongoose = require('mongoose');
 const assert = require('assert');
 const _ = require('lodash');
 
-const User = require('../model/user_model.js');
-const {Tournament,TournamentRound} = require('../model/tournament_model.js');
-const {Game, ActiveGame} = require('../model/game_model.js');
-const Lobby = require('../model/lobby_model.js');
+const User = require('../mongo/user_model.js');
+const {Tournament,TournamentRound} = require('../mongo/tournament_model.js');
+const {Game, ActiveGame} = require('../mongo/game_model.js');
+const Lobby = require('../mongo/lobby_model.js');
 
 
 /**
@@ -270,8 +270,8 @@ async function atomicEndTournamentGame(session, game, score) {
 
 /**
  * Atomically start a tournament if it hasn't started
- * @param {*} session 
- * @param {*} tournament_id 
+ * @param {Session} session 
+ * @param {Mongoose.types.ObjectId} tournament_id 
  */
 async function atomicStartTournament(session, tournament_id) {
 

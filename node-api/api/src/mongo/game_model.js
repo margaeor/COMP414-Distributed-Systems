@@ -1,6 +1,6 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-var globals = require('../globals.js');
+var globals = require('../lib/globals.js');
 
 var game = new mongoose.Schema({
     player1: {

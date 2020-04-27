@@ -1,6 +1,6 @@
 var mongoose = require('mongoose');
-var globals = require('../globals.js');
-var connect = require('../connect.js');
+var globals = require('../lib/globals.js');
+var connect = require('./connect.js');
 
 var Schema = mongoose.Schema;
 
