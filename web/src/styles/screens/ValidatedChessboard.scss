@@ -27,10 +27,13 @@
   &__header {
     background-color: $color-accent;
     color: $color-text-dark;
-    padding: 0.2rem 0.5rem;
+    padding: 0.4rem 0.5rem;
 
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
+    border-radius: 3px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border: 2px solid darken($color-accent, 30);
+    border-bottom: 2px solid darken($color-accent, 40);
 
     text-align: center;
     font-weight: 500;
@@ -38,10 +41,12 @@
   }
 
   &__button {
+    margin-top: 3px;
     padding: 0.5rem 0.5rem 0.5rem 3.5rem;
-    border-top: 5px solid $color-primary-dark;
     @extend %base-button;
     @include button-primary;
+    border-radius: 3px;
+    border: 2px solid $color-primary-dark;
 
     display: flex;
     flex-direction: row;
@@ -55,8 +60,8 @@
   }
 
   &__button:last-of-type {
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
   }
 }
 
