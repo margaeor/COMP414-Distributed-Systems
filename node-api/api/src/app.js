@@ -12,6 +12,7 @@ const globals = require('./globals.js');
 const transactions = require('./transactions.js');
 const errors = require('./lib/errors.js');
 const logger = require('./lib/logger.js');
+const util = require('./lib/util.js');
 
 const {
   createUserIfNotExists,
@@ -38,14 +39,7 @@ app.get('/playmaster/getinfo', async (req, res) => {
   var game_id = req.query.game_id;
   var id = req.query.id;
 
-  var ip = (req.headers['x-forwarded-for'] || '').split(',').pop() || 
-         req.connection.remoteAddress || 
-         req.socket.remoteAddress || 
-         req.connection.socket.remoteAddress;
-
-  if (ip.substr(0, 7) == "::ffff:") {
-    ip = ip.substr(7)
-  }
+  let ip = util.findIpFromRequest(req);
 
   try {
 
@@ -85,14 +79,7 @@ app.get('/playmaster/results', async (req, res) => {
   var score = req.query.score;
   var id = req.query.id;
 
-  var ip = (req.headers['x-forwarded-for'] || '').split(',').pop() || 
-         req.connection.remoteAddress || 
-         req.socket.remoteAddress || 
-         req.connection.socket.remoteAddress;
-
-  if (ip.substr(0, 7) == "::ffff:") {
-    ip = ip.substr(7)
-  }
+  let ip = util.findIpFromRequest(req);
 
   try {
 
@@ -202,7 +189,7 @@ app.get('/tournament/create', async (req, res) => {
 
 
 
-//Create new tournament
+//Start tournament
 app.get('/tournament/start', async (req, res) => {
 
   var id = req.query.id;
@@ -324,7 +311,7 @@ app.get('/user/stats', async function(req, res) {
 
       // If user doesn't exist, create it
       let user = await User.findById(username).select(
-        {"total_games":1,"total_wins":1,"total_losses":1,"total_ties":1}
+        {"total_games":1,"total_wins":1,"total_losses":1,"total_ties":1, "rating":1}
       ).exec();
 
       if(user) {
