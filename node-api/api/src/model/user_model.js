@@ -10,6 +10,10 @@ var user = new Schema({
   email: {
     type: String
   },
+  rating: {
+    type: Number,
+    default: 1500
+  },
   total_games: {
     type: Number,
     default: 0

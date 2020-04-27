@@ -1,5 +1,6 @@
 const globals = require('../globals.js');
 const errors = require('./errors.js');
+const elo = require('./elo.js');
 const zookeeper = require('../zookeeper/functions.js');
 const mongoose = require('mongoose');
 const assert = require('assert');
@@ -341,6 +342,10 @@ async function atomicEndGame(session, game_id, score) {
         } else throw new errors.InvalidArgumentException('Wrong score value');
         user1.past_games.indexOf(game_id) === -1 && user1.past_games.push(game_id);
         user2.past_games.indexOf(game_id) === -1 && user2.past_games.push(game_id);
+
+        let delta = elo.getRatingDelta(user1.rating,user2.rating,(score-'0'+1)/2);
+        user1.rating += delta;
+        user2.rating -= delta;
         await user1.save({ session });
         await user2.save({ session });
       } else throw new errors.InvalidArgumentException('Invalid fields');
