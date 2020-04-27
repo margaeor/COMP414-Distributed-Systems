@@ -3,6 +3,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const Dotenv = require("dotenv-webpack");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const FaviconsWebpackPlugin = require("favicons-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 module.exports = {
   // Entry / Output
@@ -37,6 +38,10 @@ module.exports = {
         },
       },
     }),
+    new MiniCssExtractPlugin({
+      filename: "[name].css",
+      chunkFilename: "[id].css",
+    }),
   ],
   module: {
     rules: [
@@ -56,7 +61,17 @@ module.exports = {
       {
         // Sass Files / Styling
         test: /\.scss$/,
-        use: ["style-loader", "css-loader", "sass-loader"],
+        // use: ["style-loader", "css-loader", "sass-loader"],
+        use: [
+          {
+            loader: MiniCssExtractPlugin.loader,
+            options: {
+              hmr: process.env.NODE_ENV === "development",
+            },
+          },
+          "css-loader",
+          "sass-loader",
+        ],
       },
       {
         // Image Support
