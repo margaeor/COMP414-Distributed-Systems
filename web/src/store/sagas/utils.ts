@@ -15,8 +15,7 @@ export function* callApi(message: string, effect: CallEffect) {
   while (1) {
     yield put(startLoading(message));
     try {
-      yield effect;
-      return;
+      return yield effect;
     } catch (e) {
       if (e instanceof ConnectionError) {
         yield put(loadingFailed("Connection Error"));

@@ -1,9 +1,14 @@
 import { History, Location } from "history";
-import { select } from "redux-saga/effects";
-import { ChangeScreenAction, notifyUrlChange } from "../actions";
+import { select, take } from "redux-saga/effects";
+import {
+  ChangeScreenAction,
+  notifyUrlChange,
+  NOTIFY_URL_CHANGE,
+} from "../actions";
 import { selectPlay } from "../selectors";
 import { LoaderStep, ScreenState } from "../types";
 import { Dispatch } from "redux";
+import { GO_HOME, GO_ADMIN, GO_LEADERBOARD, LOGOUT } from "../actions/header";
 
 /**
  * Small task that updates the url as we move around the app
@@ -67,4 +72,37 @@ export function urlListener(history: History, dispatch: Dispatch) {
     const { screen, id } = decodeUrl(location);
     dispatch(notifyUrlChange(screen, id));
   });
+}
+
+export function* navHandler(inGame: boolean) {
+  let act, c;
+  do {
+    act = yield take([
+      GO_HOME,
+      GO_ADMIN,
+      GO_LEADERBOARD,
+      LOGOUT,
+      NOTIFY_URL_CHANGE,
+    ]);
+
+    if (inGame) {
+      c = confirm("You are currently in game, are you sure?");
+    } else {
+      c = true;
+    }
+  } while (!c);
+
+  switch (act.type) {
+    case GO_HOME:
+      return ScreenState.LOBBY;
+    case GO_ADMIN:
+      return ScreenState.ADMINISTRATION;
+    case GO_LEADERBOARD:
+      return ScreenState.LEADERBOARDS;
+    case LOGOUT:
+      // TODO: Fill in
+      return ScreenState.LOBBY;
+    case NOTIFY_URL_CHANGE:
+      return { screen: act.screen, id: act.id };
+  }
 }

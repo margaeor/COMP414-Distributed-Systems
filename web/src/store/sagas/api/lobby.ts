@@ -138,4 +138,6 @@ export async function joinTournament(token: string, id: string) {}
 
 export async function joinQuickGame(token: string, game: Game) {}
 
+export async function checkQuickGame(token: string) {}
+
 export async function joinPlay(token: string, id: string) {}
