@@ -208,15 +208,40 @@ async function atomicEndTournamentGame(session, game, score) {
         // Announce winners
         let previous_round = await TournamentRound.findById(tournament.rounds.slice(-2)[0]).session(session);
 
-        let leaderboard = [
+        let best_players = [
           last_round.winners.filter(x => !previous_round.losers.includes(x))[0],
           last_round.losers.filter(x => !previous_round.losers.includes(x))[0],
           last_round.winners.filter(x => !previous_round.winners.includes(x))[0],
           last_round.losers.filter(x => !previous_round.winners.includes(x))[0]
         ];
 
-        console.log('WINNERS ARE ',leaderboard);
+        let n = last_round.round_number;
 
+        let leaderboard = [
+          {
+            username: best_players[0],
+            wins: n,
+            losses: 0
+          },
+          {
+            username: best_players[1],
+            wins: n-1,
+            losses: 1
+          },
+          {
+            username: best_players[2],
+            wins: n-1,
+            losses: 1
+          },
+          {
+            username: best_players[3],
+            wins: n-2,
+            losses: 2
+          }
+        ];
+
+        tournament.leaderboard = leaderboard;
+        await tournament.save({session});
       }
 
     }
@@ -226,18 +251,6 @@ async function atomicEndTournamentGame(session, game, score) {
   
   await last_round.save({session});
 
-  
-
-  //console.log("after",last_round);
-
-
-  //let new_round = await atomicCreateNextRound(session,tournament,last_round.queue,last_round.round_number+1);
-
-  //console.log(new_round);
-
-  
-
-  //throw "SHIT EXCEPTION";
 
 }
 

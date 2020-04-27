@@ -54,6 +54,14 @@ var tournament = new mongoose.Schema({
     required: true,
     default:Date.now
   },
+  leaderboard: [{
+    username: {
+      type: String,
+      ref: 'user'
+    },
+    wins: Number,
+    losses: Number
+  }],
   has_started: {
     type: Boolean,
     required: true,
