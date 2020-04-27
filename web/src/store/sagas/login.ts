@@ -1,29 +1,30 @@
-import { put, take, fork, cancel, select, call } from "redux-saga/effects";
-import {
-  renewRefreshToken,
-  signUp,
-  changePassword,
-  renewAccessToken,
-} from "./api/login";
+import { call, put, take } from "redux-saga/effects";
 import {
   changeScreen,
-  SUBMIT_LOGIN,
   FORGOT_PASSWORD,
-  SIGN_UP,
-  LoginSubmitAction,
+  loadingFailed,
   LoginForgotAction,
   LoginSignUpAction,
-  updateError,
-  startLoading,
-  loadingFailed,
+  LoginSubmitAction,
   RETRY_LOADING,
+  SIGN_UP,
+  startLoading,
+  SUBMIT_LOGIN,
+  updateError,
 } from "../actions";
-import { ScreenState, LoaderStep } from "../types";
-import { ConnectionError } from "./api/errors";
+import { LoaderStep, ScreenState } from "../types";
+import { ConnectionError, RefreshTokenError } from "./api/errors";
+import {
+  changePassword,
+  renewAccessToken,
+  renewRefreshToken,
+  signUp,
+} from "./api/login";
+import { callApi, sleep } from "./utils";
 
 function* login() {
   while (1) {
-    yield put(changeScreen(ScreenState.LOGIN, LoaderStep.INACTIVE));
+    yield put(changeScreen(ScreenState.LOGIN));
     const action:
       | LoginSubmitAction
       | LoginForgotAction
@@ -32,27 +33,35 @@ function* login() {
       FORGOT_PASSWORD,
       SIGN_UP,
     ]);
-    yield put(changeScreen(ScreenState.LOGIN, LoaderStep.LOADING));
 
     // Make proper api call
     try {
       switch (action.type) {
         case SUBMIT_LOGIN:
-          yield call(renewRefreshToken, action.username, action.password);
+          yield* callApi(
+            "Logging In...",
+            call(renewRefreshToken, action.username, action.password)
+          );
           break;
         case FORGOT_PASSWORD:
-          yield call(
-            changePassword,
-            action.username,
-            action.password,
-            action.answer
+          yield* callApi(
+            "Resetting Password...",
+            call(
+              changePassword,
+              action.username,
+              action.password,
+              action.answer
+            )
           );
           break;
         case SIGN_UP:
-          yield call(signUp, action.username, action.password, action.answer);
+          yield* callApi(
+            "Creating account...",
+            call(signUp, action.username, action.password, action.answer)
+          );
           break;
       }
-      return yield call(renewAccessToken);
+      return;
     } catch (e) {
       updateError(e.toString());
     }
@@ -66,12 +75,14 @@ export default function* getAccessToken() {
       return yield call(renewAccessToken);
     } catch (e) {
       // Only complete loop for connection errors
-      if (!(e instanceof ConnectionError)) break;
+      if (e instanceof RefreshTokenError) yield* login();
+      else if (e instanceof ConnectionError) {
+        yield put(loadingFailed("Connection Error"));
+        yield take(RETRY_LOADING);
+      } else {
+        throw e;
+      }
       console.error(e.toString());
     }
-
-    yield put(loadingFailed("Connection Error"));
-    yield take(RETRY_LOADING);
   }
-  return yield* login();
 }

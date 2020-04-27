@@ -1,5 +1,5 @@
-import { put, call } from "redux-saga/effects";
-import { changeScreen } from "../actions";
+import { put, call, take } from "redux-saga/effects";
+import { changeScreen, EXIT_GAME } from "../actions";
 import { LoaderStep, Play, ScreenState } from "../types";
 import { sleep } from "./utils";
 import { generateFens } from "./api/fake/fake";
@@ -7,6 +7,7 @@ import { generateFens } from "./api/fake/fake";
 export default function* game(token: string, play: Play) {
   yield put(changeScreen(ScreenState.GAME, LoaderStep.INACTIVE));
 
-  yield call(generateFens);
-  yield* sleep(1000000000);
+  yield generateFens();
+
+  yield take(EXIT_GAME);
 }

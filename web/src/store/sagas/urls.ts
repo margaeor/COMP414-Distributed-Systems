@@ -61,8 +61,9 @@ export function decodeUrl(
   }
 }
 
-export function* urlListener(history: History, dispatch: Dispatch) {
-  history.listen((location, action) => {
+export function urlListener(history: History, dispatch: Dispatch) {
+  return history.listen((location, action) => {
+    if (action === "PUSH") return;
     const { screen, id } = decodeUrl(location);
     dispatch(notifyUrlChange(screen, id));
   });

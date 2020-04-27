@@ -5,7 +5,7 @@ import { ChangeScreenAction, CHANGE_SCREEN } from "../actions";
 import { Game, ScreenState } from "../types";
 import joinFakeGame from "./api/fake/fake";
 import game from "./game";
-import { decodeUrl, updateUrl } from "./urls";
+import { decodeUrl, updateUrl, urlListener } from "./urls";
 import getAccessToken from "./login";
 
 function* mainSaga(previousScreen: ScreenState, id?: string) {
@@ -27,13 +27,17 @@ function* mainSaga(previousScreen: ScreenState, id?: string) {
 
 export default function* rootSaga(dispatch: Dispatch) {
   const history = createBrowserHistory();
+  const listener = urlListener(history, dispatch);
   yield takeLatest(CHANGE_SCREEN, (a) =>
     updateUrl(history, a as ChangeScreenAction)
   );
 
   const { screen, id } = decodeUrl(history.location);
+  yield* mainSaga(screen, id);
 
   while (1) {
-    yield* mainSaga(screen, id);
+    yield* mainSaga(ScreenState.LOBBY);
   }
+
+  listener();
 }

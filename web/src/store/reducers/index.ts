@@ -35,7 +35,7 @@ function loader(
   action: ChangeScreenAction
 ): LoaderStep {
   if (action.type === CHANGE_SCREEN) {
-    return action.loader ? action.loader : state;
+    return action.loader ? action.loader : LoaderStep.INACTIVE;
   } else if (action.type === START_LOADING) {
     return LoaderStep.LOADING;
   } else if (action.type === STOP_LOADING) {
@@ -57,7 +57,11 @@ function error(state = "", action: UpdateErrorAction | LoadingFailedAction) {
 
 function message(
   state = "",
-  action: UpdateMessageAction | LoadingStartAction | LoadingFailedAction
+  action:
+    | UpdateMessageAction
+    | LoadingStartAction
+    | LoadingFailedAction
+    | ChangeScreenAction
 ) {
   if (action.type === UPDATE_MESSAGE) {
     return action.message;
@@ -65,6 +69,8 @@ function message(
     return action.message;
   } else if (action.type === LOADING_FAILED) {
     return action.message ? action.message : state;
+  } else if (action.type === CHANGE_SCREEN) {
+    return "";
   }
   return state;
 }
