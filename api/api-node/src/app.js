@@ -6,7 +6,7 @@ const HOST = '0.0.0.0';
 const express = require('express');
 const mongoose = require('mongoose');
 const app = express();
-const connect = require('./mongo/connect.js');
+const connection = require('./mongo/connect.js');
 const zookeeper = require('./zookeeper/functions.js');
 const globals = require('./lib/globals.js');
 const transactions = require('./lib/transactions.js');
@@ -182,7 +182,7 @@ app.get('/tournament/create', async (req, res) => {
 
     let username = authenticateUser(jwt, 'official');
 
-    if(tournament_name) {
+    if(tournament_name && game_type) {
 
       let tournament =  await Tournament.create({
         name: tournament_name,
@@ -331,7 +331,7 @@ app.get('/tournament/info', async function(req, res) {
         exec();
       if(tournament) {
         res.json(errors.createSuccessResponse('',tournament));
-      } else throw new errors.InvalidOperationException('Cannot register tournament');
+      } else throw new errors.InvalidOperationException('Cannot view tournament info');
 
     } else throw new errors.InvalidArgumentException('Wrong parameters');
   } catch(e){
@@ -463,8 +463,7 @@ console.log(`Running on http://${HOST}:${PORT}`);
 app.set('port', process.env.PORT || PORT);
 
 
-connect('mongodb://root:password123@mongodb-primary/', {useNewUrlParser: true,useUnifiedTopology: true})
-  .then(() => app.listen(PORT, () => {
+connection.then(() => app.listen(PORT, () => {
     console.log('server on http://localhost:3000')
   }))
   .catch(e => console.error(e))

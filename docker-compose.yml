@@ -66,6 +66,10 @@ services:
     build: ./api/api-node
     environment: 
       JWT_PUBLIC_KEY: "${AUTH_PUBLIC}"
+      MONGODB_USER: '${MONGODB_USER}'
+      MONGODB_ROOT_PASSWORD: '${MONGODB_ROOT_PASSWORD}'
+      MONGODB_REPLICA_SET_NAME: '${MONGODB_REPLICA_SET_NAME}'
+      MONGODB_REPLICA_SET_MEMBERS: 'mongodb-primary,mongodb-secondary'
     volumes:
         - ./api/api-node/src:/usr/src/app
     ports:
@@ -80,10 +84,11 @@ services:
   mongodb-primary:
     image: 'bitnami/mongodb:latest'
     environment:
-      - MONGODB_ADVERTISED_HOSTNAME=mongodb-primary
-      - MONGODB_REPLICA_SET_MODE=primary
-      - MONGODB_ROOT_PASSWORD=password123
-      - MONGODB_REPLICA_SET_KEY=replicasetkey123
+      MONGODB_ADVERTISED_HOSTNAME: mongodb-primary
+      MONGODB_REPLICA_SET_MODE: primary
+      MONGODB_ROOT_PASSWORD: '${MONGODB_ROOT_PASSWORD}'
+      MONGODB_REPLICA_SET_KEY: '${MONGODB_REPLICA_SET_KEY}'
+      MONGODB_REPLICA_SET_NAME: '${MONGODB_REPLICA_SET_NAME}'
     ports:
       - "27017:27017"
     networks:
@@ -99,12 +104,13 @@ services:
     depends_on:
       - mongodb-primary
     environment:
-      - MONGODB_ADVERTISED_HOSTNAME=mongodb-secondary
-      - MONGODB_REPLICA_SET_MODE=secondary
-      - MONGODB_PRIMARY_HOST=mongodb-primary
-      - MONGODB_PRIMARY_PORT_NUMBER=27017
-      - MONGODB_PRIMARY_ROOT_PASSWORD=password123
-      - MONGODB_REPLICA_SET_KEY=replicasetkey123
+      MONGODB_ADVERTISED_HOSTNAME: mongodb-secondary
+      MONGODB_REPLICA_SET_MODE: secondary
+      MONGODB_PRIMARY_HOST: mongodb-primary
+      MONGODB_PRIMARY_PORT_NUMBER: '${MONGODB_PRIMARY_PORT_NUMBER}'
+      MONGODB_PRIMARY_ROOT_PASSWORD: '${MONGODB_ROOT_PASSWORD}'
+      MONGODB_REPLICA_SET_KEY: '${MONGODB_REPLICA_SET_KEY}'
+      MONGODB_REPLICA_SET_NAME: '${MONGODB_REPLICA_SET_NAME}'
     container_name: mongodb-secondary
 
   mongodb-arbiter:
@@ -114,12 +120,13 @@ services:
     depends_on:
       - mongodb-primary
     environment:
-      - MONGODB_ADVERTISED_HOSTNAME=mongodb-arbiter
-      - MONGODB_REPLICA_SET_MODE=arbiter
-      - MONGODB_PRIMARY_HOST=mongodb-primary
-      - MONGODB_PRIMARY_PORT_NUMBER=27017
-      - MONGODB_PRIMARY_ROOT_PASSWORD=password123
-      - MONGODB_REPLICA_SET_KEY=replicasetkey123
+      MONGODB_ADVERTISED_HOSTNAME: mongodb-arbiter
+      MONGODB_REPLICA_SET_MODE: arbiter
+      MONGODB_PRIMARY_HOST: mongodb-primary
+      MONGODB_PRIMARY_PORT_NUMBER: '${MONGODB_PRIMARY_PORT_NUMBER}'
+      MONGODB_PRIMARY_ROOT_PASSWORD: '${MONGODB_ROOT_PASSWORD}'
+      MONGODB_REPLICA_SET_KEY: '${MONGODB_REPLICA_SET_KEY}'
+      MONGODB_REPLICA_SET_NAME: '${MONGODB_REPLICA_SET_NAME}'
     container_name: mongodb-arbiter
 
   # Others
