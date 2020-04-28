@@ -30,6 +30,7 @@ export interface DataEvent {
 export interface UpdatedStateEvent {
   event:
     | "OP_DISCONNECTED"
+    | "OP_RECONNECTED"
     | "OP_FORFEITED"
     | "SERVER_ERROR"
     | "GAME_STARTED"
@@ -49,7 +50,7 @@ export const EMIT_FORFEIT = FORFEIT;
 export const EMIT_READY = READY;
 export const RECEIVE_MESSAGE = MESSAGE;
 export const RECEIVE_DATA = DATA;
-export const RECEIVE_UPDATE_STATE = UPDATED_STATE;
+export const RECEIVE_UPDATED_STATE = UPDATED_STATE;
 
 export interface MessageReception {
   type: typeof RECEIVE_MESSAGE;

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { eventChannel, buffers } from "redux-saga";
+import { buffers, eventChannel } from "redux-saga";
 import { Game, Play, TournamentPlay } from "../../../types";
 import { ConnectionError } from "../errors";
 import { sleep } from "../utils";
@@ -11,20 +11,20 @@ import {
   DATA,
   DataEvent,
   DISCONNECTED,
+  EMIT_MAKE_MOVE,
+  EMIT_MESSAGE,
+  EXIT,
   FORFEIT,
+  MakeMoveEvent,
   MESSAGE,
+  MessageEvent,
+  READY,
   RECEIVE_DATA,
   RECEIVE_MESSAGE,
-  RECEIVE_UPDATE_STATE,
+  RECEIVE_UPDATED_STATE,
   TIMED_OUT,
   UpdatedStateEvent,
   UPDATED_STATE,
-  EXIT,
-  EMIT_MESSAGE,
-  MessageEvent,
-  EMIT_MAKE_MOVE,
-  MakeMoveEvent,
-  READY,
 } from "./contract";
 
 export async function retrievePlay(
@@ -98,7 +98,7 @@ export function setupSocketChannel(socket: SocketIOClient.Socket) {
       emitter({ type: RECEIVE_DATA, event })
     );
     socket.on(UPDATED_STATE, (event: UpdatedStateEvent) =>
-      emitter({ type: RECEIVE_UPDATE_STATE, event })
+      emitter({ type: RECEIVE_UPDATED_STATE, event })
     );
 
     socket.emit(READY);
