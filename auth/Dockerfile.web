@@ -39,7 +39,7 @@ RUN chown -R nobody.nobody /var/www/html && \
   setcap 'cap_net_bind_service=+ep' /usr/sbin/nginx
 
 #RUN chmod 777 /etc/nginx/nginx.conf
-RUN chmod 777 /var/www/html
+RUN chmod -R 777 /var/www/html
 
 # Make the document root a volume
 # VOLUME /var/www/html

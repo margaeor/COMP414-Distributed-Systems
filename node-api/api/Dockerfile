@@ -31,4 +31,4 @@ WORKDIR /usr/src/app
 EXPOSE 8080
 
 #CMD [ "pm2-runtime","start","ecosystem.config.js","--only","dev" ]
-CMD ["supervisor", "app.js"]
+CMD npm install && supervisor app.js

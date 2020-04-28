@@ -16,7 +16,7 @@ services:
       AUTH_PUBLIC: "${AUTH_PUBLIC}"
       AUTH_PRIVATE: "${AUTH_PRIVATE}"
     volumes:
-      - ./auth/src/:/var/www/html/:rw
+      - ./auth/src/:/var/www/html/
     networks:
       - backend
     container_name: auth
