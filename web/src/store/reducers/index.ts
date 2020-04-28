@@ -18,6 +18,7 @@ import {
   STOP_LOADING,
   LoadingFailedAction,
   LoadingStartAction,
+  LoadingStopAction,
 } from "../actions/loader";
 
 function screen(
@@ -32,7 +33,11 @@ function screen(
 
 function loader(
   state = LoaderStep.LOADING,
-  action: ChangeScreenAction
+  action:
+    | ChangeScreenAction
+    | LoadingFailedAction
+    | LoadingStartAction
+    | LoadingStopAction
 ): LoaderStep {
   if (action.type === CHANGE_SCREEN) {
     return action.loader ? action.loader : LoaderStep.INACTIVE;
@@ -41,7 +46,11 @@ function loader(
   } else if (action.type === STOP_LOADING) {
     return LoaderStep.INACTIVE;
   } else if (action.type === LOADING_FAILED) {
-    return LoaderStep.FAILED;
+    return action.canRetry
+      ? action.canExit
+        ? LoaderStep.FAILED_CAN_EXIT
+        : LoaderStep.FAILED
+      : LoaderStep.FAILED_ONLY_EXIT;
   }
   return state;
 }

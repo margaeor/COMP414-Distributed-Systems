@@ -18,3 +18,10 @@ export class AccessTokenError extends Error {
     this.name = "ConnectionError";
   }
 }
+
+export class UserCancelledError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "UserCancelled";
+  }
+}

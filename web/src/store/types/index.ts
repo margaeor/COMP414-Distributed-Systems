@@ -17,6 +17,8 @@ export enum LoaderStep {
   INACTIVE = 1,
   LOADING = 2,
   FAILED = 3,
+  FAILED_CAN_EXIT = 4,
+  FAILED_ONLY_EXIT = 5,
 }
 
 export interface User {

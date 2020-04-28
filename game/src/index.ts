@@ -8,7 +8,7 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(http);
 
-app.get("/", (req, res) => {
+app.get("/play", (req, res) => {
   res.sendFile(__dirname + "/index.html");
 });
 

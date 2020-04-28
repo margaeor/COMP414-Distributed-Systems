@@ -1,5 +1,4 @@
-import getAccessToken from "../login";
-import { ConnectionError, RefreshTokenError } from "./errors";
+import { RefreshTokenError } from "./errors";
 import { sleep } from "./utils";
 
 const REFRESH_NAME = "refresh";
