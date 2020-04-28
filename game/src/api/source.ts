@@ -1,4 +1,4 @@
-import { Play } from "./types";
+import { Play, Result } from "./types";
 
 export function retrievePlay(id: string): Play {
   return {
@@ -12,3 +12,5 @@ export function retrievePlay(id: string): Play {
 export function retrievePlayProgress(id: string): string {
   return "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1;;w";
 }
+
+export function publishResult(id: string, result: Result): void {}
