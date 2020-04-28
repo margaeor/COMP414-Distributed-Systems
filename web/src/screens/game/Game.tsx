@@ -10,7 +10,6 @@ import {
   selectUser,
 } from "../../store/selectors";
 import { isTournamentPlay, Play, State, User } from "../../store/types";
-import ValidatedChessboard from "./chess/ValidatedChessboard";
 import ChessGame from "./chess";
 
 interface IProps {

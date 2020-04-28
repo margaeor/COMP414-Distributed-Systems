@@ -1,34 +1,40 @@
 import Chess from "chess.js";
-import { put, take, call } from "redux-saga/effects";
-import {
-  MakeMoveAction,
-  MAKE_MOVE,
-  setPlay,
-  updatePlayData,
-  setUser,
-} from "../../../actions";
-import { Game, PlayStep } from "../../../types";
+import { put, take } from "redux-saga/effects";
+import { MakeMoveAction, MAKE_MOVE, updatePlayData } from "../../../actions";
+import { PlayStep, Game, Play, TournamentPlay } from "../../../types";
 import { sleep } from "../../utils";
 
-export default function* joinFakeGame() {
-  yield put(
-    setPlay({
-      id: "1234",
-      game: Game.CHESS,
-      opponent: "john",
-      started: false,
-    })
-  );
-
-  yield put(
-    setUser({
-      username: "bobby",
-      officer: true,
-      admin: false,
-      email: "bob@gmail.com",
-    })
-  );
-}
+export const PLAY_LIST: (Play | TournamentPlay)[] = [
+  {
+    id: "1234",
+    game: Game.CHESS,
+    isPlayer1: true,
+    opponent: "vetIO",
+    started: true,
+  },
+  {
+    id: "aaaa",
+    game: Game.CHESS,
+    isPlayer1: true,
+    opponent: "bomboclaat",
+    started: false,
+  },
+  {
+    id: "2345",
+    game: Game.CHESS,
+    isPlayer1: true,
+    name: "NFC: Recruitment Rounds IV",
+    opponent: "juicy",
+    started: true,
+  },
+  {
+    id: "3456",
+    game: Game.CHESS,
+    isPlayer1: true,
+    opponent: "juicy",
+    started: false,
+  },
+];
 
 export function* generateFens() {
   const color = Math.random() > 0.5 ? "w" : "b";

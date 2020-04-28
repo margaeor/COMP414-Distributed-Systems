@@ -28,7 +28,7 @@ import {
   RECEIVE_DATA,
   RECEIVE_MESSAGE,
   RECEIVE_UPDATED_STATE,
-} from "./api/game/contract";
+} from "./api/game/receiverContract";
 import { callApi, failLoadingAndExit } from "./utils";
 
 function* connectToServer(token: string, id: string) {

@@ -1,5 +1,6 @@
 import { RefreshTokenError } from "./errors";
 import { sleep } from "./utils";
+import { User } from "../../types";
 
 const REFRESH_NAME = "refresh";
 const REFRESH_DAYS = 30;
@@ -65,11 +66,22 @@ export async function changePassword(
   await sleep(200);
 }
 
-export async function renewAccessToken(): Promise<string> {
+export async function renewAccessToken(): Promise<{
+  token: string;
+  user: User;
+}> {
   // Todo: implement the api call
   await sleep(200);
   if (getRefreshToken() === "") throw new RefreshTokenError("poopie");
-  return "abc";
+  return {
+    token: "abc",
+    user: {
+      username: "vetIO",
+      admin: true,
+      officer: false,
+      email: "vet@prohax.io",
+    },
+  };
 }
 
 export async function requestLogout() {

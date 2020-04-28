@@ -4,9 +4,6 @@ import { Game, Play, TournamentPlay } from "../../../types";
 import { ConnectionError } from "../errors";
 import { sleep } from "../utils";
 import {
-  AUTHENTICATED,
-  AUTHENTICATION,
-  AuthenticationEvent,
   CONNECTION_ERROR,
   DATA,
   DataEvent,
@@ -15,6 +12,7 @@ import {
   EMIT_MESSAGE,
   EXIT,
   FORFEIT,
+  ID_COOKIE,
   MakeMoveEvent,
   MESSAGE,
   MessageEvent,
@@ -23,11 +21,11 @@ import {
   RECEIVE_MESSAGE,
   RECEIVE_UPDATED_STATE,
   TIMED_OUT,
+  TOKEN_COOKIE,
   UpdatedStateEvent,
   UPDATED_STATE,
-  TOKEN_COOKIE,
-  ID_COOKIE,
-} from "./contract";
+} from "./receiverContract";
+import { PLAY_LIST } from "../fake/fake";
 
 export async function retrievePlay(
   token: string,
@@ -36,12 +34,7 @@ export async function retrievePlay(
   // TODO: Implement this call
   await sleep(200);
   return {
-    play: {
-      id,
-      game: Game.CHESS,
-      opponent: "vetIO",
-      started: false,
-    },
+    play: PLAY_LIST.find((p) => p.id) as Play,
     url: "http://localhost:3000",
   };
 }

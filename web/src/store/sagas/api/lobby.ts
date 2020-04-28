@@ -1,4 +1,5 @@
 import { LobbyState, Game, ResultType } from "../../types";
+import { PLAY_LIST } from "./fake/fake";
 
 export async function fetchLobbyData(token: string): Promise<LobbyState> {
   // TODO: Implement this call
@@ -7,6 +8,7 @@ export async function fetchLobbyData(token: string): Promise<LobbyState> {
       {
         id: "1234",
         game: Game.CHESS,
+        isPlayer1: true,
         opponent: "vetIO",
         started: false,
         result: ResultType.WON,
@@ -14,6 +16,7 @@ export async function fetchLobbyData(token: string): Promise<LobbyState> {
       {
         id: "aaaa",
         game: Game.CHESS,
+        isPlayer1: true,
         opponent: "bomboclaat",
         started: false,
         result: ResultType.LOST,
@@ -21,6 +24,7 @@ export async function fetchLobbyData(token: string): Promise<LobbyState> {
       {
         id: "2345",
         game: Game.TICTACTOE,
+        isPlayer1: true,
         opponent: "juicy",
         started: false,
         result: ResultType.DRAW,
@@ -28,6 +32,7 @@ export async function fetchLobbyData(token: string): Promise<LobbyState> {
       {
         id: "3456",
         game: Game.CHESS,
+        isPlayer1: true,
         opponent: "juicy",
         started: false,
         result: ResultType.LOST,
@@ -78,33 +83,7 @@ export async function fetchLobbyData(token: string): Promise<LobbyState> {
         ranking: 5,
       },
     ],
-    ongoingPlays: [
-      {
-        id: "1234",
-        game: Game.CHESS,
-        opponent: "vetIO",
-        started: true,
-      },
-      {
-        id: "aaaa",
-        game: Game.CHESS,
-        opponent: "bomboclaat",
-        started: false,
-      },
-      {
-        id: "2345",
-        game: Game.CHESS,
-        name: "NFC: Recruitment Rounds IV",
-        opponent: "juicy",
-        started: true,
-      },
-      {
-        id: "3456",
-        game: Game.CHESS,
-        opponent: "juicy",
-        started: false,
-      },
-    ],
+    ongoingPlays: PLAY_LIST,
     tournaments: [
       {
         id: "1234567",

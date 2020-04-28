@@ -4,15 +4,12 @@ import { call, cancel, race } from "redux-saga/effects";
 import { ScreenState } from "../types";
 import administration from "./administration";
 import { AccessTokenError } from "./api/errors";
-import joinFakeGame from "./api/fake/fake";
 import game from "./game";
 import lobby from "./lobby";
 import { getAccessToken, logout } from "./login";
 import { decodeUrl, navHandler, updateUrlHandler, urlListener } from "./urls";
 
 function* mainSaga(token: string, screen: ScreenState, id?: string) {
-  yield* joinFakeGame();
-
   switch (screen) {
     case ScreenState.ADMINISTRATION:
       yield* administration(token);

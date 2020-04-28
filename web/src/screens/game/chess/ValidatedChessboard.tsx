@@ -8,9 +8,7 @@ import Icon from "@mdi/react";
 import Chess, { ChessInstance, Square } from "chess.js";
 import Chessboard from "chessboardjsx";
 import React, { useMemo, useState } from "react";
-import { exitGame } from "../../../store/actions";
-import { selectGameData } from "../../../store/selectors";
-import { State } from "../../../store/types";
+import { exitGame, makeMove } from "../../../store/actions";
 import {
   BOARD_STYLE,
   DARK_SQUARE_STYLE,
@@ -23,8 +21,8 @@ import {
 interface IProps {
   board: string;
   move: string;
-  color: "b" | "w";
-  makeMove: (board: string) => void;
+  color: "w" | "b";
+  makeMove: typeof makeMove;
   exitGame: typeof exitGame;
 }
 

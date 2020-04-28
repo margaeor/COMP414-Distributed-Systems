@@ -30,7 +30,7 @@ app.get("/check", (req, res) => {
 
 const disconnectSocketWithError = (
   socket: SocketIO.Socket,
-  error: string = "An error happened during the handshake."
+  error = "An error happened during the handshake."
 ) => {
   socket.emit(CONNECTION_ERROR, {
     error,

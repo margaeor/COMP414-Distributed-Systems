@@ -10,6 +10,7 @@ export enum PlayStep {
 
 export interface Play {
   id: string;
+  isPlayer1: boolean;
   opponent: string;
   game: Game;
   started: boolean;
@@ -34,6 +35,7 @@ export function isTournamentPlay(play: Play): play is TournamentPlay {
 export const NULL_PLAY_STATE: PlayState = {
   play: {
     id: "",
+    isPlayer1: true,
     opponent: "",
     game: Game.CHESS,
     started: false,

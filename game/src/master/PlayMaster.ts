@@ -20,7 +20,9 @@ export default class PlayMaster extends AbstractPlayMaster {
     return null;
   }
 
-  protected backupProgress(id: string, progress: string): void {}
+  protected backupProgress(id: string, progress: string): void {
+    return;
+  }
 
   protected startingPosition(game: string): string {
     if (game !== "chess") throw new Error(`game ${game} is not implemented`);

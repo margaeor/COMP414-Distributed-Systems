@@ -11,6 +11,7 @@ import {
   startLoading,
   SUBMIT_LOGIN,
   updateError,
+  setUser,
 } from "../actions";
 import { LoaderStep, ScreenState } from "../types";
 import { ConnectionError, RefreshTokenError } from "./api/errors";
@@ -77,7 +78,9 @@ export function* getAccessToken() {
   while (1) {
     yield put(startLoading("Loading..."));
     try {
-      return yield call(renewAccessToken);
+      const { user, token } = yield call(renewAccessToken);
+      yield put(setUser(user));
+      return token;
     } catch (e) {
       // Only complete loop for connection errors
       if (e instanceof RefreshTokenError) yield* login();

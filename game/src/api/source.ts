@@ -10,7 +10,9 @@ export function retrievePlay(id: string): Play {
 }
 
 export function retrievePlayProgress(id: string): string {
-  return "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1;;w";
+  return "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1;";
 }
 
-export function publishResult(id: string, result: Result): void {}
+export function publishResult(id: string, result: Result): void {
+  console.log(`play ${id} finished with status: ${result}`);
+}
