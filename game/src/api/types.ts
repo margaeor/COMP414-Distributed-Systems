@@ -11,7 +11,7 @@ export interface PlaySession {
   play: Play;
   user1: string | null;
   user2: string | null;
-  progress: string | null;
+  progress: string;
 }
 
 export type Result = "won" | "draw" | "lost" | "ongoing";

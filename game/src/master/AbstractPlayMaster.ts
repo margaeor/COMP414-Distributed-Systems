@@ -1,6 +1,6 @@
-import { Play, PlaySession, Result } from "./api/types";
+import { Play, PlaySession, Result } from "../api/types";
 
-export abstract class PlayMaster {
+export default abstract class AbstractPlayMaster {
   socketMap: Record<string, PlaySession> = {};
   sessions: Record<string, PlaySession> = {};
 
@@ -8,6 +8,7 @@ export abstract class PlayMaster {
   protected abstract retrievePlay(id: string): Play | null;
   protected abstract restoreProgress(id: string): string | null;
   protected abstract backupProgress(id: string, progress: string): void;
+  protected abstract startingPosition(game: string): string;
   protected abstract processMove(
     game: string,
     user: number,
@@ -43,7 +44,7 @@ export abstract class PlayMaster {
         play,
         user1: isOpponent1 ? sockId : null,
         user2: isOpponent2 ? sockId : null,
-        progress: progress,
+        progress: progress ? progress : this.startingPosition(play.game),
       };
       this.sessions[playId] = session;
     } else {

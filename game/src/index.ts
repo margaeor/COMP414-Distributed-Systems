@@ -1,11 +1,9 @@
+import dotenv from "dotenv";
 import express from "express";
 import http from "http";
 import socketIo from "socket.io";
-import dotenv from "dotenv";
 import { ID_COOKIE, TOKEN_COOKIE } from "./api/contract";
-import { checkToken } from "./api/authenticate";
-import { retrievePlay, retrievePlayProgress } from "./api/source";
-import { PlayMaster } from "./PlayMaster";
+import PlayMaster from "./master/PlayMaster";
 
 dotenv.config();
 const app = express();
@@ -20,25 +18,19 @@ app.get("/check", (req, res) => {
   });
 });
 
-io.use((socket, next) => {
+io.on("connection", (socket) => {
   const playId = socket.handshake.headers[ID_COOKIE];
   const userToken = socket.handshake.headers[TOKEN_COOKIE];
 
-  const user = checkToken(userToken);
-  if (!user) return next(new Error("Invalid Token"));
+  if (!playId || !userToken) return next(new Error("Missing credentials"));
 
-  let play = playMaster.getPlay(playId);
-  if (!play) {
-    play = retrievePlay(playId);
-    if (!play) return next(new Error("Invalid Play"));
-    if (play.opponent1 !== user || play.opponent2 !== user)
-      return next(new Error("User is not part of play"));
-    const progress = retrievePlayProgress(playId);
-    playMaster.registerPlay(play, progress);
-  } else if (play.opponent1 !== user || play.opponent2 !== user)
-    return next(new Error("User is not part of play"));
+  try {
+    playMaster.registerUser(socket.id, userToken, playId);
+  } catch (e) {
+    return next(e);
+  }
 
-  socket.on("disconnect");
+  socket.roo;
 
   return next();
 });
