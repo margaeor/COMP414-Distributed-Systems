@@ -1,4 +1,4 @@
-import { Play, PlaySession } from "./api/types";
+import { Play, PlaySession, Result } from "./api/types";
 
 export abstract class PlayMaster {
   socketMap: Record<string, PlaySession> = {};
@@ -14,6 +14,7 @@ export abstract class PlayMaster {
     data: string,
     move: string
   ): string | null;
+  protected abstract processResults(game: string, data: string): Result;
 
   public registerUser(sockId: string, token: string, playId: string) {
     // Check user
@@ -95,7 +96,9 @@ export abstract class PlayMaster {
     return this.socketMap[sockId].progress;
   }
 
-  getPlay(id: string): Play | undefined {
-    return undefined;
+  public getResult(sockId: string) {
+    const session = this.socketMap[sockId];
+    if (!session.progress) return "ongoing";
+    return this.processResults(session.play.game, session.progress);
   }
 }

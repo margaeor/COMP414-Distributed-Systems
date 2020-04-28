@@ -1,4 +1,4 @@
-type Game = "chess" | "tictactoe";
+export type Game = "chess" | "tictactoe";
 
 export interface Play {
   id: string;
@@ -13,3 +13,5 @@ export interface PlaySession {
   user2: string | null;
   progress: string | null;
 }
+
+export type Result = "won" | "draw" | "lost" | "ongoing";
