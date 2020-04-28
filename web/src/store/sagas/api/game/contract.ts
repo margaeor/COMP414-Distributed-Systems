@@ -1,5 +1,5 @@
-export const AUTHENTICATION = "AUTHENTICATION";
-export const AUTHENTICATED = "AUTHENTICATED";
+export const TOKEN_COOKIE = "AUTHENTICATION";
+export const ID_COOKIE = "ID_COOKIE";
 export const READY = "READY";
 export const MAKE_MOVE = "MAKE_MOVE";
 export const MESSAGE = "MESSAGE";

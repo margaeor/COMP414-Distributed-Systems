@@ -25,6 +25,8 @@ import {
   TIMED_OUT,
   UpdatedStateEvent,
   UPDATED_STATE,
+  TOKEN_COOKIE,
+  ID_COOKIE,
 } from "./contract";
 
 export async function retrievePlay(
@@ -62,20 +64,29 @@ export async function checkPlay(
 }
 
 export async function setupSocket(token: string, url: string, id: string) {
-  const socket = io.connect(url, {});
+  const socket = io.connect(url, {
+    transportOptions: {
+      polling: {
+        extraHeaders: {
+          [TOKEN_COOKIE]: token,
+          [ID_COOKIE]: id,
+        },
+      },
+    },
+  });
 
   try {
     await new Promise((resolve, reject) => {
       socket.on("connect_error", () => {
+        socket.off("connect_error");
+        socket.off("connect");
         socket.disconnect();
         reject();
       });
       socket.on("connect", () => {
-        socket.emit(AUTHENTICATION, { token, id } as AuthenticationEvent);
-        socket.on(AUTHENTICATED, () => {
-          socket.off("connect_error", reject);
-          resolve();
-        });
+        socket.off("connect_error");
+        socket.off("connect");
+        resolve();
       });
     });
   } catch (e) {
