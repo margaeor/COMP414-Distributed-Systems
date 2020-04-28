@@ -32,8 +32,6 @@ import {
 import { callApi, failLoadingAndExit } from "./utils";
 
 function* connectToServer(token: string, id: string) {
-  yield put(changeScreen(ScreenState.GAME));
-
   try {
     // Retrieve Play and ip
     const { play, url } = yield* callApi(
@@ -41,6 +39,11 @@ function* connectToServer(token: string, id: string) {
       call(retrievePlay, token, id),
       true
     );
+
+    // Save and continue
+    yield put(setPlay(play));
+    yield put(changeScreen(ScreenState.GAME));
+
     // Connect to game server and verify validity
     const valid = yield* callApi(
       "Connecting to Game Server...",
@@ -50,18 +53,19 @@ function* connectToServer(token: string, id: string) {
 
     // If not valid exit
     if (!valid) {
-      failLoadingAndExit("Tried to join an Invalid Play.");
+      yield* failLoadingAndExit("Tried to join an Invalid Play.");
       return null;
     }
-
-    // Save and continue
-    yield put(setPlay(play));
 
     const socket: SocketIOClient.Socket = yield* callApi(
       "Creating Route...",
       call(setupSocket, token, url, id),
       true
     );
+    if (!socket) {
+      yield* failLoadingAndExit("Could not create socket...");
+      return null;
+    }
     const channel = setupSocketChannel(socket);
 
     yield put(startLoading("Waiting for Opponent..."));
@@ -69,10 +73,10 @@ function* connectToServer(token: string, id: string) {
     if (act.type === RECEIVE_DATA && act.event.data === READY)
       return { socket, channel };
 
-    failLoadingAndExit("Connection Closed");
+    yield* failLoadingAndExit("Connection Closed");
     return null;
   } catch (e) {
-    failLoadingAndExit("Connection failed: " + e.message);
+    yield* failLoadingAndExit("Connection failed: " + e.message);
     return null;
   }
 }

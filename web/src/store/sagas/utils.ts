@@ -32,12 +32,12 @@ export function* callApi(
     } catch (e) {
       if (e instanceof ConnectionError) {
         if (canCancel) {
-          yield put(loadingFailed("Connection Error", undefined, true, true));
+          yield put(loadingFailed(e.message, undefined, true, true));
           const { type } = yield take([RETRY_LOADING, CANCEL_LOADING]);
           if (type === CANCEL_LOADING)
             throw new UserCancelledError("User cancelled");
         } else {
-          yield put(loadingFailed("Connection Error"));
+          yield put(loadingFailed(e.message));
           yield take(RETRY_LOADING);
         }
       } else if (e instanceof AccessTokenError) {

@@ -73,15 +73,25 @@ export async function renewAccessToken(): Promise<{
   // Todo: implement the api call
   await sleep(200);
   if (getRefreshToken() === "") throw new RefreshTokenError("poopie");
-  return {
-    token: "abc",
-    user: {
-      username: "vetIO",
-      admin: true,
-      officer: false,
-      email: "vet@prohax.io",
-    },
-  };
+  return Math.random() > 0.5
+    ? {
+        token: "vetIO",
+        user: {
+          username: "vetIO",
+          admin: true,
+          officer: false,
+          email: "vet@prohax.io",
+        },
+      }
+    : {
+        token: "killX",
+        user: {
+          username: "killX",
+          admin: true,
+          officer: false,
+          email: "vet@prohax.io",
+        },
+      };
 }
 
 export async function requestLogout() {

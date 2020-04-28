@@ -2,8 +2,8 @@ import { Play, Result } from "./types";
 
 export function retrievePlay(id: string): Play {
   return {
-    id: "12543",
-    opponent1: "bobby",
+    id,
+    opponent1: "killX",
     opponent2: "vetIO",
     game: "chess",
   };

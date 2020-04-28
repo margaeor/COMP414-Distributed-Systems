@@ -1,7 +1,9 @@
 import axios from "axios";
+import io from "socket.io-client";
 import { buffers, eventChannel } from "redux-saga";
-import { Game, Play, TournamentPlay } from "../../../types";
+import { Play, TournamentPlay } from "../../../types";
 import { ConnectionError } from "../errors";
+import { PLAY_LIST } from "../fake/fake";
 import { sleep } from "../utils";
 import {
   CONNECTION_ERROR,
@@ -25,7 +27,6 @@ import {
   UpdatedStateEvent,
   UPDATED_STATE,
 } from "./receiverContract";
-import { PLAY_LIST } from "../fake/fake";
 
 export async function retrievePlay(
   token: string,
@@ -34,8 +35,11 @@ export async function retrievePlay(
   // TODO: Implement this call
   await sleep(200);
   return {
-    play: PLAY_LIST.find((p) => p.id) as Play,
-    url: "http://localhost:3000",
+    play: PLAY_LIST.map((p) => ({
+      ...p,
+      isPlayer1: p.opponent !== token,
+    })).find((p) => p.id) as Play,
+    url: process.env.GAME_URL as string,
   };
 }
 
@@ -45,9 +49,10 @@ export async function checkPlay(
   id: string
 ): Promise<boolean> {
   try {
-    const req = await axios.get(`${url}/check`, { params: { id } });
+    const req = await axios.get(`${url}/check`, { params: { id, token } });
     return req.status === 200 && req.data.valid;
   } catch (error) {
+    console.log(error);
     if (!error.response) {
       throw new ConnectionError("Server did not respond");
     } else {

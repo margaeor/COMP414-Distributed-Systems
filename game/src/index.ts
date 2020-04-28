@@ -1,31 +1,34 @@
+import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import http from "http";
 import socketIo from "socket.io";
 import {
-  ID_COOKIE,
-  TOKEN_COOKIE,
   CONNECTION_ERROR,
+  DATA,
+  ID_COOKIE,
   MakeMoveEvent,
   MAKE_MOVE,
   MESSAGE,
   MessageEvent,
-  DATA,
+  TOKEN_COOKIE,
 } from "./api/contract";
-import PlayMaster from "./master/PlayMaster";
 import { publishResult } from "./api/source";
+import PlayMaster from "./master/PlayMaster";
 
 dotenv.config();
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(http);
+const io = socketIo(http, { origins: "*:*" });
 
 const master = new PlayMaster();
 
+app.use(cors());
 app.get("/check", (req, res) => {
   res.send({
     valid: true,
   });
+  console.log("served check");
 });
 
 const disconnectSocketWithError = (
@@ -41,6 +44,8 @@ const disconnectSocketWithError = (
 io.on("connection", (socket) => {
   const playId = socket.handshake.headers[ID_COOKIE];
   const userToken = socket.handshake.headers[TOKEN_COOKIE];
+
+  console.log(`player with token: ${userToken} connected`);
 
   if (!playId || !userToken) {
     disconnectSocketWithError(socket, "Missing credentials");
