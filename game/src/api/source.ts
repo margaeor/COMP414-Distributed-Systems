@@ -1,13 +1,4 @@
-export interface Play {
-  id: string;
-  opponent1: string;
-  opponent2: string;
-  game: "chess" | "tictactoe";
-}
-
-export interface ExtendedPlay extends Play {
-  data: string;
-}
+import { Play } from "./types";
 
 export function retrievePlay(id: string): Play {
   return {

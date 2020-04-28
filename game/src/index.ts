@@ -23,8 +23,10 @@ app.get("/check", (req, res) => {
 io.use((socket, next) => {
   const playId = socket.handshake.headers[ID_COOKIE];
   const userToken = socket.handshake.headers[TOKEN_COOKIE];
+
   const user = checkToken(userToken);
   if (!user) return next(new Error("Invalid Token"));
+
   let play = playMaster.getPlay(playId);
   if (!play) {
     play = retrievePlay(playId);
