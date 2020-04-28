@@ -3,10 +3,10 @@ services:
   # Authentication
   auth:
     build: 
-      context: './auth/'
-      dockerfile: Dockerfile.web
+      context: './auth/auth-php/'
+      dockerfile: Dockerfile.dev
     ports:
-      - "8080:8080"
+      - "8080:80"
     environment: 
       DB_HOST: "auth-db"
       DB_NAME: "${DB_NAME}"
@@ -16,7 +16,7 @@ services:
       AUTH_PUBLIC: "${AUTH_PUBLIC}"
       AUTH_PRIVATE: "${AUTH_PRIVATE}"
     volumes:
-      - ./auth/src/:/var/www/html/
+      - ./auth/auth-php/src/:/var/www/html/
     networks:
       - backend
     container_name: auth
@@ -35,18 +35,19 @@ services:
       PMA_HOST: auth-db
       PMA_USER: root
       PMA_PASSWORD: "${DB_ROOT_PASSWORD}"
+
   # Authentication database
   auth-db:
     build:
-      context: './auth-db/'
-      dockerfile: Dockerfile.web
+      context: './auth/auth-db/'
+      dockerfile: Dockerfile.dev
       args:
         MYSQL_VERSION: ${MYSQL_VERSION}
     restart: always
     ports:
       - "3306:3306"
     volumes:
-      - ./auth-db/db_init:/docker-entrypoint-initdb.d
+      - ./auth/auth-db/db_init:/docker-entrypoint-initdb.d
       #- data:/var/lib/mysql
     networks:
       - backend
@@ -62,11 +63,11 @@ services:
   api:
     container_name: api
     restart: always
-    build: ./node-api/api
+    build: ./api/api-node
     environment: 
       JWT_PUBLIC_KEY: "${AUTH_PUBLIC}"
     volumes:
-        - ./node-api/api/src:/usr/src/app
+        - ./api/api-node/src:/usr/src/app
     ports:
       - "3001:3000"
     depends_on:
