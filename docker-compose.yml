@@ -73,8 +73,8 @@ services:
     build: ./api/api-node
     environment: 
       JWT_PUBLIC_KEY: "${AUTH_PUBLIC}"
-      MONGODB_USER: '${MONGODB_USER}'
-      MONGODB_ROOT_PASSWORD: '${MONGODB_ROOT_PASSWORD}'
+      MONGODB_USER: '${MONGODB_API_USER}'
+      MONGODB_DATABASE: '${MONGODB_API_DB}'
       MONGODB_REPLICA_SET_NAME: '${MONGODB_REPLICA_SET_NAME}'
       MONGODB_REPLICA_SET_MEMBERS: 'mongodb-primary,mongodb-secondary'
     volumes:
@@ -83,9 +83,12 @@ services:
       - "3001:3000"
     depends_on:
       - mongodb-primary
+      - mongodb-secondary
       - zookeeper
     networks:
       - backend
+    secrets:
+      - mongodb_api_password
 
   # Mongodb replica set for api
   mongodb-primary:
@@ -96,10 +99,16 @@ services:
       MONGODB_ROOT_PASSWORD: '${MONGODB_ROOT_PASSWORD}'
       MONGODB_REPLICA_SET_KEY: '${MONGODB_REPLICA_SET_KEY}'
       MONGODB_REPLICA_SET_NAME: '${MONGODB_REPLICA_SET_NAME}'
+      MONGODB_API_USER: '${MONGODB_API_USER}'
+      MONGODB_API_DB: '${MONGODB_API_DB}'
     ports:
       - "27017:27017"
+    volumes:
+      - ./api/mongo/init:/docker-entrypoint-initdb.d
     networks:
       - backend
+    secrets:
+      - mongodb_api_password
     container_name: mongodb-primary
     #volumes:
     #  - 'mongodb_master_data:/bitnami'
@@ -154,6 +163,8 @@ secrets:
     file: ./secrets/mysql_password
   mysql_root_password:
     file: ./secrets/mysql_root_password
+  mongodb_api_password:
+    file: ./secrets/mongodb_api_password
 
 networks:
   frontend:

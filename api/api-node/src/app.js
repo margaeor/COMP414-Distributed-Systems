@@ -469,5 +469,5 @@ app.set('port', process.env.PORT || PORT);
 
 connection.then(() => app.listen(PORT, () => {
     console.log('server on http://localhost:3000')
-  }))
-  .catch(e => console.error(e))
+}))
+  //.catch(e => console.error(e))
