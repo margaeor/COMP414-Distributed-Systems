@@ -1,9 +1,9 @@
-FROM node:10-alpine
+FROM node:12-alpine
 
 RUN apk update && apk upgrade && \
     apk add --no-cache bash git openssh
 
-RUN apk add --update python krb5 krb5-libs gcc make g++ krb5-dev
+#RUN apk add --update python krb5 krb5-libs gcc make g++ krb5-dev
 
 RUN mkdir -p /usr/src/app
 RUN mkdir /.npm
@@ -28,7 +28,7 @@ RUN npm install supervisor -g
 
 WORKDIR /usr/src/app
 
-EXPOSE 8080
+#EXPOSE 8080
 
 #CMD [ "pm2-runtime","start","ecosystem.config.js","--only","dev" ]
 CMD npm install && supervisor app.js
