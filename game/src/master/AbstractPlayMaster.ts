@@ -77,6 +77,8 @@ export default abstract class AbstractPlayMaster {
     const session = this.socketMap[sockId];
     const currData = session.progress;
     // Move came with stale data
+    console.log(currData);
+    console.log(data);
     if (currData !== data) return false;
 
     const newData = this.processMove(

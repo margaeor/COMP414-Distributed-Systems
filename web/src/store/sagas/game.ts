@@ -137,7 +137,7 @@ function* handlePlayer(socket: SocketIOClient.Socket) {
 
     switch (act.type) {
       case MAKE_MOVE:
-        ({ data } = yield select(selectGameData));
+        data = yield select(selectGameData);
         emitMove(socket, data, act.move);
         break;
       case SEND_MESSAGE:

@@ -15,6 +15,7 @@ import {
   UPDATED_STATE,
   UpdatedStateEvent,
   READY,
+  DataEvent,
 } from "./api/contract";
 import { publishResult } from "./api/source";
 import PlayMaster from "./master/PlayMaster";
@@ -67,7 +68,10 @@ io.on("connection", (socket) => {
   socket.join(playId);
 
   socket.on(MAKE_MOVE, (e: MakeMoveEvent) => {
+    console.log("received move");
+    console.log(e);
     const r = master.makeMove(socket.id, e.data, e.move);
+    console.log("processed move: " + r);
     if (!r) return;
 
     const result = master.getResult(socket.id);
@@ -90,6 +94,10 @@ io.on("connection", (socket) => {
   socket.on(READY, (e: MessageEvent) => {
     if (master.arePlayersReady(socket.id)) {
       io.to(playId).emit(READY);
+      io.to(playId).emit(DATA, {
+        data: master.getData(socket.id),
+        isOver: false,
+      } as DataEvent);
       console.log("ready");
     } else {
       console.log("not ready");

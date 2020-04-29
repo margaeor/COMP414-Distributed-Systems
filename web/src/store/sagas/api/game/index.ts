@@ -155,5 +155,6 @@ export async function emitMove(
   data: string,
   move: string
 ) {
+  console.log(data);
   socket.emit(EMIT_MAKE_MOVE, { data, move } as MakeMoveEvent);
 }
