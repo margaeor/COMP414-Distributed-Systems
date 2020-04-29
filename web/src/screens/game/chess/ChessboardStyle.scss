@@ -1,0 +1,17 @@
+@import "../../../styles/_variables.scss";
+
+:export {
+  accent: $color-accent;
+  primaryLight: $color-primary-light;
+  primary: $color-primary;
+  primaryDark: $color-primary-dark;
+  textLight: $color-text-light;
+  textDark: $color-text-dark;
+
+  lightSquare: desaturate($color-accent, 70);
+  darkSquare: $color-primary;
+
+  activeSquare: rgba($color-accent, 0.4);
+  possibleSquare: rgba($color-accent, 0.9);
+  activeSquarePossible: rgba($color-accent, 0.6);
+}

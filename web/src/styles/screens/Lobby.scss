@@ -1,0 +1,161 @@
+$lobby-width: 800px;
+
+.lobby {
+  max-width: $lobby-width;
+  align-self: stretch;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+
+  &__header {
+    border-right: 2px solid $color-accent;
+    align-self: stretch;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    background-color: $color-primary;
+    border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
+
+    &__label {
+      padding: 0.2rem 0.6rem 0.3rem 0.7rem;
+      border-top-left-radius: 5px;
+      background-color: $color-accent;
+      color: $color-text-dark;
+    }
+
+    &__game {
+      padding: 0.2rem 0;
+      width: 10rem;
+      border-right: 2px solid $color-accent;
+      @extend %base-button;
+      @include button-color($color-primary-light);
+    }
+  }
+}
+
+.player-info {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  justify-content: stretch;
+  align-items: stretch;
+  max-height: 70vh;
+
+  // background-color: $color-primary;
+  border: 2px solid $color-accent;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+
+  .player-info__col:last-of-type {
+    border: none;
+  }
+
+  &__col {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    border-right: 2px solid $color-accent;
+
+    &__label {
+      padding: 0.4rem 0;
+      text-align: center;
+      font-size: 1.1rem;
+      background-color: $color-primary;
+      border-bottom-left-radius: 5px;
+      border-bottom-right-radius: 5px;
+      border-bottom: 2px solid $color-accent;
+    }
+
+    &__list {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: stretch;
+
+      list-style-type: none;
+      overflow-y: auto;
+      margin: 0.3rem 0;
+      padding: 0 0.6rem;
+
+      @include scrollbars(10px, $color-primary, $color-accent);
+    }
+  }
+}
+
+.list-node {
+  padding: 0.3rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: start;
+
+  &__icon {
+    height: 1rem;
+    padding-right: 0.2rem;
+  }
+
+  &__name,
+  &__tertiary {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__name {
+    color: $color-accent;
+  }
+
+  &__button {
+    @extend %base-button;
+    @include button-accent;
+    border-radius: 5px;
+    margin-top: 8px;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .lobby {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+.user-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: stretch;
+
+  &__username {
+    font-weight: 500;
+    padding: 0.2rem 1rem 0 1.5rem;
+    border-left: 2px solid $color-accent;
+  }
+
+  &__icon {
+    color: $color-accent;
+    padding: 0.3rem 0.5rem 0 0.5rem;
+    height: 20px;
+  }
+
+  &__stats {
+    padding: 0.2rem 1rem 0 0;
+  }
+}
+
+.scores {
+  max-width: 30%;
+}
+
+.tournaments {
+  max-width: 40%;
+}
+
+.plays {
+  max-width: 30%;
+}

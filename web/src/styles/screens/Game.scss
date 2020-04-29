@@ -1,0 +1,83 @@
+.game {
+  display: flex;
+  flex-direction: row;
+
+  &__loader {
+    height: 40px;
+  }
+}
+
+.chat {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
+  margin-right: $top-margin;
+
+  &__history {
+    margin-top: 4px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    resize: none;
+    flex-grow: 1;
+
+    @include input;
+    @include colored-input;
+  }
+
+  &__form {
+    margin-top: 2px;
+    display: flex;
+    flex-direction: row;
+    justify-content: stretch;
+
+    &__input {
+      @include text-input;
+      border-bottom-left-radius: 5px;
+    }
+
+    &__submit {
+      @extend %base-button;
+      @include button-accent;
+      border-bottom-right-radius: 5px;
+    }
+  }
+}
+
+.play-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  background-color: $color-primary;
+  border-radius: 5px;
+  overflow: hidden;
+
+  &__title {
+    padding: 0.2rem 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    background-color: $color-accent;
+    color: $color-text-dark;
+    @include ellipsis;
+  }
+
+  &__players {
+    display: flex;
+    padding: 0.2rem 0.5rem 0.4rem 0.5rem;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+
+    &__you,
+    &__opponent {
+      font-weight: 500;
+      @include ellipsis;
+    }
+
+    &__vs {
+      align-self: flex-end;
+      height: 2rem;
+      margin: -1rem 0;
+    }
+  }
+}
