@@ -1,5 +1,5 @@
-export const TOKEN_COOKIE = "AUTHENTICATION";
-export const ID_COOKIE = "ID_COOKIE";
+export const TOKEN_COOKIE = "tokencookie";
+export const ID_COOKIE = "idcookie";
 
 export const READY = "READY";
 export const MAKE_MOVE = "MAKE_MOVE";

@@ -28,6 +28,7 @@ import {
   RECEIVE_DATA,
   RECEIVE_MESSAGE,
   RECEIVE_UPDATED_STATE,
+  RECEIVE_READY,
 } from "./api/game/receiverContract";
 import { callApi, failLoadingAndExit } from "./utils";
 
@@ -66,12 +67,12 @@ function* connectToServer(token: string, id: string) {
       yield* failLoadingAndExit("Could not create socket...");
       return null;
     }
-    const channel = setupSocketChannel(socket);
+    const channel = yield call(setupSocketChannel, socket);
 
     yield put(startLoading("Waiting for Opponent..."));
     const act = yield take(channel);
-    if (act.type === RECEIVE_DATA && act.event.data === READY)
-      return { socket, channel };
+    console.log(act);
+    if (act.type === RECEIVE_READY) return { socket, channel };
 
     yield* failLoadingAndExit("Connection Closed");
     return null;
@@ -157,10 +158,14 @@ export default function* game(token: string, id: string) {
   if (!res) return;
   const { socket, channel } = res;
 
+  yield put(stopLoading());
+
   yield race({
-    handleServer,
-    handlePlayer,
+    player: call(handlePlayer, socket),
+    server: call(handleServer, channel),
   });
+
+  console.log("exiting game...");
 
   channel.close();
   socket.close();

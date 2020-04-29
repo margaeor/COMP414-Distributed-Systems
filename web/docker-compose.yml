@@ -1,0 +1,28 @@
+version: "3"
+
+services:
+  web:
+    image: nginx
+    volumes:
+      - ./dist:/usr/share/nginx/html
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "80:80"
+    links:
+      - "game"
+  # web-builder:
+  #   image: node:12
+  #   working_dir: /home/node/app
+  #   environment:
+  #     - NODE_ENV=development
+  #   volumes:
+  #     - .:/home/node/app
+  #   command: "npm run watch"
+  game:
+    image: node:12
+    working_dir: /home/node/app
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ../game:/home/node/app
+    command: "npm run dev"

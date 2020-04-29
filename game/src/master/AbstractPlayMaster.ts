@@ -102,4 +102,9 @@ export default abstract class AbstractPlayMaster {
     if (!session.progress) return "ongoing";
     return this.processResults(session.play.game, session.progress);
   }
+
+  public arePlayersReady(sockId: string) {
+    const session = this.socketMap[sockId];
+    return session.user1 && session.user2;
+  }
 }

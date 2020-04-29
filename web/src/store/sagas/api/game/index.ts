@@ -26,7 +26,10 @@ import {
   TOKEN_COOKIE,
   UpdatedStateEvent,
   UPDATED_STATE,
+  RECEIVE_CONNECTION_ERROR,
+  RECEIVE_READY,
 } from "./receiverContract";
+import { ConnectionErrorEvent } from "./contract";
 
 export async function retrievePlay(
   token: string,
@@ -62,7 +65,8 @@ export async function checkPlay(
 }
 
 export async function setupSocket(token: string, url: string, id: string) {
-  const socket = io.connect(url, {
+  const socket = io.connect({
+    path: `${url}/socket.io`,
     transportOptions: {
       polling: {
         extraHeaders: {
@@ -72,13 +76,14 @@ export async function setupSocket(token: string, url: string, id: string) {
       },
     },
   });
-
+  console.log("created socket");
   try {
     await new Promise((resolve, reject) => {
       socket.on("connect_error", () => {
         socket.off("connect_error");
         socket.off("connect");
         socket.disconnect();
+        console.log("connection error");
         reject();
       });
       socket.on("connect", () => {
@@ -100,17 +105,29 @@ export function setupSocketChannel(socket: SocketIOClient.Socket) {
     socket.on("connect_error", () => emitter({ type: CONNECTION_ERROR }));
     socket.on("disconnect", () => emitter({ type: DISCONNECTED }));
 
-    socket.on(MESSAGE, (event: MessageEvent) =>
-      emitter({ type: RECEIVE_MESSAGE, event })
-    );
-    socket.on(DATA, (event: DataEvent) =>
-      emitter({ type: RECEIVE_DATA, event })
-    );
-    socket.on(UPDATED_STATE, (event: UpdatedStateEvent) =>
-      emitter({ type: RECEIVE_UPDATED_STATE, event })
-    );
+    socket.on(MESSAGE, (event: MessageEvent) => {
+      console.log(event);
+      emitter({ type: RECEIVE_MESSAGE, event });
+    });
+    socket.on(DATA, (event: DataEvent) => {
+      console.log(event);
+      emitter({ type: RECEIVE_DATA, event });
+    });
+    socket.on(UPDATED_STATE, (event: UpdatedStateEvent) => {
+      console.log(event);
+      emitter({ type: RECEIVE_UPDATED_STATE, event });
+    });
+    socket.on(CONNECTION_ERROR, (event: ConnectionErrorEvent) => {
+      console.log(event);
+      emitter({ type: RECEIVE_CONNECTION_ERROR, event });
+    });
+    socket.on(READY, () => {
+      console.log("ready");
+      emitter({ type: RECEIVE_READY });
+    });
 
     socket.emit(READY);
+    console.log("emitted ready...");
 
     return () => {
       socket.disconnect();

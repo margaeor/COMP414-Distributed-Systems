@@ -7,7 +7,7 @@
   "scripts": {
     "build": "webpack",
     "release": "cross-env NODE_ENV=production webpack",
-    "watch": "webpack --watch",
+    "watch": "cross-env NODE_ENV=development webpack --watch",
     "dev": "cross-env NODE_ENV=development webpack-dev-server",
     "dev80": "sudo npm run dev -- --port 80",
     "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\""

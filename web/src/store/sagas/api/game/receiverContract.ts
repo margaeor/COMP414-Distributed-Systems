@@ -26,6 +26,8 @@ export const EMIT_READY = READY;
 export const RECEIVE_MESSAGE = MESSAGE;
 export const RECEIVE_DATA = DATA;
 export const RECEIVE_UPDATED_STATE = UPDATED_STATE;
+export const RECEIVE_CONNECTION_ERROR = CONNECTION_ERROR;
+export const RECEIVE_READY = READY;
 
 export interface MessageReception {
   type: typeof RECEIVE_MESSAGE;
@@ -43,6 +45,6 @@ export interface UpdatedStateReception {
 }
 
 export interface ConnectionErrorReception {
-  type: typeof CONNECTION_ERROR;
+  type: typeof RECEIVE_CONNECTION_ERROR;
   event: ConnectionErrorEvent;
 }

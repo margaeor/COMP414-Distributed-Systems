@@ -12,6 +12,9 @@ import {
   MESSAGE,
   MessageEvent,
   TOKEN_COOKIE,
+  UPDATED_STATE,
+  UpdatedStateEvent,
+  READY,
 } from "./api/contract";
 import { publishResult } from "./api/source";
 import PlayMaster from "./master/PlayMaster";
@@ -19,7 +22,7 @@ import PlayMaster from "./master/PlayMaster";
 dotenv.config();
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(http, { origins: "*:*" });
+const io = socketIo(server);
 
 const master = new PlayMaster();
 
@@ -38,6 +41,7 @@ const disconnectSocketWithError = (
   socket.emit(CONNECTION_ERROR, {
     error,
   });
+  console.log(error);
   socket.disconnect();
 };
 
@@ -51,6 +55,7 @@ io.on("connection", (socket) => {
     disconnectSocketWithError(socket, "Missing credentials");
     return;
   }
+  console.log(playId);
 
   try {
     master.registerUser(socket.id, userToken, playId);
@@ -78,7 +83,17 @@ io.on("connection", (socket) => {
     io.to(playId).send(MESSAGE, { message: e.message })
   );
   socket.on("disconnect", () => {
+    console.log("unregistering user...");
     master.unregisterUser(socket.id);
+  });
+
+  socket.on(READY, (e: MessageEvent) => {
+    if (master.arePlayersReady(socket.id)) {
+      io.to(playId).emit(READY);
+      console.log("ready");
+    } else {
+      console.log("not ready");
+    }
   });
 });
 
