@@ -14,5 +14,6 @@ const connection = mongoose.connect(conn_str,
   {useNewUrlParser: true,useUnifiedTopology: true}
 )
 
+//mongoose.setReadPref('secondary');
 
 module.exports = connection

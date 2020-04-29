@@ -378,7 +378,9 @@ app.get('/me/match_history', async function(req, res) {
 
     if(username) {
 
-      let user = await User.findById(username).select(
+      let user = await User.findById(username).
+      read('secondaryPreferred').
+      select(
         {"past_games":1}
       ).
       populate({
@@ -422,7 +424,9 @@ app.get('/me/active_games', async function(req, res) {
 
     if(username) {
 
-      let user = await User.findById(username).select(
+      let user = await User.findById(username).
+      read('secondaryPreferred').
+      select(
         {"active_games":1}
       ).
       populate({

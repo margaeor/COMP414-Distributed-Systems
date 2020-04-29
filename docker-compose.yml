@@ -7,11 +7,13 @@ services:
       dockerfile: Dockerfile.dev
     ports:
       - "8080:80"
+    secrets:
+      - mysql_password
     environment: 
       DB_HOST: "auth-db"
-      DB_NAME: "${DB_NAME}"
-      DB_USERNAME: "${DB_USERNAME}"
-      DB_PASSWORD: "${DB_PASSWORD}"
+      DB_NAME: "${MYSQL_NAME}"
+      DB_USERNAME: "${MYSQL_USERNAME}"
+      DB_PASSWORD_FILE: /run/secrets/mysql_password
       AUTH_ISSUER: "${AUTH_ISSUER}"
       AUTH_PUBLIC: "${AUTH_PUBLIC}"
       AUTH_PRIVATE: "${AUTH_PRIVATE}"
@@ -23,6 +25,8 @@ services:
   
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest  
+    secrets:
+      - mysql_root_password
     depends_on:
       - auth-db
     networks:
@@ -34,7 +38,7 @@ services:
     environment:
       PMA_HOST: auth-db
       PMA_USER: root
-      PMA_PASSWORD: "${DB_ROOT_PASSWORD}"
+      PMA_PASSWORD_FILE: /run/secrets/mysql_root_password
 
   # Authentication database
   auth-db:
@@ -43,6 +47,9 @@ services:
       dockerfile: Dockerfile.dev
       args:
         MYSQL_VERSION: ${MYSQL_VERSION}
+    secrets:
+      - mysql_root_password
+      - mysql_password
     restart: always
     ports:
       - "3306:3306"
@@ -52,10 +59,10 @@ services:
     networks:
       - backend
     environment:
-      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
-      MYSQL_DATABASE: "${DB_NAME}"
-      MYSQL_USER: "${DB_USERNAME}"
-      MYSQL_PASSWORD: "${DB_PASSWORD}"
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
+      MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
+      MYSQL_DATABASE: "${MYSQL_NAME}"
+      MYSQL_USER: "${MYSQL_USERNAME}"
       MYSQL_INITDB_SKIP_TZINFO: "yes"
     container_name: auth-db
   
@@ -141,7 +148,12 @@ services:
       - ./zookeeper/scripts:/opt/zoo/scripts
     container_name: zookeeper
     #command: /opt/zoo/scripts/init_script.sh
-  
+
+secrets:
+  mysql_password:
+    file: ./secrets/mysql_password
+  mysql_root_password:
+    file: ./secrets/mysql_root_password
 
 networks:
   frontend:

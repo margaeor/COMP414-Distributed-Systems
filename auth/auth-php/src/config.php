@@ -1,12 +1,17 @@
 <?php
 
 
+if (!defined('DB_PASSWORD') ) {
+    // Make sure that the password is loaded once per request
+    define('DB_PASSWORD',file_get_contents(getenv('DB_PASSWORD_FILE')));
+}
+
 return array(
     'dbhost' => getenv('DB_HOST'),
     'dbport' => '',
     'dbname' => getenv('DB_NAME'),
     'dbuser' => getenv('DB_USERNAME'),
-    'dbpass' => getenv('DB_PASSWORD'),
+    'dbpass' => DB_PASSWORD,
 
     // Authorization config
     'key_issuer'             => getenv('AUTH_ISSUER'),

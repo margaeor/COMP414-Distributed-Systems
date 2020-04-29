@@ -17,7 +17,8 @@ class DB {
         $dbuser = $this->config['dbuser'];
         $dbpass = $this->config['dbpass'];
         
-		$this->conn = new mysqli($dbhost, $dbuser, $dbpass, $dbname);
+        // Initialize a persistent connection
+		$this->conn = new mysqli("p:$dbhost", $dbuser, $dbpass, $dbname);
 		
 		return !$this->conn ? $this->conn : $this->conn->connect_error;
     }
