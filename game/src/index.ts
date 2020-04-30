@@ -4,6 +4,8 @@ import express from "express";
 import http from "http";
 import socketIo from "socket.io";
 import ip from "ip";
+import connection from './mongo/connect.js';
+
 // @ts-ignore
 import { 
   registerToZookeeper,
@@ -34,7 +36,9 @@ const io = socketIo(server);
 
 //var server_id: String;
 
-
+connection.then(() => {
+  console.log('Successfully connected to mongo');
+});
 // Register to zookeeper
 registerToZookeeper(ip.address()).then(
   (server_id : any) => {
@@ -82,10 +86,10 @@ registerToZookeeper(ip.address()).then(
 
     socket.join(playId);
 
-    socket.on(MAKE_MOVE, (e: MakeMoveEvent) => {
+    socket.on(MAKE_MOVE, async (e: MakeMoveEvent) => {
       console.log("received move");
       console.log(e);
-      const r = master.makeMove(socket.id, e.data, e.move);
+      const r = await master.makeMove(socket.id, e.data, e.move);
       console.log("processed move: " + r);
       if (!r) return;
 

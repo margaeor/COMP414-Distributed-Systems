@@ -18,8 +18,9 @@ export function processChessMove(
   move: string
 ): string | null {
   const chess = deStringify(data);
-  if (chess.turn() === "w" && user !== 1) return null;
-  if (chess.turn() === "b" && user !== 2) return null;
+  //@TODO figure out why those conditions don't work
+  //if (chess.turn() === "w" && user !== 1) {console.log('error1');return null;} 
+  //if (chess.turn() === "b" && user !== 2) {console.log('error2s');return null;}
   const newMove = chess.move(move);
   return newMove ? chess.fen() : null;
 }

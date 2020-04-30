@@ -11,8 +11,8 @@ export default abstract class AbstractPlayMaster {
 
   protected abstract checkToken(token: string): string | null;
   protected abstract async retrievePlay(server_id: string, id: string): Promise<Play>;
-  protected abstract restoreProgress(id: string): string | null;
-  protected abstract backupProgress(id: string, progress: string): void;
+  protected abstract async restoreProgress(id: string): Promise<string>;
+  protected abstract async backupProgress(id: string, progress: string): Promise<any>;
   protected abstract startingPosition(game: string): string;
   protected abstract processMove(
     game: string,
@@ -45,7 +45,7 @@ export default abstract class AbstractPlayMaster {
     let session;
     if (!(playId in this.sessions)) {
       // Create play session
-      const progress = this.restoreProgress(playId);
+      const progress = await this.restoreProgress(playId);
       session = {
         play,
         user1: isOpponent1 ? sockId : null,
@@ -79,7 +79,7 @@ export default abstract class AbstractPlayMaster {
     delete this.socketMap[sockId];
   }
 
-  public makeMove(sockId: string, data: string, move: string) {
+  public async makeMove(sockId: string, data: string, move: string) {
     const session = this.socketMap[sockId];
     const currData = session.progress;
     // Move came with stale data
@@ -95,7 +95,7 @@ export default abstract class AbstractPlayMaster {
     );
     if (newData) {
       session.progress = newData;
-      this.backupProgress(session.play.id, newData);
+      await this.backupProgress(session.play.id, newData);
       return true;
     }
     return false;

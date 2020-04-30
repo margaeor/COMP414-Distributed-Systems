@@ -104,6 +104,8 @@ services:
       MONGODB_REPLICA_SET_NAME: '${MONGODB_REPLICA_SET_NAME}'
       MONGODB_API_USER: '${MONGODB_API_USER}'
       MONGODB_API_DB: '${MONGODB_API_DB}'
+      MONGODB_PLAYMASTER_USER: '${MONGODB_PLAYMASTER_USER}'
+      MONGODB_PLAYMASTER_DB: '${MONGODB_PLAYMASTER_DB}'
     ports:
       - "27017:27017"
     volumes:
@@ -112,6 +114,7 @@ services:
       - backend
     secrets:
       - mongodb_api_password
+      - mongodb_playmaster_password
     container_name: mongodb-primary
     #volumes:
     #  - 'mongodb_master_data:/bitnami'
@@ -171,6 +174,11 @@ services:
     #ports:
     #  - "3002:3000"
     environment:
+      JWT_PUBLIC_KEY: "${AUTH_PUBLIC}"
+      MONGODB_USER: '${MONGODB_PLAYMASTER_USER}'
+      MONGODB_DATABASE: '${MONGODB_PLAYMASTER_DB}'
+      MONGODB_REPLICA_SET_NAME: '${MONGODB_REPLICA_SET_NAME}'
+      MONGODB_REPLICA_SET_MEMBERS: 'mongodb-primary,mongodb-secondary'
       NODE_ENV: 'development'
       PORT: '${GAME_PORT}'
     networks:
@@ -179,6 +187,8 @@ services:
       - zookeeper
     volumes:
       - ./game:/home/node/app/
+    secrets:
+      - mongodb_playmaster_password
     container_name: game
     command: bash -c "npm i && npm run dev"
   
@@ -214,6 +224,8 @@ secrets:
     file: ./secrets/mysql_root_password
   mongodb_api_password:
     file: ./secrets/mongodb_api_password
+  mongodb_playmaster_password:
+    file: ./secrets/mongodb_playmaster_password
 
 networks:
   frontend:

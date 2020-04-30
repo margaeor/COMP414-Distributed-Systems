@@ -1,6 +1,10 @@
 import AbstractPlayMaster from "./AbstractPlayMaster";
 import { checkToken as apiCheckToken } from "../api/authenticate";
-import { retrievePlay as apiRetrievePlay } from "../api/source";
+import { 
+  retrievePlay as apiRetrievePlay,
+  restoreProgress as apiRestoreProgress,
+  backupProgress as apiBackupProgress
+} from "../api/source";
 import {
   startingChessPosition,
   processChessMove,
@@ -16,12 +20,12 @@ export default class PlayMaster extends AbstractPlayMaster {
     return await apiRetrievePlay(game_id, id);
   }
 
-  protected restoreProgress(id: string) {
-    return null;
+  protected async restoreProgress(id: string): Promise<string> {
+    return await apiRestoreProgress(id);
   }
 
-  protected backupProgress(id: string, progress: string): void {
-    return;
+  protected async backupProgress(id: string, progress: string): Promise<any> {
+    return await apiBackupProgress(id,progress);
   }
 
   protected startingPosition(game: string): string {

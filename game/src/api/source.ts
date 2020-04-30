@@ -1,5 +1,8 @@
 import { Play, Result } from "./types";
 import http from "http";
+import connect from "../mongo/connect";
+const {GameState} = require("../mongo/game_state");
+import mongoose from "mongoose";
 
 async function asyncGetRequest(host: string, path: string, port: number): Promise<any> {
 
@@ -50,8 +53,6 @@ export async function retrievePlay(server_id:string, id: string): Promise<any> {
       return placeholder;
     }
 
-    //return data;
-
   } catch(e){
     console.log(e);
     return placeholder;
@@ -59,10 +60,42 @@ export async function retrievePlay(server_id:string, id: string): Promise<any> {
   
 }
 
-export function retrievePlayProgress(id: string): string {
-  return "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1;";
-}
 
 export function publishResult(id: string, result: Result): void {
   console.log(`play ${id} finished with status: ${result}`);
+}
+
+
+export async function restoreProgress(id: string) : Promise<string> {
+  var placeholder = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1;";
+  //@TODO remove placeholder
+  try {
+
+    let game = await GameState.findById(id).exec();
+
+    if(game){
+
+      console.log("RETURNING "+game.position);
+      return game.position;
+
+    } else return placeholder;
+
+} catch(e) {
+    console.log(e);
+    return placeholder;
+  }
+}
+
+export async function backupProgress(id: string, progress: string): Promise<any> {
+  try {
+
+    let game = await GameState.findOneAndUpdate({_id:id},{position:progress},{new:true,upsert:true}).exec();
+    if(game) {
+      console.log('Game saved ',game);
+      return true;
+    } else return false;
+  } catch(e) {
+    console.log(e);
+    return false;
+  }
 }
