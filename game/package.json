@@ -6,10 +6,10 @@
   "private": true,
   "scripts": {
     "start": "npm run build && nodemon dist/index.js",
-    "build": "babel src -d dist --extensions \".ts,.tsx\"",
+    "build": "babel src -d dist --extensions \".ts,.tsx,.js\"",
     "serve": "node dist/index.js",
     "restart": "npm run build && npm run serve",
-    "dev": "nodemon --exec npm run restart --ignore dist --ext ts, json",
+    "dev": "nodemon --exec npm run restart --ignore dist/* --ext ts,js,json",
     "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\""
   },
   "author": "",
@@ -25,12 +25,12 @@
     "@types/chess.js": "^0.10.1",
     "@types/cors": "^2.8.6",
     "@types/express": "^4.17.6",
+    "@types/ip": "^1.1.0",
     "@types/socket.io": "^2.1.4",
     "@typescript-eslint/eslint-plugin": "^2.29.0",
     "@typescript-eslint/parser": "^2.29.0",
     "babel-polyfill": "^6.26.0",
     "cross-env": "^7.0.2",
-    "dotenv": "^8.2.0",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.10.1",
     "eslint-plugin-import": "^2.20.2",
@@ -40,7 +40,7 @@
     "typescript": "^3.8.3"
   },
   "dependencies": {
-    "@babel/runtime": "^7.9.6",
+    "dotenv": "^8.2.0",
     "axios": "^0.19.2",
     "chess.js": "^0.10.3",
     "cors": "^2.8.5",

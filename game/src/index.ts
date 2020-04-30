@@ -4,7 +4,8 @@ import express from "express";
 import http from "http";
 import socketIo from "socket.io";
 import ip from "ip";
-import {registerToZookeeper} from "./zookeeper/functions.js";
+// @ts-ignore
+import { registerToZookeeper } from "./zookeeper/functions";
 import {
   CONNECTION_ERROR,
   DATA,
@@ -28,10 +29,9 @@ const server = http.createServer(app);
 const io = socketIo(server);
 
 const master = new PlayMaster();
-console.log( "IP IS" +ip.address() );
+console.log("IP IS" + ip.address());
 
 registerToZookeeper(ip.address);
-
 
 app.use(cors());
 app.get("/check", (req, res) => {
