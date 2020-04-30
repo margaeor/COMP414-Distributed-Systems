@@ -70,7 +70,8 @@ services:
   api:
     container_name: api
     restart: always
-    build: ./api/api-node
+    image: node:12
+    working_dir: /home/node/app/
     environment: 
       JWT_PUBLIC_KEY: "${AUTH_PUBLIC}"
       MONGODB_USER: '${MONGODB_API_USER}'
@@ -78,7 +79,7 @@ services:
       MONGODB_REPLICA_SET_NAME: '${MONGODB_REPLICA_SET_NAME}'
       MONGODB_REPLICA_SET_MEMBERS: 'mongodb-primary,mongodb-secondary'
     volumes:
-        - ./api/api-node/src:/usr/src/app
+        - ./api/node:/home/node/app
     ports:
       - "3001:3000"
     depends_on:
@@ -89,6 +90,7 @@ services:
       - backend
     secrets:
       - mongodb_api_password
+    command: bash -c "npm i && npm run dev"
 
   # Mongodb replica set for api
   mongodb-primary:
@@ -169,7 +171,7 @@ services:
     #  - "3002:3000"
     environment:
       - NODE_ENV=development
-      - PORT='${GAME_PORT}''
+      - PORT='${GAME_PORT}'
     volumes:
       - ./game:/home/node/app/
     container_name: game
