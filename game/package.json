@@ -19,6 +19,7 @@
     "@babel/core": "^7.9.0",
     "@babel/node": "^7.8.7",
     "@babel/plugin-proposal-class-properties": "^7.8.3",
+    "@babel/plugin-transform-runtime": "^7.9.6",
     "@babel/preset-env": "^7.9.5",
     "@babel/preset-typescript": "^7.9.0",
     "@types/chess.js": "^0.10.1",
@@ -27,6 +28,7 @@
     "@types/socket.io": "^2.1.4",
     "@typescript-eslint/eslint-plugin": "^2.29.0",
     "@typescript-eslint/parser": "^2.29.0",
+    "babel-polyfill": "^6.26.0",
     "cross-env": "^7.0.2",
     "dotenv": "^8.2.0",
     "eslint": "^6.8.0",
@@ -38,11 +40,14 @@
     "typescript": "^3.8.3"
   },
   "dependencies": {
+    "@babel/runtime": "^7.9.6",
     "axios": "^0.19.2",
     "chess.js": "^0.10.3",
     "cors": "^2.8.5",
     "express": "^4.17.1",
+    "ip": "^1.1.5",
     "jsonwebtoken": "^8.5.1",
+    "node-zookeeper-client": "^1.1.0",
     "socket.io": "^2.3.0"
   }
 }

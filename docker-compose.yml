@@ -170,8 +170,10 @@ services:
     #ports:
     #  - "3002:3000"
     environment:
-      - NODE_ENV=development
-      - PORT='${GAME_PORT}'
+      NODE_ENV: 'development'
+      PORT: '${GAME_PORT}'
+    networks:
+      - backend
     volumes:
       - ./game:/home/node/app/
     container_name: game
@@ -186,6 +188,8 @@ services:
       - "8001:80"
     links:
       - "game"
+    networks:
+      - backend
     container_name: web
 
   web-builder:
@@ -195,6 +199,8 @@ services:
       - NODE_ENV=development
     volumes:
       - ./web/:/home/node/app
+    networks:
+      - backend
     command: bash -c "npm i; npm run watch"
     container_name: web-builder
 
