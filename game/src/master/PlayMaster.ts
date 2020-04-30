@@ -12,8 +12,8 @@ export default class PlayMaster extends AbstractPlayMaster {
   protected checkToken(token: string) {
     return apiCheckToken(token);
   }
-  protected retrievePlay(id: string) {
-    return apiRetrievePlay(id);
+  protected async retrievePlay(game_id:string, id: string) {
+    return await apiRetrievePlay(game_id, id);
   }
 
   protected restoreProgress(id: string) {

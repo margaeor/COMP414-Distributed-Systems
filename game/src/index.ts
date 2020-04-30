@@ -31,95 +31,97 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
 
-const master = new PlayMaster();
-var server_id: String;
+
+//var server_id: String;
+
 
 // Register to zookeeper
 registerToZookeeper(ip.address()).then(
-  (n : any) => {
-    server_id = n;
-  }
-)
+  (server_id : any) => {
+  
+  const master = new PlayMaster(server_id);
 
-
-app.use(cors());
-app.get("/check", (req, res) => {
-  res.send({
-    valid: true,
-  });
-  console.log("served check");
-});
-
-const disconnectSocketWithError = (
-  socket: SocketIO.Socket,
-  error = "An error happened during the handshake."
-) => {
-  socket.emit(CONNECTION_ERROR, {
-    error,
-  });
-  console.log(error);
-  socket.disconnect();
-};
-
-io.on("connection", (socket) => {
-  const playId = socket.handshake.headers[ID_COOKIE];
-  const userToken = socket.handshake.headers[TOKEN_COOKIE];
-
-  console.log(`player with token: ${userToken} connected`);
-
-  if (!playId || !userToken) {
-    disconnectSocketWithError(socket, "Missing credentials");
-    return;
-  }
-  console.log(playId);
-
-  try {
-    master.registerUser(socket.id, userToken, playId);
-  } catch (e) {
-    disconnectSocketWithError(socket, e.message);
-    return;
-  }
-
-  socket.join(playId);
-
-  socket.on(MAKE_MOVE, (e: MakeMoveEvent) => {
-    console.log("received move");
-    console.log(e);
-    const r = master.makeMove(socket.id, e.data, e.move);
-    console.log("processed move: " + r);
-    if (!r) return;
-
-    const result = master.getResult(socket.id);
-    const isOver = result !== "ongoing";
-    io.to(playId).emit(DATA, {
-      data: master.getData(socket.id),
-      isOver,
+  app.use(cors());
+  app.get("/check", (req, res) => {
+    res.send({
+      valid: true,
     });
-
-    if (isOver) publishResult(playId, result);
-  });
-  socket.on(MESSAGE, (e: MessageEvent) =>
-    io.to(playId).send(MESSAGE, { message: e.message })
-  );
-  socket.on("disconnect", () => {
-    console.log("unregistering user...");
-    master.unregisterUser(socket.id);
+    console.log("served check");
   });
 
-  socket.on(READY, (e: MessageEvent) => {
-    if (master.arePlayersReady(socket.id)) {
-      io.to(playId).emit(READY);
+  const disconnectSocketWithError = (
+    socket: SocketIO.Socket,
+    error = "An error happened during the handshake."
+  ) => {
+    socket.emit(CONNECTION_ERROR, {
+      error,
+    });
+    console.log(error);
+    socket.disconnect();
+  };
+
+  io.on("connection", async (socket) => {
+    const playId = socket.handshake.headers[ID_COOKIE];
+    const userToken = socket.handshake.headers[TOKEN_COOKIE];
+
+    console.log(`player with token: ${userToken} connected`);
+
+    if (!playId || !userToken) {
+      disconnectSocketWithError(socket, "Missing credentials");
+      return;
+    }
+    console.log(playId);
+
+    try {
+      await master.registerUser(socket.id, userToken, playId);
+      console.log('Registered');
+    } catch(e) {
+      disconnectSocketWithError(socket, e.message);
+      return;
+    }
+
+    socket.join(playId);
+
+    socket.on(MAKE_MOVE, (e: MakeMoveEvent) => {
+      console.log("received move");
+      console.log(e);
+      const r = master.makeMove(socket.id, e.data, e.move);
+      console.log("processed move: " + r);
+      if (!r) return;
+
+      const result = master.getResult(socket.id);
+      const isOver = result !== "ongoing";
       io.to(playId).emit(DATA, {
         data: master.getData(socket.id),
-        isOver: false,
-      } as DataEvent);
-      console.log("ready");
-    } else {
-      console.log("not ready");
-    }
-  });
-});
+        isOver,
+      });
 
-server.listen(process.env.PORT, () => {
-  console.log(`listening on *:${process.env.PORT}`);
+      if (isOver) publishResult(playId, result);
+    });
+    socket.on(MESSAGE, (e: MessageEvent) =>
+      io.to(playId).send(MESSAGE, { message: e.message })
+    );
+    socket.on("disconnect", () => {
+      console.log("unregistering user...");
+      master.unregisterUser(socket.id);
+    });
+
+    socket.on(READY, (e: MessageEvent) => {
+      if (master.arePlayersReady(socket.id)) {
+        io.to(playId).emit(READY);
+        io.to(playId).emit(DATA, {
+          data: master.getData(socket.id),
+          isOver: false,
+        } as DataEvent);
+        console.log("ready");
+      } else {
+        console.log("not ready");
+      }
+    });
+  });
+
+  server.listen(process.env.PORT, () => {
+    console.log(`listening on *:${process.env.PORT}`);
+  });
+
 });

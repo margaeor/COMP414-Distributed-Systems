@@ -6,6 +6,13 @@ import { sleep } from "../../utils";
 
 export const PLAY_LIST: (Play | TournamentPlay)[] = [
   {
+    id: "5eab10ae431a3c00240d9063",
+    game: Game.CHESS,
+    isPlayer1: true,
+    opponent: "vetIO",
+    started: false,
+  },
+  {
     id: "1234",
     game: Game.CHESS,
     isPlayer1: true,

@@ -30,7 +30,14 @@ async function validateServerClaim(server_id,server_ip) {
   try {
     let node = '/playmasters/'+server_id;
 
-    return (await getValuePromise(node)).toString('utf8') == server_ip;
+    let value = (await getValuePromise(node)).toString('utf8');
+
+    let last_ip_digits = value.substr(1);
+
+    if(!last_ip_digits || last_ip_digits.length==0) return false;
+
+    return last_ip_digits == server_ip.substr(-last_ip_digits.length);
+    
   } catch(e) {
     console.log(e);
     return false;

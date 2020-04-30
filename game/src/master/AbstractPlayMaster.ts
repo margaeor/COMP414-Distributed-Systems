@@ -3,9 +3,14 @@ import { Play, PlaySession, Result } from "../api/types";
 export default abstract class AbstractPlayMaster {
   socketMap: Record<string, PlaySession> = {};
   sessions: Record<string, PlaySession> = {};
+  server_id : string;
+
+  constructor(server_id: string){
+    this.server_id = server_id;
+  }
 
   protected abstract checkToken(token: string): string | null;
-  protected abstract retrievePlay(id: string): Play | null;
+  protected abstract async retrievePlay(server_id: string, id: string): Promise<Play>;
   protected abstract restoreProgress(id: string): string | null;
   protected abstract backupProgress(id: string, progress: string): void;
   protected abstract startingPosition(game: string): string;
@@ -17,7 +22,7 @@ export default abstract class AbstractPlayMaster {
   ): string | null;
   protected abstract processResults(game: string, data: string): Result;
 
-  public registerUser(sockId: string, token: string, playId: string) {
+  public async registerUser(sockId: string, token: string, playId: string) {
     // Check user
     const user = this.checkToken(token);
     if (!user) throw new Error("Invalid Token");
@@ -27,14 +32,15 @@ export default abstract class AbstractPlayMaster {
     if (playId in this.sessions) {
       play = this.sessions[playId].play;
     } else {
-      play = this.retrievePlay(playId);
+      play = await this.retrievePlay(this.server_id, playId);
     }
     if (!play) throw new Error("Play not found");
 
     // Check user in play
     const isOpponent1 = play.opponent1 === user;
     const isOpponent2 = play.opponent2 === user;
-    if (!isOpponent1 && !isOpponent2) throw new Error("Play not in play");
+    console.log(play,user);
+    if (!isOpponent1 && !isOpponent2) throw new Error("Player not in play");
 
     let session;
     if (!(playId in this.sessions)) {

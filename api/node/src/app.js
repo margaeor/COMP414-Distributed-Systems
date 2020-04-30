@@ -39,7 +39,6 @@ app.get('/playmaster/getinfo', async (req, res) => {
   
   let game_id = req.query.game_id;
   let id = req.query.id;
-
   let ip = util.findIpFromRequest(req);
 
   try {

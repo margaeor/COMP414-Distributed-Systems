@@ -1,122 +1,241 @@
-api.boardgames.com/
 
-/me/scores?auth=#
+
+# Lists the tournaments using pagination
+GET /tournament/list?jwt=#&mode=active|future|past&[page=1]
 {
-	status: 200,
-	tournament: [
-		{id: #, name: 'Very Fun Time', position: 3, game: 'Chess', date: #},
-		...
-	];
-	practise: [
-		{id: #, opponent: 'Antheas', won: true, game: 'Chess', date: #},
-		...
-	];
+    "status": 200,
+    "message": "",
+    "data": {
+        "docs": [{
+            "_id": "5ea754cb44a47e4624bd1df6",
+            "has_started": true,
+            "has_ended": false,
+            "rounds": ["5ea5fec58f69571071a29fb2", "5ea6101ea3fd601270c732c6", "5ea612c233a4cd129cb76cc6"],
+            "participants": ["geomar1", "geomar2", "geomar3", "geomar4", "geomar5"],
+            "name": "NiceTournament2",
+            "date_created": "2020-04-24T22:14:13.416Z",
+            "__v": 11,
+            "game_type": "chess",
+            "leaderboard": [{
+                "_id": "5ea70db50fc124168fbd1091",
+                "username": "geomar4",
+                "wins": 3,
+                "losses": 0
+            }, {
+                "_id": "5ea70db50fc124168fbd1092",
+                "username": "geomar1",
+                "wins": 2,
+                "losses": 1
+            }, {
+                "_id": "5ea70db50fc124168fbd1093",
+                "username": "geomar3",
+                "wins": 2,
+                "losses": 1
+            }, {
+                "_id": "5ea70db50fc124168fbd1094",
+                "username": "geomar2",
+                "wins": 1,
+                "losses": 2
+            }],
+            "id": "5ea754cb44a47e4624bd1df6"
+        }],
+        "totalDocs": 2,
+        "limit": 1,
+        "totalPages": 2,
+        "page": 2,
+        "pagingCounter": 2,
+        "hasPrevPage": true,
+        "hasNextPage": false,
+        "prevPage": 1,
+        "nextPage": null
+    }
 }
 
-/me/scores/tournament?auth=#&id=#
-{
-	status: 200,
-	tournament: {
-		id: #, 
-		name: 'Very Fun Time',
-		game: 'Chess',
-		date: #,
-		ranking: [
-			{name: 'Antheas', id: #},
-			{name: 'Margar', id: #},
-			...
-		]
-	};
-}
-
-/me/friends?auth=#
-{
-	status: 200,
-	friends: {
-		{name: 'Antheas', id: #, online: true},
-		{name: 'Margar', id: #, online: false},
-		...
-	};
-}
-
-/me/games?auth=#
-{
-	status: 200,
-	tournament: [
-		{id: #, name: 'Very Fun Time', game: 'Chess', date: #, canJoin: true},
-		...
-	];
-	practise: [
-		{id: #, opponent: 'Antheas', game: 'Chess', date: #, status: 'accept'},
-		...
-	];
-}
 
 
-/tournament/create?auth=#
-Post request:
+# Returns all the information about a specific tournament including rounds, games and leaderboard
+/tournament/info?jwt=#&id={tournament_id}
 {
-	name: 'Very Fun Tournament!',
-	players: #,
-	game: #
+    "status": 200,
+    "message": "",
+    "data": {
+        "has_started": true,
+        "has_ended": false,
+        "rounds": [{
+            "games": [{
+                "score": 0,
+                "player1": "geomar5",
+                "player2": "geomar4"
+            }, {
+                "score": 0,
+                "player1": "geomar4",
+                "player2": "geomar5"
+            }, {
+                "score": 0,
+                "player1": "geomar5",
+                "player2": "geomar4"
+            }, {
+                "score": 1,
+                "player1": "geomar4",
+                "player2": "geomar5"
+            }],
+            "_id": "5ea5fec58f69571071a29fb2",
+            "date_created": "2020-04-26T21:36:05.310Z"
+        }, {
+            "games": [{
+                "score": 0,
+                "player1": "geomar3",
+                "player2": "geomar4"
+            }, {
+                "score": 1,
+                "player1": "geomar1",
+                "player2": "geomar2"
+            }, {
+                "score": 1,
+                "player1": "geomar4",
+                "player2": "geomar3"
+            }],
+            "_id": "5ea6101ea3fd601270c732c6",
+            "date_created": "2020-04-26T22:50:06.002Z"
+        }, {
+            "games": [{
+                "score": 1,
+                "player1": "geomar4",
+                "player2": "geomar1"
+            }, {
+                "score": 1,
+                "player1": "geomar3",
+                "player2": "geomar2"
+            }],
+            "_id": "5ea612c233a4cd129cb76cc6",
+            "date_created": "2020-04-26T23:01:22.774Z"
+        }],
+        "participants": ["geomar1", "geomar2", "geomar3", "geomar4", "geomar5"],
+        "_id": "5ea364b56d965309fdc6ad2a",
+        "name": "NiceTournament",
+        "date_created": "2020-04-24T22:14:13.416Z",
+        "__v": 11,
+        "game_type": "chess",
+        "leaderboard": [{
+            "_id": "5ea70db50fc124168fbd1091",
+            "username": "geomar4",
+            "wins": 3,
+            "losses": 0
+        }, {
+            "_id": "5ea70db50fc124168fbd1092",
+            "username": "geomar1",
+            "wins": 2,
+            "losses": 1
+        }, {
+            "_id": "5ea70db50fc124168fbd1093",
+            "username": "geomar3",
+            "wins": 2,
+            "losses": 1
+        }, {
+            "_id": "5ea70db50fc124168fbd1094",
+            "username": "geomar2",
+            "wins": 1,
+            "losses": 2
+        }]
+    }
 }
 
-/tournament/start?auth=#&id=#
+# Creates a new tournament assuming at least 'official'
+# role
+GET /tournament/create?jwt=#&name=#&game_type=chess|tic-tac-toe
 {
-	status: 200,
+	"status": 200
 }
 
-/tournament/register?auth=#&id=#
+# Gets the match history of a specific user
+GET /me/match_history?jwt=#
 {
-	status: 200
+    "status": 200,
+    "message": "",
+    "data": [{
+        "has_ended": true,
+        "tournament_id": null,
+        "score": 1,
+        "_id": "5ea707f970d29a15dfd3eba1",
+        "player1": "antheas",
+        "player2": "antheas12",
+        "date_created": "2020-04-27T16:27:37.266Z"
+    }]
 }
 
-/tournament/join?auth=#&id=#
+
+
+# Gets the active games of a specific user 
+GET /me/active_games?jwt=#
 {
-	status: 200,
-	id: #,
-	game: 'chess',
-	link: 'g3.bigdaddybiggame.com'
+    "status": 200,
+    "message": "",
+    "data": [{
+        "has_ended": false,
+        "tournament_id": null,
+        "_id": "5ea707f970d29a15dfd3eba1",
+        "player1": "antheas",
+        "player2": "antheas12",
+        "date_created": "2020-04-27T16:27:37.266Z"
+    }]
 }
 
-/tournament/forfeit?auth=#&id=#
+
+# Gets the stats of a specific user
+GET /user/stats?jwt=#&username=geomar
 {
-	status: 200
+    "status": 200,
+    "message": "",
+    "data": {
+        "rating": 1453,
+        "total_games": 15,
+        "total_wins": 15,
+        "total_losses": 0,
+        "total_ties": 0,
+        "_id": "geomar"
+    }
 }
 
-/practice/create?auth=#&friend=#
+
+# Enters matchmaking (practice) queue for
+# a specific type of game (chess or tic-tac-toe)
+GET /practice/join_queue?jwt=#&game_type=chess|tic-tac-toe
 {
-	status: 200
+	"status": 200
 }
 
-/practice/accept?auth=#&id=#
+
+# Joins an existing active game
+GET /practice/join_queue?jwt=#&game_id=#
 {
-	status: 200
+    "status": 200,
+    "data": {
+        "server_id": "p0000000002",
+        "server_ip": "192.168.1.2",
+        "_id": "5ea612c233a4cd129cb76cc8",
+        "__v": 0
+    }
 }
 
-/practice/deny?auth=#&id=#
+
+# Gets info about a specific game using playmaster id
+GET /playmaster/info?id=p000000002&game_id=#
 {
-	status: 200
+    "status": 200,
+    "message": "",
+    "data": {
+        "_id": "5ea5fec58f69571071a29fb3",
+        "opponents": ["geomar5", "geomar4"],
+        "game_type": "chess"
+    }
 }
 
-/practice/join?auth=#&id=#
+
+
+# Publish the game results
+GET /playmaster/info?id=p000000002&game_id=#&score=-1|0|1
 {
-	status: 200,
-	link: 'g3.bigdaddybiggame.com'
+    "status": 200
 }
 
-/practice/forfeit?auth=#&id=#
-{
-	status: 200
-}
 
-/playserver/getinfo?id=#
-{
-	status: 200,
-	{id: #, opponents: [#, #], game: 'Chess'},
-}
-
-/playserver/results?id=#&winner=#
-{
-	status: 200
-}

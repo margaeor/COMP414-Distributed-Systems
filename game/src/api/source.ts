@@ -1,12 +1,62 @@
 import { Play, Result } from "./types";
+import http from "http";
 
-export function retrievePlay(id: string): Play {
-  return {
+async function asyncGetRequest(host: string, path: string, port: number): Promise<any> {
+
+  return await (new Promise((resolve, reject) => { 
+    http.get({
+      host: host, 
+      path: path,
+      port: port
+    }, function(resp){
+        resp.on('data', function(d){
+          try {
+            let json = JSON.parse(d.toString('utf8'));
+            if(json) resolve(json);
+            else reject('Not a valid json response');
+          } catch(e){
+            reject('Not a valid json response');
+          }
+        })
+    }).on('error', function(err){
+        reject(err);
+    })
+  }));
+}
+
+export async function retrievePlay(server_id:string, id: string): Promise<any> {
+
+  // @TODO remove placeholder and return null on error
+  let placeholder = {
     id,
-    opponent1: "killX",
+    opponent1: "killX22",
     opponent2: "vetIO",
     game: "chess",
   };
+
+  try {
+
+    let data = await asyncGetRequest('api','/playmaster/getinfo?id='+server_id+'&game_id='+id,3000);
+
+    if(data.status == 200 && data.data) {
+      data = data.data;
+      return {
+        id: data._id,
+        opponent1: data.opponents[0],
+        opponent2: data.opponents[1],
+        game: data.game_type,
+      };
+    } else {
+      return placeholder;
+    }
+
+    //return data;
+
+  } catch(e){
+    console.log(e);
+    return placeholder;
+  }
+  
 }
 
 export function retrievePlayProgress(id: string): string {

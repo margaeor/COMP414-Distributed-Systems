@@ -78,6 +78,7 @@ services:
       MONGODB_DATABASE: '${MONGODB_API_DB}'
       MONGODB_REPLICA_SET_NAME: '${MONGODB_REPLICA_SET_NAME}'
       MONGODB_REPLICA_SET_MEMBERS: 'mongodb-primary,mongodb-secondary'
+      PLAYMASTER_IP_PREFIX: '172.21.0.'
     volumes:
         - ./api/node:/home/node/app
     ports:
@@ -174,6 +175,8 @@ services:
       PORT: '${GAME_PORT}'
     networks:
       - backend
+    depends_on:
+      - zookeeper
     volumes:
       - ./game:/home/node/app/
     container_name: game
