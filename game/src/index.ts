@@ -5,7 +5,10 @@ import http from "http";
 import socketIo from "socket.io";
 import ip from "ip";
 // @ts-ignore
-import { registerToZookeeper } from "./zookeeper/functions";
+import { 
+  registerToZookeeper,
+  changeLoadBalancingCounter
+ } from "./zookeeper/functions";
 import {
   CONNECTION_ERROR,
   DATA,
@@ -29,9 +32,15 @@ const server = http.createServer(app);
 const io = socketIo(server);
 
 const master = new PlayMaster();
-console.log("IP IS" + ip.address());
+var server_id: String;
 
-registerToZookeeper(ip.address);
+// Register to zookeeper
+registerToZookeeper(ip.address()).then(
+  (n : any) => {
+    server_id = n;
+  }
+)
+
 
 app.use(cors());
 app.get("/check", (req, res) => {

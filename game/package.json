@@ -9,7 +9,7 @@
     "build": "babel src -d dist --extensions \".ts,.tsx,.js\"",
     "serve": "node dist/index.js",
     "restart": "npm run build && npm run serve",
-    "dev": "nodemon --exec npm run restart --ignore dist/* --ext ts,js,json",
+    "dev": "nodemon --ignore './dist/' --ext ts,js --verbose --exec \"npm run restart\"",
     "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\""
   },
   "author": "",

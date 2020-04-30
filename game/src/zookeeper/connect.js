@@ -1,7 +1,7 @@
 
 const zookeeper = require('node-zookeeper-client');
 
-const client = zookeeper.createClient('zookeeper:2181');
+const client = zookeeper.createClient('zookeeper:2181',{ sessionTimeout: 5000 });
 
 
 client.on('connected', function () {
