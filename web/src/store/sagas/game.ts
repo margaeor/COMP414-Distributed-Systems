@@ -31,8 +31,11 @@ import {
   RECEIVE_READY,
 } from "./api/game/receiverContract";
 import { callApi, failLoadingAndExit } from "./utils";
+import { EventChannel } from "redux-saga";
 
 function* connectToServer(token: string, id: string) {
+  let socket: SocketIOClient.Socket | null = null;
+  let channel = null;
   try {
     // Retrieve Play and ip
     const { play, url } = yield* callApi(
@@ -58,7 +61,7 @@ function* connectToServer(token: string, id: string) {
       return null;
     }
 
-    const socket: SocketIOClient.Socket = yield* callApi(
+    socket = yield* callApi(
       "Creating Route...",
       call(setupSocket, token, url, id),
       true
@@ -67,7 +70,7 @@ function* connectToServer(token: string, id: string) {
       yield* failLoadingAndExit("Could not create socket...");
       return null;
     }
-    const channel = yield call(setupSocketChannel, socket);
+    channel = (yield call(setupSocketChannel, socket)) as EventChannel<any>;
 
     yield put(startLoading("Waiting for Opponent..."));
     const act = yield take(channel);
@@ -79,6 +82,9 @@ function* connectToServer(token: string, id: string) {
   } catch (e) {
     yield* failLoadingAndExit("Connection failed: " + e.message);
     return null;
+  } finally {
+    if (channel) channel.close();
+    if (socket) socket.disconnect();
   }
 }
 
@@ -158,15 +164,17 @@ export default function* game(token: string, id: string) {
   if (!res) return;
   const { socket, channel } = res;
 
-  yield put(stopLoading());
+  try {
+    yield put(stopLoading());
 
-  yield race({
-    player: call(handlePlayer, socket),
-    server: call(handleServer, channel),
-  });
+    yield race({
+      player: call(handlePlayer, socket),
+      server: call(handleServer, channel),
+    });
 
-  console.log("exiting game...");
-
-  channel.close();
-  socket.close();
+    console.log("exiting game...");
+  } finally {
+    channel.close();
+    socket.close();
+  }
 }
