@@ -20,16 +20,16 @@ function authenticateUser(token, privillege_level='player') {
         throw new errors.AnauthorizedException("Access is denied");
     }
    
-    if(!decoded || !decoded.data || !decoded.data.username || !decoded.data.role)
+    if(!decoded || !decoded.data || !decoded.data.username || !decoded.data.roles || !Array.isArray(decoded.data.roles))
         throw new errors.AnauthorizedException("Malformed token");
 
     //console.log(decoded);
     
     var p_level = (x) => {return ['player','official','admin'].indexOf(x)};
 
-    if(p_level(decoded.data.role) == -1) throw new errors.AnauthorizedException("Malformed token");
+    // if(p_level(decoded.data.role) == -1) throw new errors.AnauthorizedException("Malformed token");
 
-    if(p_level(privillege_level) > p_level(decoded.data.role)) 
+    if(decoded.data.roles.indexOf(privillege_level) == -1) 
         throw new errors.AnauthorizedException("Not enough privilleges");
 
     return decoded.data.username;
