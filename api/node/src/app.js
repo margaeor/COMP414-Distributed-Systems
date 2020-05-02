@@ -21,12 +21,13 @@ const {
   atomicStartTournament,
   atomicEndGame,
   resetActiveGameState,
-  createGame
+  createGame,
+  canUserJoinNewGame
 } = require('./lib/core.js');
 
 
 const User = require('./mongo/user_model.js');
-const {Tournament,TournamentRound} = require('./mongo/tournament_model.js');
+const {Tournament,TournamentRound, ActiveTournament} = require('./mongo/tournament_model.js');
 const {Game, ActiveGame} = require('./mongo/game_model.js');
 const Lobby = require('./mongo/lobby_model.js');
 
@@ -176,17 +177,34 @@ app.get('/tournament/create', async (req, res) => {
 
   let jwt = req.query.jwt;
   let tournament_name = req.query.name;
+  let max_players = req.query.max_players;
   let game_type = req.query.game_type;
   try {
 
     let username = authenticateUser(jwt, 'official');
 
-    if(tournament_name && game_type) {
+    if(tournament_name && game_type && max_players) {
+
+      try {
+        max_players = parseInt(max_players);
+      } catch(e) {
+        throw new errors.InvalidArgumentException('Wrong max players');
+      }
+      
+      let mx = globals.MAX_TOURNAMENT_PLAYERS;
+      let mn = globals.MIN_TOURNAMENT_PLAYERS;
+      if(max_players < mn || max_players > mx) 
+        throw new errors.InvalidArgumentException('Max players must be between '+String(mn)+' and '+String(mx));
 
       let tournament =  await Tournament.create({
         name: tournament_name,
-        game_type: game_type
+        game_type: game_type,
+        max_players:max_players
       });
+
+
+      let active = await ActiveTournament.findByIdAndUpdate(
+        tournament._id,{_id:tournament._id},{upsert:true,new:true}).exec();
 
       res.json(errors.createSuccessResponse('Tournament created',tournament));
 
@@ -197,8 +215,6 @@ app.get('/tournament/create', async (req, res) => {
     return res.json(errors.convertExceptionToResponse(e));
   }
 });
-
-
 
 
 
@@ -243,15 +259,20 @@ app.get('/tournament/register', async function(req, res) {
       
       let tournament = await Tournament.findById(tournament_id).exec();
       if(tournament) {
+        if(tournament.has_started)
+          throw new errors.InvalidArgumentException('Tournament already started');
 
         if(tournament.participants.indexOf(username) != -1) 
           throw new errors.InvalidArgumentException('Already joined');
 
-        if(tournament.participants.length >= globals.MAX_TOURNAMENT_PLAYERS) 
+        if(tournament.participants.length >= tournament.max_players) 
           throw new errors.InvalidArgumentException('No more players');
 
         tournament.participants.push(username);
-        tournament.save();
+        await tournament.save();
+        
+        user.tournaments.push(tournament._id);
+        await user.save();
 
         res.json(errors.createSuccessResponse('Registered tournament'));
       } else throw new errors.InvalidOperationException('Cannot register tournament');
@@ -368,6 +389,7 @@ app.get('/user/stats', async function(req, res) {
 
 });
 
+// @TODO make this less costly
 app.get('/me/match_history', async function(req, res) {
   
   let jwt = req.query.jwt;
@@ -377,7 +399,7 @@ app.get('/me/match_history', async function(req, res) {
 
     if(username) {
 
-      let user = await User.findById(username).
+      let user_past_games = await User.findById(username).
       read('secondaryPreferred').
       select(
         {"past_games":1}
@@ -392,18 +414,62 @@ app.get('/me/match_history', async function(req, res) {
           'player1': 1,
           'player2': 1
         },
+        options: { sort: '-date_created' },
         populate: {
           path: 'tournament_id',
           select: {
             'name': 1,
             'date_created': 1
-          }
+          },
+          options: { sort: '-date_created' }
         }
       }).
       exec();
 
-      if(user) {
-        res.json(errors.createSuccessResponse('',user['past_games']));
+      let user_tournaments = await User.findById(username).
+      read('secondaryPreferred').
+      select(
+        {"tournaments":1}
+      ).
+      populate({
+        path: 'tournaments',
+        select: {
+          'name': 1,
+          'date_created': 1,
+          'game_type':1,
+          'has_started': 1,
+          'has_ended':1,
+          'rounds':1
+        },
+        populate: {
+          path: 'rounds',
+          select: {
+            'games': 1,
+            '_id': 0
+          },
+          populate: {
+            path: 'games',
+            select: {
+              'has_ended': 1,
+              'tournament_id':1,
+              'date_created': 1,
+              'score' : 1,
+              'player1': 1,
+              'player2': 1
+            }
+          }
+        },
+        options: { sort: '-date_created' }
+      }).
+      exec();
+
+
+      if(user_past_games && user_tournaments) {
+        let data = {
+          past_games : user_past_games['past_games'],
+          user_tournaments : user_tournaments['tournaments']
+        };
+        res.json(errors.createSuccessResponse('',data));
       } else throw new errors.InvalidOperationException('User not found');
 
     } else throw new errors.InvalidArgumentException('Wrong parameters');
@@ -413,6 +479,85 @@ app.get('/me/match_history', async function(req, res) {
   }
 
 });
+
+// @TODO add max players to tournament
+app.get('/me/lobby', async function(req, res) {
+  
+  let jwt = req.query.jwt;
+  try {
+
+    let username = authenticateUser(jwt);
+
+    if(username) {
+
+      let user = await User.findById(username).
+      read('secondaryPreferred').
+      select(
+        {"active_games":1}
+      ).
+      populate({
+        path: 'active_games',
+        select: {
+          'has_ended': 1,
+          'tournament_id': 1,
+          'date_created': 1,
+          'player1': 1,
+          'player2': 1,
+          'game_type': 1
+        },
+        populate: {
+          path: 'tournament_id',
+          select: {
+            'name': 1,
+            'date_created': 1
+          }
+        }
+      }).
+      exec();
+      
+
+      let active_tournaments = await ActiveTournament.find().
+      read('secondaryPreferred').
+      select(
+        {"active_games":1}
+      ).
+      populate({
+        path: '_id',
+        select: {
+          'name': 1,
+          'date_created': 1,
+          'has_started':1,
+          'has_ended':1,
+          'participants':1
+        },
+      }).lean().exec();
+
+      
+      active_tournaments = active_tournaments.map(x => x['_id']);
+      active_tournaments = active_tournaments.filter(x => 
+        !x['has_ended'] && 
+        (!x['has_started'] || x['participants'].indexOf(username) != -1
+      ));
+      active_tournaments = active_tournaments.map(x => {delete x.participants; return x});
+      
+      if(user) {
+        let active_games = user['active_games'];
+        let data = {
+          active_games: active_games,
+          active_tournaments: active_tournaments
+        };
+        res.json(errors.createSuccessResponse('',data));
+      } else throw new errors.InvalidOperationException('User not found');
+
+    } else throw new errors.InvalidArgumentException('Wrong parameters');
+  } catch(e){
+    logger.log(e);
+    return res.json(errors.convertExceptionToResponse(e));
+  }
+
+});
+
+
 
 app.get('/me/active_games', async function(req, res) {
   

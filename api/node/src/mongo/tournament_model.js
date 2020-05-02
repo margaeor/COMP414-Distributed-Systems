@@ -38,12 +38,24 @@ var tournament_round = new mongoose.Schema({
   }
 });
 
+var active_tournament = new mongoose.Schema({
+  _id:{
+    type: Schema.Types.ObjectId,
+    ref: 'tournament',
+    required: true
+  }
+});
 
 
 var tournament = new mongoose.Schema({
   name: {
     type: String,
     required: true
+  },
+  max_players: {
+    type:Number,
+    required: true,
+    default:8
   },
   date_created: {
     type: Date,
@@ -93,6 +105,7 @@ tournament.plugin(mongoosePaginate);
 
 var TournamentRound = mongoose.model('tournament_round', tournament_round);
 var Tournament = mongoose.model('tournament', tournament);
+var ActiveTournament = mongoose.model('active_tournament', active_tournament);
 
 function arrayLimit(val) {
   console.log("LENGTH IS "+val.length);
@@ -104,5 +117,6 @@ Tournament.createCollection();
 
 module.exports = {
   Tournament:Tournament,
-  TournamentRound: TournamentRound
-};     
+  TournamentRound: TournamentRound,
+  ActiveTournament: ActiveTournament
+};

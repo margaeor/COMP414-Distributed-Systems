@@ -37,6 +37,10 @@ var user = new Schema({
   past_games: [{
     type: Schema.Types.ObjectId,
     ref: 'game'
+  }],
+  tournaments: [{
+    type: Schema.Types.ObjectId,
+    ref: 'tournament'
   }]
 });
 

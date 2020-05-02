@@ -5,6 +5,10 @@ var connect = require('./connect.js');
 var Schema = mongoose.Schema;
 
 var lobby = new Schema({
+    active_tournaments: [{
+        type: Schema.Types.ObjectId,
+        ref: 'game'
+    }],
     game_type : {
         type: String,
         enum : globals.GAME_TYPES,

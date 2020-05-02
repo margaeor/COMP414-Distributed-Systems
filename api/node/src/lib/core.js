@@ -2,12 +2,14 @@ const globals = require('./globals.js');
 const errors = require('./errors.js');
 const elo = require('./elo.js');
 const zookeeper = require('../zookeeper/functions.js');
+const {shuffleArray,findIpFromRequest} = require('./util.js');
 const mongoose = require('mongoose');
 const assert = require('assert');
 const _ = require('lodash');
 
+
 const User = require('../mongo/user_model.js');
-const {Tournament,TournamentRound} = require('../mongo/tournament_model.js');
+const {Tournament,TournamentRound, ActiveTournament} = require('../mongo/tournament_model.js');
 const {Game, ActiveGame} = require('../mongo/game_model.js');
 const Lobby = require('../mongo/lobby_model.js');
 
@@ -255,7 +257,11 @@ async function atomicEndTournamentGame(session, game, score) {
         ];
 
         tournament.leaderboard = leaderboard;
+        tournament.has_ended = true;
         await tournament.save({session});
+
+        // Remove tournament from active tournament list
+        await ActiveTournament.findByIdAndRemove(tournament._id).session(session);
       }
 
     }
@@ -265,7 +271,7 @@ async function atomicEndTournamentGame(session, game, score) {
   
   await last_round.save({session});
 
-
+  return tournament;
 }
 
 /**
@@ -311,8 +317,15 @@ async function atomicEndGame(session, game_id, score) {
     createUserIfNotExists(game.player1);
     createUserIfNotExists(game.player2);
 
-    if(game.tournament_id) await atomicEndTournamentGame(session,game,score);
-    else {
+    if(game.tournament_id) {
+      let tournament = await atomicEndTournamentGame(session,game,score);
+      let user1 = await User.findByIdAndUpdate(game.player1,
+        {"$addToSet": {past_games: game._id}},{new:true,upsert:true})
+        .session(session);
+      let user2 = await User.findByIdAndUpdate(game.player2,
+          {"$addToSet": {past_games: game._id}},{new:true,upsert:true})
+          .session(session);
+    } else {
       // If the game is a normal game, update stats
       let user1 = await User.findByIdAndUpdate(game.player1,
           {"$addToSet": {past_games: game._id}},{new:true,upsert:true})
@@ -451,5 +464,6 @@ async function atomicEndGame(session, game_id, score) {
       atomicEndTournamentGame: atomicEndTournamentGame,
       atomicEndGame: atomicEndGame,
       resetActiveGameState: resetActiveGameState,
-      createGame: createGame
+      createGame: createGame,
+      canUserJoinNewGame:canUserJoinNewGame
   }

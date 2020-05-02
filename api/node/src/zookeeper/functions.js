@@ -28,6 +28,7 @@ const nodeExistsPromise = (...args) => {
 
 async function validateServerClaim(server_id,server_ip) {
   try {
+    if(globals.DEBUG) return true;
     let node = '/playmasters/'+server_id;
 
     let value = (await getValuePromise(node)).toString('utf8');
