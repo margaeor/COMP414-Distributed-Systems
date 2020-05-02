@@ -40,7 +40,9 @@ class Auth {
 
         $hash = password_hash($password, PASSWORD_DEFAULT);
 
-        if($this->db->insertUser($username, $hash, $email, 'player', $secret) != -1) {
+        if($this->db->insertUser($username, $hash, $email, $secret) != -1) {
+            $user = $this->db->fetchUser($username);
+            if($user && $this->db->setRoles($user,array('player')) != -1)
             return True;
         } else {
             throw new Exception("Error inserting user");
@@ -92,14 +94,14 @@ class Auth {
         $hash = password_hash($new_password, PASSWORD_DEFAULT);
 
         if($this->db->updatePassword($username, $hash, $secret) == 0) {
-            return True;
+            return $this->login($username,$new_password);
         } else {
             throw new Exception("Access is denied.");
         }
 
     }
 
-    function changeRole($token, $username, $new_role) {
+    function setRoles($token, $username, $new_roles) {
         
 
         if(!$this->db || !$this->db->conn) throw new Exception("Database connection not established!");
@@ -115,14 +117,24 @@ class Auth {
             throw new Exception("Access is denied.");
 
         } 
+        
+        $user = $this->db->fetchUser($decoded->data->username);
+        if(!$user) throw new Exception("No such user exists");
 
-        $user_info = $this->db->fetchUser($decoded->data->username);
+        $roles = $this->db->fetchUserRoles($user['id']);
 
-        if($user_info['role'] === 'admin' && in_array($new_role,$this->config['user_roles'])) {
-            if($this->db->updateRole($username, $new_role) === 0) {
+        if(is_array($new_roles)) array_push($new_roles,'player');
+
+        if(is_array($roles) && in_array('admin', $roles)) {
+
+            $target_user = $this->db->fetchUser($username);
+
+            if(!$target_user) throw new Exception("User does not exist");
+
+            if($this->db->setRoles($target_user, $new_roles) === 0) {
                 return True;
             } else {
-                throw new Exception("No such user exists");
+                throw new Exception("Cannot set permissions");
             }
         } else {
             throw new Exception("Operation not permitted!");
@@ -137,17 +149,20 @@ class Auth {
         $issuer_claim = $this->config['key_issuer']; 
         $issuedat_claim = time(); // issued at
         $expire_claim = $issuedat_claim + $this->config['token_lifetime']; // expire time in seconds
+        $roles = $this->db->fetchUserRoles($user['id']);
+
+        $data = array(
+            "id" => $user['id'],
+            "username" => $user['username'],
+            "email" => $user['email'],
+            "roles" => $roles
+        );
         $token = array(
             "iss" => $issuer_claim,
             "iat" => $issuedat_claim,
             "exp" => $expire_claim,
-            "data" => array(
-                "id" => $user['id'],
-                "username" => $user['username'],
-                "email" => $user['email'],
-                "role" => $user['role']
-        ));
-
+            "data" => $data);
+        
         $jwt = JWT::encode($token, $secret_key, $this->config['algorithm']);
         
 
@@ -166,6 +181,8 @@ class Auth {
 
         return array(
             'jwt' => $jwt,
+            'username' => $data['username'],
+            'roles' => $data['roles'],
             'refresh_token' => $refresh_token,
             'refresh_expiration' => $issuedat_claim + $this->config['refresh_token_lifetime'],
             'public_key' => base64_encode($this->config['auth_public'])
@@ -183,7 +200,7 @@ class Auth {
             'refres'
         );
 
-        if ($user = $this->db->fetchUser($username,$password)) {
+        if ($user = $this->db->fetchUser($username)) {
             $pass = $user['password'];
             $user_id = $user['id'];
             

@@ -43,15 +43,15 @@ class DB {
         else return array();
     }
 
-    function insertUser($username, $hash, $email, $role, $secret) {
+    function insertUser($username, $hash, $email, $secret) {
 
         if(!$this->conn) return -1;
 
-        $query = "INSERT INTO users (username,password,email,role,secret) 
-        VALUES (?,?,?,?,?)";
+        $query = "INSERT INTO users (username,password,email,secret) 
+        VALUES (?,?,?,?)";
 
         $stmt = $this->conn->prepare($query);
-        $stmt->bind_param("sssss", $username, $hash, $email, $role, $secret);
+        $stmt->bind_param("ssss", $username, $hash, $email, $secret);
 
         if($stmt->execute()) {
             $stmt->close();
@@ -96,6 +96,25 @@ class DB {
         // } else {
         //     return -1;
         // }
+    }
+
+    function setRoles($user, $roles) {
+
+        if(!is_array($roles)) return -1;
+
+        if(!$user) return -1;
+
+        $stmt = $this->conn->prepare("DELETE FROM roles WHERE user_id = ?;");
+        $stmt->bind_param("i", $user['id']);
+        if(!$stmt->execute()) return -1;
+        
+        foreach (array_unique($roles) as $role) {
+            $stmt = $this->conn->prepare("INSERT INTO roles VALUES (?,?);");
+            $stmt->bind_param("is", $user['id'],$role);
+            if(!$stmt->execute()) return -1;
+        }
+        return 0;
+
     }
 
     function updatePassword($username,$hash, $secret) {
@@ -174,6 +193,24 @@ class DB {
         }
         return array();
 
+    }
+    function fetchUserRoles($user_id) {
+        $stmt = $this->conn->prepare("SELECT role FROM roles WHERE user_id = ? ");
+        $stmt->bind_param("s", $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows === 0) {
+            return array();
+        }
+
+        $roles = array();
+        while($row = $result->fetch_array(MYSQLI_NUM)) {
+            array_push($roles,$row[0]);
+        }
+        $stmt->close();
+
+        return $roles;
     }
 
     function insertToken($token, $user_id, $token_lifetime) {

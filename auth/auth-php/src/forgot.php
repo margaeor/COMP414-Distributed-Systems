@@ -10,10 +10,9 @@ if(isset($_GET['username'], $_GET['password'], $_GET['secret']) &&
     
     $auth = new Auth();
     try {
-        $auth->resetPassword($_GET['username'],$_GET['password'],$_GET['secret']);
-        echo json_encode([
-            'status' => 200
-        ]);
+        $response = $auth->resetPassword($_GET['username'],$_GET['password'],$_GET['secret']);
+        $response['status'] = 200;
+        echo json_encode($response);
 
     } catch (Exception $e) {
         echo json_encode([
