@@ -29,6 +29,8 @@ COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 RUN mkdir -p /var/www/html
 RUN mkdir -p /.composer
 
+COPY ./src/ /var/www/html/
+
 # Make sure files/folders needed by the processes are accessable when they run under the nobody user
 RUN chown -R nobody.nobody /var/www/html && \
   chown -R nobody.nobody /run && \
@@ -44,7 +46,7 @@ RUN chmod -R 777 /var/www/html
 # Make the document root a volume
 # VOLUME /var/www/html
 
-COPY ./src/ /var/www/html/
+
 
 
 # Switch to use a non-root user from here on
