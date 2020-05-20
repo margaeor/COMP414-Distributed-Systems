@@ -265,13 +265,3 @@ if (typeof define !== 'undefined')
     return TicTacToe
   })
 
-
-
-// var t = TicTacToe('110020002');
-
-// console.log(t.getBoard());
-// console.log('Has ended ',t.hasGameEnded());
-// console.log(t.move('02'));
-// console.log('Has ended ',t.hasGameEnded());
-
-// console.log('Hello');
