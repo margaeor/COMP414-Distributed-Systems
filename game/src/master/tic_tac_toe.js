@@ -1,4 +1,4 @@
-
+var assert = require('assert');
 
 // fen-> fen for tic tac toe
 var TicTacToe = function(fen) {
@@ -184,10 +184,79 @@ var TicTacToe = function(fen) {
                 Returns the array of moves
             */
             return moves;
+        },
+        getMoveNumber: () => {
+            return getHalfMove(board);
+        },
+        turn: () => {
+            return getPlayerTurn(board);
         }
     };
 }
 
+function test1() {
+    let t = new TicTacToe();
+    assert(t.fen() === "000000000");
+    assert(t.getMoveNumber() === 0);
+    assert(t.hasGameEnded() === 0);
+    assert(t.turn() === 1);
+
+    // Illegal moves
+    assert(!t.move('03') && !t.move('030'));
+
+    // move to center
+    assert(t.move('11') === '11');
+    assert(t.getMoveNumber() === 1);
+    assert(t.fen() === '000010000');
+    assert(t.hasGameEnded() === 0);
+    assert(t.turn() === 2);
+
+    // move northwest
+    assert(t.move('00') === '00');
+    assert(t.getMoveNumber() === 1);
+    assert(t.fen() === '200010000');
+    assert(t.hasGameEnded() === 0);
+    assert(t.turn() === 1);
+
+    // move north
+    assert(t.move('01') === '01');
+    assert(t.getMoveNumber() === 2);
+    assert(t.fen() === '210010000');
+    assert(t.hasGameEnded() === 0);
+    assert(t.turn() === 2);
+
+    // move southeast
+    assert(t.move('22') === '22');
+    assert(t.getMoveNumber() === 2);
+    assert(t.fen() === '210010002');
+    assert(t.hasGameEnded() === 0);
+    assert(t.turn() === 1);
+
+    // move south (final move)
+    assert(t.move('21') === '21');
+    assert(t.getMoveNumber() === 3);
+    assert(t.fen() === '210010012');
+    assert(t.hasGameEnded() === 1);
+    assert(t.turn() === 2);
+}
+
+function test2() {
+    let t = new TicTacToe('011120002');
+    assert(t.fen() === "011120002");
+    assert(t.getMoveNumber() === 3);
+    assert(t.hasGameEnded() === 0);
+    assert(t.turn() === 2);
+
+    // move north west (final move)
+    assert(t.move('00') === '00');
+    assert(t.getMoveNumber() === 3);
+    assert(t.fen() === '211120002');
+    assert(t.hasGameEnded() === 2);
+    assert(t.turn() === 1);
+}
+
+//test1();
+//test2();
 
 if (typeof exports !== 'undefined') exports.TicTacToe = TicTacToe
 /* export Chess object for any RequireJS compatible environment */

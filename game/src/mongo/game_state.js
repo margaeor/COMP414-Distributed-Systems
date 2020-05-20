@@ -2,6 +2,7 @@
 var mongoose = require('mongoose');
 
 var game_state = new mongoose.Schema({
+    _id: {type: String},
     position: {
         type: String,
         required: true
