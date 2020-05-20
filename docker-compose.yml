@@ -4,7 +4,7 @@ services:
   auth:
     build: 
       context: './auth/auth-php/'
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile.prod
     ports:
       - "8080:80"
     secrets:
@@ -17,8 +17,8 @@ services:
       AUTH_ISSUER: "${AUTH_ISSUER}"
       AUTH_PUBLIC: "${AUTH_PUBLIC}"
       AUTH_PRIVATE: "${AUTH_PRIVATE}"
-    volumes:
-      - ./auth/auth-php/src/:/var/www/html/
+    #volumes:
+    #  - ./auth/auth-php/src/:/var/www/html/
     networks:
       - backend
     container_name: auth
@@ -171,8 +171,8 @@ services:
     #   dockerfile: Dockerfile.dev
     image: node:12
     working_dir: /home/node/app/
-    #ports:
-    #  - "3002:3000"
+    ports:
+      - "3002:3000"
     environment:
       JWT_PUBLIC_KEY: "${AUTH_PUBLIC}"
       MONGODB_USER: '${MONGODB_PLAYMASTER_USER}'

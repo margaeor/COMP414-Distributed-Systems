@@ -6,10 +6,17 @@ import {
   backupProgress as apiBackupProgress
 } from "../api/source";
 import {
-  startingChessPosition,
-  processChessMove,
-  processChessResults,
+  startingChessPosition as cStartingChessPosition,
+  processChessMove as cProcessChessMove,
+  processChessResults as cProcessChessResults,
 } from "./ChessMaster";
+
+import {
+  startingChessPosition as tStartingChessPosition,
+  processChessMove as tProcessChessMove,
+  processChessResults as tProcessChessResults,
+} from "./TicTacToeMaster";
+
 import { Result } from "../api/types";
 
 export default class PlayMaster extends AbstractPlayMaster {
@@ -29,8 +36,9 @@ export default class PlayMaster extends AbstractPlayMaster {
   }
 
   protected startingPosition(game: string): string {
-    if (game !== "chess") throw new Error(`game ${game} is not implemented`);
-    return startingChessPosition();
+    if (game === "chess") return cStartingChessPosition();
+    else if(game === "tictactoe") return tStartingChessPosition();
+    else throw new Error(`game ${game} is not implemented`);
   }
 
   protected processMove(
@@ -39,11 +47,16 @@ export default class PlayMaster extends AbstractPlayMaster {
     data: string,
     move: string
   ): string | null {
-    if (game !== "chess") throw new Error(`game ${game} is not implemented`);
-    return processChessMove(user, data, move);
+    if (game === "chess") return cProcessChessMove(user, data, move);
+    else if(game === "tictactoe") return tProcessChessMove(user, data, move);
+    else throw new Error(`game ${game} is not implemented`);
+    
   }
 
   protected processResults(game: string, data: string): Result {
-    return processChessResults(data);
+
+    if (game === "chess") return cProcessChessResults(data);
+    else if(game === "tictactoe") return tProcessChessResults(data);
+    else throw new Error(`game ${game} is not implemented`);
   }
 }
