@@ -68,7 +68,7 @@ export function updateTournaments(
   };
 }
 
-export function updateOngoingPlaysAction(
+export function updateOngoingPlays(
   ongoingPlays: (Play | TournamentPlay)[]
 ): UpdateOngoingAction {
   return {
