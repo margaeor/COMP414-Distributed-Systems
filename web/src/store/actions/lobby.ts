@@ -1,6 +1,18 @@
-import { LobbyState, Game } from "../types";
+import {
+  LobbyState,
+  Game,
+  FinishedPracticePlay,
+  FinishedTournament,
+  TournamentPlay,
+  Play,
+  Tournament,
+} from "../types";
 
 export const UPDATE_LOBBY_DATA = "UPDATE_LOBBY_DATA";
+export const UPDATE_TOURNAMENTS = "UPDATE_TOURNAMENTS";
+export const UPDATE_ONGOING_PLAYS = "UPDATE_ONGOING_PLAYS";
+export const UPDATE_SCORES = "UPDATE_SCORES";
+
 export const JOIN_GAME = "JOIN_GAME";
 export const JOIN_TOURNAMENT = "JOIN_TOURNAMENT";
 export const JOIN_QUICK_PLAY = "JOIN_QUICK_PLAY";
@@ -8,6 +20,21 @@ export const JOIN_QUICK_PLAY = "JOIN_QUICK_PLAY";
 export interface UpdateLobbyAction {
   type: typeof UPDATE_LOBBY_DATA;
   newState: LobbyState;
+}
+
+export interface UpdateScoresAction {
+  type: typeof UPDATE_SCORES;
+  scores: (FinishedTournament | FinishedPracticePlay)[];
+}
+
+export interface UpdateOngoingAction {
+  type: typeof UPDATE_ONGOING_PLAYS;
+  ongoingPlays: (Play | TournamentPlay)[];
+}
+
+export interface UpdateTournamentsAction {
+  type: typeof UPDATE_TOURNAMENTS;
+  tournaments: Tournament[];
 }
 
 export interface JoinGameAction {
@@ -29,6 +56,33 @@ export function updateLobby(newState: LobbyState): UpdateLobbyAction {
   return {
     type: UPDATE_LOBBY_DATA,
     newState,
+  };
+}
+
+export function updateTournaments(
+  tournaments: Tournament[]
+): UpdateTournamentsAction {
+  return {
+    type: UPDATE_TOURNAMENTS,
+    tournaments,
+  };
+}
+
+export function updateOngoingPlaysAction(
+  ongoingPlays: (Play | TournamentPlay)[]
+): UpdateOngoingAction {
+  return {
+    type: UPDATE_ONGOING_PLAYS,
+    ongoingPlays,
+  };
+}
+
+export function updateScores(
+  scores: (FinishedTournament | FinishedPracticePlay)[]
+): UpdateScoresAction {
+  return {
+    type: UPDATE_SCORES,
+    scores,
   };
 }
 

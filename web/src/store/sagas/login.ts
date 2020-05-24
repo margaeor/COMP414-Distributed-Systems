@@ -96,7 +96,6 @@ export function* getAccessToken() {
       } else {
         throw e;
       }
-      console.error(e.toString());
     }
   }
 }
