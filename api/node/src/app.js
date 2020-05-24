@@ -473,7 +473,10 @@ app.get('/me/match_history', async function(req, res) {
           user_tournaments : user_tournaments['tournaments']
         };
         res.json(errors.createSuccessResponse('',data));
-      } else res.json(errors.createSuccessResponse('',[]));
+      } else res.json(errors.createSuccessResponse('',{
+        "past_games":[],
+        "user_tournaments":[]
+      }));
       //throw new errors.InvalidOperationException('User not found');
 
     } else throw new errors.InvalidArgumentException('Wrong parameters');
@@ -559,7 +562,10 @@ app.get('/me/lobby', async function(req, res) {
           active_tournaments: active_tournaments
         };
         res.json(errors.createSuccessResponse('',data));
-      } else res.json(errors.createSuccessResponse('',[]));
+      } else res.json(errors.createSuccessResponse('',{
+        "active_games":[],
+        "active_tournaments":[]
+      }));
       //else throw new errors.InvalidOperationException('User not found');
 
     } else throw new errors.InvalidArgumentException('Wrong parameters');
