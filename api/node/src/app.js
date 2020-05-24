@@ -144,7 +144,7 @@ app.get('/practice/join_queue', async (req, res) => {
 
 
 // Join existing practice game
-app.get('/practice/join_game', async (req, res) => {
+app.get('/join_game', async (req, res) => {
   
   let game_id = req.query.game_id;
   let jwt = req.query.jwt;

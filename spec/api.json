@@ -206,7 +206,7 @@ GET /practice/join_queue?jwt=#&game_type=chess|tic-tac-toe
 
 
 # Joins an existing active game
-GET /practice/join_queue?jwt=#&game_id=#
+GET /join_game?jwt=#&game_id=#
 {
     "status": 200,
     "data": {
