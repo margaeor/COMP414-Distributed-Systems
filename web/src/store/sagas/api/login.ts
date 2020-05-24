@@ -1,4 +1,8 @@
-import { RefreshTokenError, ConnectionError } from "./errors";
+import {
+  RefreshTokenError,
+  ConnectionError,
+  WrongParametersError,
+} from "./errors";
 import { sleep } from "./utils";
 import { User } from "../../types";
 import axios from "axios";
@@ -40,19 +44,27 @@ function getRefreshToken(): string {
 
 export async function checkRefreshToken(): Promise<boolean> {
   // Todo: implement the api call
-  return true;
+  return getRefreshToken() !== "";
 }
 
 export async function renewRefreshToken(username: string, password: string) {
   try {
-    const res = await axios.get("/login", {
+    const { data } = await axios.get("auth/login", {
       params: {
         username,
         password,
       },
     });
-    console.log(res);
+
+    if (data.status !== 200) {
+      throw new WrongParametersError(
+        data.error || `Unknown Error: ${data.status}`
+      );
+    } else {
+      setRefreshToken(data.refresh_token);
+    }
   } catch (e) {
+    if (e instanceof WrongParametersError) throw e;
     throw new ConnectionError(e.message);
   }
 }
@@ -60,10 +72,30 @@ export async function renewRefreshToken(username: string, password: string) {
 export async function signUp(
   username: string,
   password: string,
+  email: string,
   answer: string
 ) {
-  // TODO: Implement this call
-  await sleep(200);
+  try {
+    const { data } = await axios.get("auth/create", {
+      params: {
+        username,
+        password,
+        email,
+        secret: answer,
+      },
+    });
+
+    if (data.status !== 200) {
+      throw new WrongParametersError(
+        data.error || `Unknown Error: ${data.status}`
+      );
+    } else {
+      setRefreshToken(data.refresh_token);
+    }
+  } catch (e) {
+    if (e instanceof WrongParametersError) throw e;
+    throw new ConnectionError(e.message);
+  }
 }
 
 export async function changePassword(
@@ -71,36 +103,59 @@ export async function changePassword(
   password: string,
   answer: string
 ) {
-  // TODO: Implement this call
-  await sleep(200);
+  try {
+    const { data } = await axios.get("auth/forgot", {
+      params: {
+        username,
+        password,
+        secret: answer,
+      },
+    });
+
+    if (data.status !== 200) {
+      throw new WrongParametersError(
+        data.error || `Unknown Error: ${data.status}`
+      );
+    } else {
+      setRefreshToken(data.refresh_token);
+    }
+  } catch (e) {
+    if (e instanceof WrongParametersError) throw e;
+    throw new ConnectionError(e.message);
+  }
 }
 
 export async function renewAccessToken(): Promise<{
   token: string;
   user: User;
 }> {
-  // Todo: implement the api call
-  await sleep(200);
-  if (getRefreshToken() === "") throw new RefreshTokenError("poopie");
-  return Math.random() > 0.5
-    ? {
-        token: "vetIO",
+  try {
+    const { data } = await axios.get("auth/refresh_token", {
+      params: {
+        refresh_token: getRefreshToken(),
+      },
+    });
+
+    if (data.status !== 200) {
+      throw new RefreshTokenError(
+        data.error || `Unknown Error: ${data.status}`
+      );
+    } else {
+      setRefreshToken(data.refresh_token);
+      return {
+        token: data.jwt,
         user: {
-          username: "vetIO",
-          admin: true,
-          officer: false,
-          email: "vet@prohax.io",
-        },
-      }
-    : {
-        token: "killX",
-        user: {
-          username: "killX",
-          admin: true,
-          officer: false,
-          email: "vet@prohax.io",
+          username: data.username,
+          officer: data.roles.includes("official"),
+          admin: data.roles.includes("admin"),
+          email: "",
         },
       };
+    }
+  } catch (e) {
+    if (e instanceof RefreshTokenError) throw e;
+    throw new ConnectionError(e.message);
+  }
 }
 
 export async function requestLogout() {

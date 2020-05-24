@@ -15,7 +15,14 @@ export class ConnectionError extends Error {
 export class AccessTokenError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = "ConnectionError";
+    this.name = "AccessTokenError";
+  }
+}
+
+export class WrongParametersError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "WrongParametersError";
   }
 }
 
