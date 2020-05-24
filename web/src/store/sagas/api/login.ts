@@ -1,6 +1,7 @@
-import { RefreshTokenError } from "./errors";
+import { RefreshTokenError, ConnectionError } from "./errors";
 import { sleep } from "./utils";
 import { User } from "../../types";
+import axios from "axios";
 
 const REFRESH_NAME = "refresh";
 const REFRESH_DAYS = 30;
@@ -43,9 +44,17 @@ export async function checkRefreshToken(): Promise<boolean> {
 }
 
 export async function renewRefreshToken(username: string, password: string) {
-  // TODO: Implement this call
-  setRefreshToken("abc");
-  await sleep(200);
+  try {
+    const res = await axios.get("/login", {
+      params: {
+        username,
+        password,
+      },
+    });
+    console.log(res);
+  } catch (e) {
+    throw new ConnectionError(e.message);
+  }
 }
 
 export async function signUp(
