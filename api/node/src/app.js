@@ -531,7 +531,9 @@ app.get('/me/lobby', async function(req, res) {
           'date_created': 1,
           'has_started':1,
           'has_ended':1,
-          'participants':1
+          'participants':1,
+          'game_type':1,
+          'max_players':1
         },
       }).lean().exec();
 
@@ -541,7 +543,13 @@ app.get('/me/lobby', async function(req, res) {
         !x['has_ended'] && 
         (!x['has_started'] || x['participants'].indexOf(username) != -1
       ));
-      active_tournaments = active_tournaments.map(x => {delete x.participants; return x});
+      active_tournaments = active_tournaments.map(x => {
+        let l = x;
+        l['joined'] = (x['participants'].indexOf(username) != -1);
+        l['players'] = x['participants'].length;
+        delete l.participants; 
+        return l;
+      });
       
       if(user) {
         let active_games = user['active_games'];

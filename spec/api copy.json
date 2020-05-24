@@ -74,21 +74,39 @@ OR
           }
        ],
        "active_tournaments":[
-          { // This is an ongoing tournament 
-             "_id":"5ecac0b30b2fbc0033743809",
-             "has_started":true,
-             "has_ended":false,
-             "name":"NiceTournament",
-             "date_created":"2020-05-24T18:45:07.338Z"
-          },
-          { // This tournament hasn't started yet and the user
-            // must be able to join it
-             "_id":"5ecac3d40b2fbc003374380e",
-             "has_started":false,
-             "has_ended":false,
-             "name":"SecondTournament",
-             "date_created":"2020-05-24T18:58:28.640Z"
-          }
+            {
+                "_id": "5ecafa0cc6f19b15b2b07963",
+                "max_players": 5,
+                "has_started": false,
+                "has_ended": false,
+                "name": "NiceTournament",
+                "game_type": "chess",
+                "date_created": "2020-05-24T22:49:48.308Z",
+                "joined": false,
+                "players": 0
+            },
+            {
+                "_id": "5ecafa16c6f19b15b2b07964",
+                "max_players": 5,
+                "has_started": false,
+                "has_ended": false,
+                "name": "NiceTournament2",
+                "game_type": "chess",
+                "date_created": "2020-05-24T22:49:58.487Z",
+                "joined": true,
+                "players": 2
+            },
+            {
+                "_id": "5ecafa1ac6f19b15b2b07965",
+                "max_players": 5,
+                "has_started": false,
+                "has_ended": false,
+                "name": "NiceTournament3",
+                "game_type": "chess",
+                "date_created": "2020-05-24T22:50:02.457Z",
+                "joined": true,
+                "players": 3
+            }
        ]
     }
  }
