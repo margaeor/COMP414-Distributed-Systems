@@ -14,6 +14,7 @@ export interface Play {
   opponent: string;
   game: Game;
   started: boolean;
+  date: Date;
 }
 
 export interface TournamentPlay extends Play {

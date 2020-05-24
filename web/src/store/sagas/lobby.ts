@@ -1,25 +1,54 @@
-import { call, fork, put, cancel, take } from "redux-saga/effects";
-import { updateLobby, changeScreen, startLoading } from "../actions";
-import { LobbyState, ScreenState, LoaderStep, Game } from "../types";
+import { call, cancel, fork, put, select, take } from "redux-saga/effects";
 import {
-  fetchLobbyData,
-  joinPlay,
-  joinTournament,
-  joinQuickGame,
+  changeScreen,
+  JOIN_GAME,
+  JOIN_QUICK_PLAY,
+  JOIN_TOURNAMENT,
+  updateOngoingPlays,
+  updateTournaments,
+  updateScores,
+} from "../actions";
+import { selectUser } from "../selectors";
+import {
+  Game,
+  Play,
+  ScreenState,
+  Tournament,
+  TournamentPlay,
+  User,
+  FinishedPracticePlay,
+  FinishedTournament,
+} from "../types";
+import {
   checkQuickGame,
+  fetchLobbyData,
+  joinQuickGame,
+  joinTournament,
+  fetchScores,
 } from "./api/lobby";
-import { sleep, callApi } from "./utils";
-import { JOIN_GAME, JOIN_QUICK_PLAY, JOIN_TOURNAMENT } from "../actions";
+import { callApi, sleep } from "./utils";
 
-function* fetchLobby(token: string) {
-  const data: LobbyState = yield call(fetchLobbyData, token);
-  yield put(updateLobby(data));
+function* fetchLobby(token: string, username: string) {
+  const data: {
+    tournaments: Tournament[];
+    ongoingPlays: (Play | TournamentPlay)[];
+  } = yield call(fetchLobbyData, token, username);
+  yield put(updateOngoingPlays(data.ongoingPlays));
+  yield put(updateTournaments(data.tournaments));
 }
 
 function* periodicFetch(token: string) {
+  const { username }: User = yield select(selectUser);
+  const scores: (FinishedTournament | FinishedPracticePlay)[] = yield call(
+    fetchScores,
+    token,
+    username
+  );
+  yield put(updateScores(scores));
+
   while (1) {
     try {
-      yield* fetchLobby(token);
+      yield* fetchLobby(token, username);
     } catch (e) {
       console.log("fetching failed: " + e.toString());
     }
@@ -54,7 +83,6 @@ export default function* lobby(token: string) {
         return { screen: ScreenState.GAME, id: act.id };
       case JOIN_TOURNAMENT:
         yield call(joinTournament, token, act.id);
-        yield* fetchLobby(token);
         break;
       case JOIN_QUICK_PLAY:
         yield cancel(fetchHandler);
