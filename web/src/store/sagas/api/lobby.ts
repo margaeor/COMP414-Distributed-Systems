@@ -133,10 +133,10 @@ export async function fetchLobbyData(
           return {
             id: t._id,
             name: t.name,
-            game: Game.CHESS, //t.game_type === "chess" ? Game.CHESS : Game.TICTACTOE,
-            joined: false,
-            players: 0,
-            maxPlayers: 0,
+            game: t.game_type === "chess" ? Game.CHESS : Game.TICTACTOE,
+            joined: t.joined,
+            players: t.players,
+            maxPlayers: t.max_players,
             date: new Date(t.date_created),
           };
         }
