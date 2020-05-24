@@ -5,7 +5,7 @@ const Globals = {
     MAX_TOURNAMENT_PLAYERS: 64,
     MIN_TOURNAMENT_PLAYERS: 4,
     NUM_OF_TOURNAMENT_WINNERS: 4,
-    DEBUG: true,
+    DEBUG: false,
     PAGINATION_LIMIT: 1
 };    
 module.exports = Globals;
