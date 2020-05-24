@@ -412,7 +412,8 @@ app.get('/me/match_history', async function(req, res) {
           'date_created': 1,
           'score' : 1,
           'player1': 1,
-          'player2': 1
+          'player2': 1,
+          'game_type': 1
         },
         options: { sort: '-date_created' },
         populate: {
@@ -439,7 +440,9 @@ app.get('/me/match_history', async function(req, res) {
           'game_type':1,
           'has_started': 1,
           'has_ended':1,
-          'rounds':1
+          'rounds':1,
+          'participants':1,
+          'leaderboard':1
         },
         populate: {
           path: 'rounds',
