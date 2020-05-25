@@ -72,21 +72,24 @@ export async function fetchScores(
         } else {
           plays = [];
         }
+        let first_users = t.leaderboard.map((x : any) => x.username);
+        let position = first_users.indexOf(username);
+        position = position == -1 ? 5 : position;
 
         return {
           id: t._id,
           name: t.name,
           game: t.game_type === "chess" ? Game.CHESS : Game.TICTACTOE,
           joined: true,
-          players: 0,
-          maxPlayers: 0,
-          ranking: 0,
+          players: t.participants.length,
+          maxPlayers: t.max_players,
+          ranking: position,
           plays,
           date: new Date(t.date_created),
         };
       }
     );
-
+    
     let pastGames: (FinishedTournament | FinishedPracticePlay)[] = [];
     pastGames = pastGames.concat(tournaments, plays);
     pastGames.sort((a, b) => (b.date > a.date ? 1 : -1));
@@ -119,12 +122,12 @@ export async function fetchLobbyData(
     }
 
     const plays: (Play | TournamentPlay)[] = data.data.active_games
-      .filter((g: Record<string, Object>) => !g.tournament_id)
+      //.filter((g: Record<string, Object>) => !g.tournament_id)
       .map(
-        (p: Record<string, string>): Play => {
+        (p: Record<string, any>): Play => {
           const isPlayer1 = p.player1 === username;
-
-          return {
+          console.log(p);
+          let result:any = {
             id: p._id,
             isPlayer1,
             opponent: isPlayer1 ? p.player2 : p.player1,
@@ -132,6 +135,10 @@ export async function fetchLobbyData(
             started: true,
             date: new Date(p.date_created),
           };
+          if(p.tournament_id && p.tournament_id.hasOwnProperty('name'))
+            result['name'] = p.tournament_id.name;
+
+          return result;
         }
       )
       .sort((a: Record<string, Object>, b: Record<string, Object>) =>

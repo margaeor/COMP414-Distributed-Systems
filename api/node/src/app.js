@@ -483,7 +483,8 @@ app.get('/me/match_history', async function(req, res) {
           'has_ended':1,
           'rounds':1,
           'participants':1,
-          'leaderboard':1
+          'leaderboard':1,
+          'max_players':1
         },
         populate: {
           path: 'rounds',

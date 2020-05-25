@@ -170,6 +170,8 @@ const PlayJoin = ({
   p: Play | TournamentPlay;
   join: typeof joinGame;
 }) => {
+  console.log(p);
+  console.log(isTournamentPlay(p));
   return (
     <li className="list-node">
       <span className="list-node__name">
