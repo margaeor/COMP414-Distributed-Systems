@@ -238,3 +238,16 @@ OR
        "__v":4
     }
  }
+
+
+ /join_game?game_id=#&jwt=#
+ {
+    "status": 200,
+    "message": "",
+    "data": {
+        "server_id": "id0000000002",
+        "server_ip": "g7",
+        "_id": "5ecb0af11756eb1683158559",
+        "__v": 0
+    }
+}
