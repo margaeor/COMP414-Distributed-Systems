@@ -8,6 +8,7 @@
 }
 
 .chat {
+  width: 270px;
   align-self: stretch;
   display: flex;
   flex-direction: column;
@@ -31,6 +32,9 @@
   &__history {
     flex-shrink: 0;
     margin: 0;
+    white-space: pre-line;
+    text-overflow: ellipsis;
+    overflow: hidden;
   }
 
   &__form {
@@ -41,6 +45,7 @@
 
     &__input {
       @include text-input;
+      flex: 1;
       border-bottom-left-radius: 5px;
     }
 
