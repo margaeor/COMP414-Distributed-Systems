@@ -80,7 +80,10 @@ function* connectToServer(token: string, id: string) {
     yield put(startLoading("Waiting for Opponent..."));
     const act = yield take(channel);
     console.log(act);
-    if (act.type === RECEIVE_READY) return { socket, channel };
+    if (act.type === RECEIVE_READY) {
+      // emitMessage(socket, `${username} connected`);
+      return { socket, channel };
+    }
 
     yield* failLoadingAndExit("Connection Closed");
     return null;
@@ -118,14 +121,18 @@ function* handleServer(channel: any) {
         break;
       case RECEIVE_UPDATED_STATE:
         if (act.event.event === "OP_DISCONNECTED")
-          yield put(
-            loadingFailed(
-              "You can wait for him to reconnect or exit",
-              "Opponent disconnected",
-              false,
-              true
-            )
-          );
+          try {
+            yield put(
+              loadingFailed(
+                "You can wait for him to reconnect or exit",
+                "Opponent disconnected",
+                false,
+                true
+              )
+            );
+          } catch (e) {
+            return;
+          }
         else if (act.event.event === "OP_RECONNECTED") {
           yield put(stopLoading());
         }
