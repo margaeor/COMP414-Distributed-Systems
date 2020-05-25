@@ -58,7 +58,7 @@ const Tournament = ({
         disabled={!isOfficer}
         onClick={() => submitTournament(name, game, parseInt(players))}
       >
-        {isOfficer ? "Create Tournament" : "Not an Officer"}
+        {isOfficer ? "Create Tournament" : "Not an Official"}
       </button>
     </div>
   );
