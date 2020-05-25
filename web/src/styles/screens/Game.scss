@@ -14,15 +14,23 @@
   justify-content: stretch;
   margin-right: $top-margin;
 
-  &__history {
+  &__history-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+    flex-grow: 1;
+
     margin-top: 4px;
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
-    resize: none;
-    flex-grow: 1;
 
     @include input;
     @include colored-input;
+  }
+
+  &__history {
+    flex-shrink: 0;
+    margin: 0;
   }
 
   &__form {

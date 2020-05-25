@@ -4,13 +4,13 @@ import express from "express";
 import http from "http";
 import socketIo from "socket.io";
 import ip from "ip";
-import connection from './mongo/connect.js';
+import connection from "./mongo/connect.js";
 
 // @ts-ignore
-import { 
+import {
   registerToZookeeper,
-  changeLoadBalancingCounter
- } from "./zookeeper/functions";
+  changeLoadBalancingCounter,
+} from "./zookeeper/functions";
 import {
   CONNECTION_ERROR,
   DATA,
@@ -33,16 +33,13 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
 
-
 //var server_id: String;
 
 connection.then(() => {
-  console.log('Successfully connected to mongo');
+  console.log("Successfully connected to mongo");
 });
 // Register to zookeeper
-registerToZookeeper(ip.address()).then(
-  (server_id : any) => {
-  
+registerToZookeeper(ip.address()).then((server_id: any) => {
   const master = new PlayMaster(server_id);
 
   app.use(cors());
@@ -78,8 +75,8 @@ registerToZookeeper(ip.address()).then(
 
     try {
       await master.registerUser(socket.id, userToken, playId);
-      console.log('Registered');
-    } catch(e) {
+      console.log("Registered");
+    } catch (e) {
       disconnectSocketWithError(socket, e.message);
       return;
     }
@@ -103,7 +100,7 @@ registerToZookeeper(ip.address()).then(
       if (isOver) publishResult(playId, result);
     });
     socket.on(MESSAGE, (e: MessageEvent) =>
-      io.to(playId).send(MESSAGE, { message: e.message })
+      io.to(playId).emit(MESSAGE, { message: e.message })
     );
     socket.on("disconnect", () => {
       console.log("unregistering user...");
@@ -127,5 +124,4 @@ registerToZookeeper(ip.address()).then(
   server.listen(process.env.PORT, () => {
     console.log(`listening on *:${process.env.PORT}`);
   });
-
 });

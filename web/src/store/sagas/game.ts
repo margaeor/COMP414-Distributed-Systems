@@ -30,7 +30,7 @@ import {
   RECEIVE_UPDATED_STATE,
 } from "./api/game/receiverContract";
 import { joinPlay } from "./api/lobby";
-import { callApi, failLoadingAndExit } from "./utils";
+import { callApi, failLoadingAndExit, sleep } from "./utils";
 
 function* connectToServer(token: string, id: string) {
   let socket: SocketIOClient.Socket | null = null;
@@ -86,10 +86,9 @@ function* connectToServer(token: string, id: string) {
     return null;
   } catch (e) {
     yield* failLoadingAndExit("Connection failed: " + e.message);
-    return null;
-  } finally {
     if (channel) channel.close();
     if (socket) socket.disconnect();
+    return null;
   }
 }
 
@@ -104,6 +103,7 @@ function* handleServer(channel: any) {
 
     switch (act.type) {
       case RECEIVE_MESSAGE:
+        console.log(act);
         history = history + "\n" + act.event.message;
         yield put(updateHistory(history));
         break;
@@ -137,6 +137,7 @@ function* handleServer(channel: any) {
 function* handlePlayer(socket: SocketIOClient.Socket) {
   let isOver = false;
   let data;
+  const { username: user }: User = yield select(selectUser);
 
   while (!isOver) {
     const act = yield take([
@@ -152,7 +153,7 @@ function* handlePlayer(socket: SocketIOClient.Socket) {
         emitMove(socket, data, act.move);
         break;
       case SEND_MESSAGE:
-        emitMessage(socket, act.message);
+        emitMessage(socket, `${user}: ${act.message}`);
         break;
       case EXIT_GAME:
         emitExit(socket);

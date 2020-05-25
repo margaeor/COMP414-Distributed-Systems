@@ -48,7 +48,9 @@ const Game = ({ user, play, history, sendMessage }: IProps) => {
             </span>
           </div>
         </div>
-        <textarea className="chat__history" readOnly value={history} />
+        <div className="chat__history-container">
+          <p className="chat__history">{history}</p>
+        </div>
         <div className="chat__form">
           <input
             className="chat__form__input"
