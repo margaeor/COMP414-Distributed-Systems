@@ -121,18 +121,14 @@ function* handleServer(channel: any) {
         break;
       case RECEIVE_UPDATED_STATE:
         if (act.event.event === "OP_DISCONNECTED")
-          try {
-            yield put(
-              loadingFailed(
-                "You can wait for him to reconnect or exit",
-                "Opponent disconnected",
-                false,
-                true
-              )
-            );
-          } catch (e) {
-            return;
-          }
+          yield put(
+            loadingFailed(
+              "You can wait for him to reconnect or exit",
+              "Opponent disconnected",
+              false,
+              true
+            )
+          );
         else if (act.event.event === "OP_RECONNECTED") {
           yield put(stopLoading());
         }

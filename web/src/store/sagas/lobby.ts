@@ -7,6 +7,8 @@ import {
   updateOngoingPlays,
   updateTournaments,
   updateScores,
+  loadingFailed,
+  CANCEL_LOADING,
 } from "../actions";
 import { selectUser } from "../selectors";
 import {
@@ -61,7 +63,15 @@ function* periodicFetch(token: string) {
 }
 
 function* quickPlay(token: string, game: Game) {
-  yield* callApi("Joining Queue...", call(joinQuickGame, token, game));
+  try {
+    yield* callApi("Joining Queue...", call(joinQuickGame, token, game));
+  } catch (e) {
+    yield put(
+      loadingFailed(e.message, "Error while joining queue", false, true)
+    );
+    yield take(CANCEL_LOADING);
+    return null;
+  }
 
   // Wait until we join a play
   let timedOut = true;
@@ -107,7 +117,6 @@ export default function* lobby(token: string) {
         yield call(joinTournament, token, act.id);
         break;
       case JOIN_QUICK_PLAY:
-        yield* quickPlay(token, act.game);
         yield cancel(fetchHandler);
         id = yield* quickPlay(token, act.game);
         if (id) {
