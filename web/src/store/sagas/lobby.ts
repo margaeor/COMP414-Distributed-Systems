@@ -7,8 +7,10 @@ import {
   updateOngoingPlays,
   updateTournaments,
   updateScores,
+  startLoading,
   loadingFailed,
   CANCEL_LOADING,
+  stopLoading,
 } from "../actions";
 import { selectUser } from "../selectors";
 import {
@@ -29,6 +31,7 @@ import {
   fetchScores,
 } from "./api/lobby";
 import { callApi, sleep } from "./utils";
+import { RefreshTokenError } from "./api/errors";
 
 function* fetchLobby(token: string, username: string) {
   const data: {
@@ -66,31 +69,34 @@ function* quickPlay(token: string, game: Game) {
   try {
     yield* callApi("Joining Queue...", call(joinQuickGame, token, game));
   } catch (e) {
-    yield put(
-      loadingFailed(e.message, "Error while joining queue", false, true)
-    );
-    yield take(CANCEL_LOADING);
-    return null;
+    const inQueue = call(checkQuickPlay, token, game);
+    if (!inQueue) {
+      yield put(
+        loadingFailed(e.message, "Error while joining queue", false, true)
+      );
+      yield take(CANCEL_LOADING);
+      return null;
+    }
   }
 
   // Wait until we join a play
+  yield put(startLoading("Waiting to join game..."));
   let timedOut = true;
   for (let i = 0; i < 10; i++) {
     try {
-      const inQueue = yield* callApi(
-        "Finding Opponent...",
-        call(checkQuickPlay, token, game)
-      );
+      const inQueue = yield call(checkQuickPlay, token, game);
       if (!inQueue) {
         timedOut = false;
         break;
       }
     } catch (e) {
       console.log("misc error: " + e.message);
+      if (e instanceof RefreshTokenError) throw e;
     }
     yield* sleep(5000);
   }
   if (timedOut) return null;
+  yield put(stopLoading());
 
   // Get play
   const data: {

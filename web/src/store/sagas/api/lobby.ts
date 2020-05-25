@@ -243,7 +243,7 @@ export async function joinPlay(
 
 export async function checkQuickPlay(token: string, game: Game) {
   try {
-    const { data } = await Axios.get("api/practice/join_queue", {
+    const { data } = await Axios.get("api/me/in_queue", {
       params: {
         jwt: token,
         game_type: game === Game.CHESS ? "chess" : "tic-tac-toe",
