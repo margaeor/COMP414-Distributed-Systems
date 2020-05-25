@@ -19,11 +19,9 @@ export function processTicMove(
   move: string
 ): string | null {
   const tic_tac_toe = deStringify(data);
-  //@TODO figure out why those conditions don't work
-  //if (chess.turn() === "w" && user !== 1) {console.log('error1');return null;}
-  //if (chess.turn() === "b" && user !== 2) {console.log('error2s');return null;}
+  const currFen = tic_tac_toe.fen();
   const newMove = tic_tac_toe.move(move);
-  return newMove ? tic_tac_toe.fen() : null;
+  return newMove ? `${currFen};${newMove}` : null;
 }
 
 export function processTicResults(data: string): Result {

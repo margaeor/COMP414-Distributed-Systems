@@ -5,12 +5,15 @@ import { selectGameData, selectPlay } from "../../../store/selectors";
 import { State } from "../../../store/types";
 
 const mapStateToProps = (state: State) => {
-  const board = selectGameData(state);
+  const data = selectGameData(state).split(";");
+  const board = data[0];
+  const move = data[1];
   const play = selectPlay(state);
   const color: "x" | "o" = play.isPlayer1 ? "x" : "o";
 
   return {
     board,
+    move,
     color,
   };
 };

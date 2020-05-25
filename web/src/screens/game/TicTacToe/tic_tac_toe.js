@@ -180,6 +180,14 @@ var TicTacToe = function(fen) {
            if(moves.length == 0) return false;
            return moves[moves.length - 1];
         },
+        fgetLastMove: () => {
+            if (moves.length == 0) return false;
+            const last = moves[moves.length - 1];
+            var move_validator = /^([0-2])([0-2])$/;
+            var matches = move_validator.exec(last);
+            if(!matches || matches.length < 3) return false;
+            return 3*(matches[1]-'0') + (matches[2]-'0');
+        },
         fgetSquare: (num) => {
             /*
                 Returns the target square with the given id

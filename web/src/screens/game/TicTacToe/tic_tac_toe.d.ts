@@ -38,6 +38,10 @@ export default function TicTacToe(
    * Returns the target square with the given id
    */
   fgetSquare: (i: number) => "x" | "o" | "-";
+  /**
+   * Returns the last move (if any).
+   */
+  fgetLastMove: () => number;
   /*
    * Draw x or o to position with id.
    */

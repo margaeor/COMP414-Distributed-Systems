@@ -1,6 +1,6 @@
 .tic-tac-toe {
-  width: 600px;
-  height: 600px;
+  width: 480px;
+  height: 480px;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
@@ -12,18 +12,50 @@
 }
 
 .tic-tac-toe .cell {
-  width: 190px;
-  height: 190px;
+  width: 150px;
+  height: 150px;
   flex-grow: 0;
   box-sizing: border-box;
   background-color: $color-primary;
   border-radius: 5px;
+  font-size: 16rem;
+  color: $color-primary;
+
+  display: flex;
+  justify-content: space-around;
+  align-content: space-around;
 
   &[data-cell="x"] {
-    content: "X";
+    color: $color-accent;
   }
 
   &[data-cell="o"] {
-    content: "O";
+    color: $color-text-light;
+  }
+
+  &__icon--preview {
+    visibility: hidden;
+  }
+
+  &[data-cell="-"]:hover {
+    .cell__icon--preview {
+      visibility: visible;
+    }
+  }
+
+  &[data-cell="-"][data-color="x"] {
+    color: darken($color-accent, 35);
+  }
+
+  &[data-cell="-"][data-color="o"] {
+    color: darken($color-text-light, 35);
+  }
+
+  &.last[data-cell="x"] {
+    border: 15px solid $color-accent;
+  }
+
+  &.last[data-cell="o"] {
+    border: 15px solid $color-text-light;
   }
 }
