@@ -120,17 +120,20 @@ export async function fetchLobbyData(
 
     const plays: (Play | TournamentPlay)[] = data.data.active_games
       .filter((g: Record<string, Object>) => !g.tournament_id)
-      .map((p: Record<string, Object>) => {
-        const isPlayer1 = p.player1 === username;
+      .map(
+        (p: Record<string, string>): Play => {
+          const isPlayer1 = p.player1 === username;
 
-        return {
-          id: p._id,
-          isPlayer1,
-          opponent: isPlayer1 ? p.player2 : p.player1,
-          game: p.game_type === "chess" ? Game.CHESS : Game.TICTACTOE,
-          started: true,
-        };
-      })
+          return {
+            id: p._id,
+            isPlayer1,
+            opponent: isPlayer1 ? p.player2 : p.player1,
+            game: p.game_type === "chess" ? Game.CHESS : Game.TICTACTOE,
+            started: true,
+            date: new Date(p.date_created),
+          };
+        }
+      )
       .sort((a: Record<string, Object>, b: Record<string, Object>) =>
         b.date > a.date ? 1 : -1
       );
