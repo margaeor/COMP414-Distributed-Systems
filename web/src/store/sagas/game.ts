@@ -191,15 +191,8 @@ function* game(token: string, id: string) {
     });
 
     if (res.server && res.server === DISCONNECTED) {
-      yield put(
-        loadingFailed(
-          "Waiting before reconnecting...",
-          "Lost Connection",
-          false,
-          false
-        )
-      );
-      yield* sleep(10000);
+      yield put(startLoading("Lost Connection, waiting to reconnect..."));
+      yield* sleep(5000);
       return true;
     }
   } finally {

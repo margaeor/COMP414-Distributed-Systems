@@ -171,8 +171,6 @@ services:
     #   dockerfile: Dockerfile.dev
     image: node:12
     working_dir: /home/node/app/
-    ports:
-      - "3002:3000"
     environment:
       JWT_PUBLIC_KEY: "${AUTH_PUBLIC}"
       MONGODB_USER: '${MONGODB_PLAYMASTER_USER}'
@@ -193,6 +191,32 @@ services:
     container_name: game
     command: bash -c "npm i && npm run dev"
   
+  game2:
+    # build:
+    #   context: './game/'
+    #   dockerfile: Dockerfile.dev
+    image: node:12
+    working_dir: /home/node/app/
+    environment:
+      JWT_PUBLIC_KEY: "${AUTH_PUBLIC}"
+      MONGODB_USER: '${MONGODB_PLAYMASTER_USER}'
+      MONGODB_DATABASE: '${MONGODB_PLAYMASTER_DB}'
+      MONGODB_REPLICA_SET_NAME: '${MONGODB_REPLICA_SET_NAME}'
+      MONGODB_REPLICA_SET_MEMBERS: '${MONGODB_REPLICA_SET_MEMBERS}'
+      NODE_ENV: 'development'
+      PORT: '${GAME_PORT}'
+      SERVER_NAME: 'g2'
+    networks:
+      - backend
+    depends_on:
+      - zookeeper
+    volumes:
+      - ./game:/home/node/app/
+    secrets:
+      - mongodb_playmaster_password
+    container_name: game2
+    command: bash -c "npm i && npm run dev"
+  
   web:
     image: nginx
     volumes:
@@ -202,6 +226,7 @@ services:
       - "80:80"
     links:
       - "game"
+      - "game2"
       - "auth"
       - "api"
       - "phpmyadmin"
