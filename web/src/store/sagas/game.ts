@@ -47,7 +47,7 @@ function* connectToServer(token: string, id: string) {
       true
     );
 
-    const url = `games/${serverName}`;
+    const url = `/games/${serverName}`;
 
     // Save and continue
     yield put(setPlay(play));
