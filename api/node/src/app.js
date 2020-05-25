@@ -153,13 +153,25 @@ app.get('/join_game', async (req, res) => {
     let username = authenticateUser(jwt);
     if(game_id && mongoose.Types.ObjectId.isValid(game_id)) {
     
-      let game = await Game.findById(game_id).exec();
+      let game = await Game.findById(game_id)
+      .populate({
+        path: 'tournament_id',
+        select: {
+          'name': 1,
+          'date_created': 1,
+          'game_type':1,
+          'has_started': 1,
+          'has_ended':1,
+        }}).lean().exec();
 
       if(username !== game.player1 && username !== game.player2) throw new errors.AnauthorizedException('Access is denied');
       let active_game = await transactions.runTransactionWithRetry(resetActiveGameState, mongoose, game);
       
       if(active_game) {
-        res.json(errors.createSuccessResponse('',active_game));
+        game['server_id'] = active_game.server_id;
+        game['server_ip'] = active_game.server_ip;
+        
+        res.json(errors.createSuccessResponse('',game));
       } else throw new errors.InvalidOperationException('Inactive game');
     }  
     else throw new errors.InvalidArgumentException('Wrong parameters');
@@ -380,6 +392,32 @@ app.get('/user/stats', async function(req, res) {
       if(user) {
         res.json(errors.createSuccessResponse('',user));
       } else throw new errors.InvalidOperationException('User not found');
+
+    } else throw new errors.InvalidArgumentException('Wrong parameters');
+  } catch(e){
+    logger.log(e);
+    return res.json(errors.convertExceptionToResponse(e));
+  }
+
+});
+
+app.get('/me/in_queue', async function(req, res) {
+  
+  let game_type = req.query.game_type;
+  let jwt = req.query.jwt;
+  try {
+
+    let username = authenticateUser(jwt);
+
+    if(game_type && username) {
+
+      // If user doesn't exist, create it
+      let lobby = await Lobby.findOne({game_type: game_type}).read('secondaryPreferred').exec();
+      
+      if(lobby) {
+        let queue = lobby.queue;
+        res.json(errors.createSuccessResponse('',queue.indexOf(username) != -1));
+      } else throw new errors.InvalidOperationException('Lobby not found');
 
     } else throw new errors.InvalidArgumentException('Wrong parameters');
   } catch(e){
