@@ -321,22 +321,22 @@ async function atomicEndGame(session, game_id, score) {
       let tournament = await atomicEndTournamentGame(session,game,score);
       let user1 = await User.findByIdAndUpdate(game.player1,
         {
-          "$addToSet": {past_games: game._id},
+          "$push": {past_games: game._id},
           "$pull":{active_games: game._id}
       },{new:true,upsert:true})
         .session(session);
       let user2 = await User.findByIdAndUpdate(game.player2,
-          {"$addToSet": {past_games: game._id},
+          {"$push": {past_games: game._id},
           "$pull":{active_games: game._id}},{new:true,upsert:true})
           .session(session);
     } else {
       // If the game is a normal game, update stats
       let user1 = await User.findByIdAndUpdate(game.player1,
-          {"$addToSet": {past_games: game._id},
+          {"$push": {past_games: game._id},
           "$pull":{active_games: game._id}},{new:true,upsert:true})
           .session(session);
       let user2 = await User.findByIdAndUpdate(game.player2,
-          {"$addToSet": {past_games: game._id},
+          {"$push": {past_games: game._id},
           "$pull":{active_games: game._id}},{new:true,upsert:true})
           .session(session);
       if(game && user1 && user2) {
