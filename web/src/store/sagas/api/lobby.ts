@@ -4,10 +4,10 @@ import {
   FinishedTournament,
   FinishedTournamentPlay,
   Game,
+  Play,
   ResultType,
   Tournament,
   TournamentPlay,
-  Play,
 } from "../../types";
 import { ConnectionError, RefreshTokenError } from "./errors";
 
@@ -101,7 +101,7 @@ export async function fetchLobbyData(
   ongoingPlays: (Play | TournamentPlay)[];
 }> {
   try {
-    const { data } = await Axios.get("api/me/match_history", {
+    const { data } = await Axios.get("api/me/lobby", {
       params: {
         jwt: token,
       },
@@ -113,7 +113,7 @@ export async function fetchLobbyData(
       );
     }
 
-    const plays: (Play | TournamentPlay)[] = data.data.past_games
+    const plays: (Play | TournamentPlay)[] = data.data.active_games
       .filter((g: Record<string, Object>) => !g.tournament_id)
       .map((p: Record<string, Object>) => {
         const isPlayer1 = p.player1 === username;

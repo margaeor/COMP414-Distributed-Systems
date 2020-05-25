@@ -62,14 +62,14 @@ function* periodicFetch(token: string) {
 
 function* quickPlay(token: string, game: Game) {
   yield* callApi("Joining Queue...", call(joinQuickGame, token, game));
-  for (let i = 0; i < 10; i++) {
-    try {
-      return yield* callApi("Finding Opponent...", call(checkQuickGame, token));
-    } catch (e) {
-      console.log("opponent not found...");
-    }
-    yield* sleep(5000);
-  }
+  // for (let i = 0; i < 10; i++) {
+  //   try {
+  //     return yield* callApi("Finding Opponent...", call(checkQuickGame, token));
+  //   } catch (e) {
+  //     console.log("opponent not found...");
+  //   }
+  //   yield* sleep(5000);
+  // }
 }
 
 export default function* lobby(token: string) {
@@ -89,13 +89,15 @@ export default function* lobby(token: string) {
         yield call(joinTournament, token, act.id);
         break;
       case JOIN_QUICK_PLAY:
-        yield cancel(fetchHandler);
-        id = yield* quickPlay(token, act.game);
-        if (id) {
-          return { screen: ScreenState.GAME, id };
-        } else {
-          return { screen: ScreenState.LOBBY };
-        }
+        yield* quickPlay(token, act.game);
+        break;
+      // yield cancel(fetchHandler);
+      // id = yield* quickPlay(token, act.game);
+      // if (id) {
+      //   return { screen: ScreenState.GAME, id };
+      // } else {
+      //   return { screen: ScreenState.LOBBY };
+      // }
     }
   }
   return { screen: ScreenState.LOBBY };
