@@ -105,9 +105,11 @@ registerToZookeeper(ip.address()).then((server_id: any) => {
     socket.on("disconnect", () => {
       console.log("unregistering user...");
       master.unregisterUser(socket.id);
+      socket.to(playId).emit(UPDATED_STATE, { event: "OP_DISCONNECTED" });
     });
 
     socket.on(READY, (e: MessageEvent) => {
+      socket.to(playId).emit(UPDATED_STATE, { event: "OP_RECONNECTED" });
       if (master.arePlayersReady(socket.id)) {
         io.to(playId).emit(READY);
         io.to(playId).emit(DATA, {
