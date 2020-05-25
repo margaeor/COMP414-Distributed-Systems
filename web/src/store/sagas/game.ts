@@ -1,3 +1,4 @@
+import { EventChannel } from "redux-saga";
 import { call, put, race, select, take } from "redux-saga/effects";
 import {
   CANCEL_LOADING,
@@ -12,35 +13,37 @@ import {
   updateHistory,
   updatePlayData,
 } from "../actions";
-import { selectGameData } from "../selectors";
-import { PlayStep, ScreenState } from "../types";
+import { selectGameData, selectUser } from "../selectors";
+import { PlayStep, ScreenState, User } from "../types";
 import {
   checkPlay,
   emitExit,
   emitMessage,
   emitMove,
-  retrievePlay,
   setupSocket,
   setupSocketChannel,
 } from "./api/game";
 import {
-  READY,
   RECEIVE_DATA,
   RECEIVE_MESSAGE,
-  RECEIVE_UPDATED_STATE,
   RECEIVE_READY,
+  RECEIVE_UPDATED_STATE,
 } from "./api/game/receiverContract";
+import { joinPlay } from "./api/lobby";
 import { callApi, failLoadingAndExit } from "./utils";
-import { EventChannel } from "redux-saga";
 
 function* connectToServer(token: string, id: string) {
   let socket: SocketIOClient.Socket | null = null;
   let channel = null;
   try {
     // Retrieve Play and ip
-    const { play, url } = yield* callApi(
+    const { username }: User = yield select(selectUser);
+    const {
+      play,
+      server: { url },
+    } = yield* callApi(
       "Loading Play...",
-      call(retrievePlay, token, id),
+      call(joinPlay, token, id, username),
       true
     );
 

@@ -31,21 +31,6 @@ import {
 } from "./receiverContract";
 import { ConnectionErrorEvent } from "./contract";
 
-export async function retrievePlay(
-  token: string,
-  id: string
-): Promise<{ play: Play | TournamentPlay; url: string }> {
-  // TODO: Implement this call
-  await sleep(200);
-  return {
-    play: PLAY_LIST.map((p) => ({
-      ...p,
-      isPlayer1: p.opponent !== token,
-    })).find((p) => p.id) as Play,
-    url: process.env.GAME_URL as string,
-  };
-}
-
 export async function checkPlay(
   token: string,
   url: string,

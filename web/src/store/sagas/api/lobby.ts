@@ -204,7 +204,6 @@ export async function joinPlay(
   play: Play | TournamentPlay;
   server: { url: string; id: string };
 }> {
-  const isPlayer1 = p.player1 === username;
   try {
     const { data } = await Axios.get("api/join_game", {
       params: {
@@ -220,6 +219,7 @@ export async function joinPlay(
     }
 
     const p = data.data;
+    const isPlayer1 = p.player1 === username;
     return {
       play: {
         id: p._id,
