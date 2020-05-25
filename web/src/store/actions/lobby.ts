@@ -14,6 +14,7 @@ export const UPDATE_ONGOING_PLAYS = "UPDATE_ONGOING_PLAYS";
 export const UPDATE_SCORES = "UPDATE_SCORES";
 
 export const JOIN_GAME = "JOIN_GAME";
+export const START_TOURNAMENT = "START_TOURNAMENT";
 export const JOIN_TOURNAMENT = "JOIN_TOURNAMENT";
 export const JOIN_QUICK_PLAY = "JOIN_QUICK_PLAY";
 
@@ -39,6 +40,11 @@ export interface UpdateTournamentsAction {
 
 export interface JoinGameAction {
   type: typeof JOIN_GAME;
+  id: string;
+}
+
+export interface StartTournamentAction {
+  type: typeof START_TOURNAMENT;
   id: string;
 }
 
@@ -89,6 +95,13 @@ export function updateScores(
 export function joinGame(id: string): JoinGameAction {
   return {
     type: JOIN_GAME,
+    id,
+  };
+}
+
+export function startTournament(id: string): StartTournamentAction {
+  return {
+    type: START_TOURNAMENT,
     id,
   };
 }

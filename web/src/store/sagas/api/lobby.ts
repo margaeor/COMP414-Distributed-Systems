@@ -53,20 +53,25 @@ export async function fetchScores(
 
     const tournaments: FinishedTournament[] = data.data.user_tournaments.map(
       (t: Record<string, any>): FinishedTournament => {
-        const plays = t.rounds.games.map(
-          (p: Record<string, Object>): FinishedTournamentPlay => ({
-            id: p.tournament_id as string,
-            player1: p.player1 as string,
-            player2: p.player2 as string,
-            result:
-              p.score === 1
-                ? ResultType.WON
-                : p.score === 0
-                ? ResultType.DRAW
-                : ResultType.LOST,
-            date: new Date(t.date_created),
-          })
-        );
+        let plays;
+        if (t.rounds.games) {
+          plays = t.rounds.games.map(
+            (p: Record<string, Object>): FinishedTournamentPlay => ({
+              id: p.tournament_id as string,
+              player1: p.player1 as string,
+              player2: p.player2 as string,
+              result:
+                p.score === 1
+                  ? ResultType.WON
+                  : p.score === 0
+                  ? ResultType.DRAW
+                  : ResultType.LOST,
+              date: new Date(t.date_created),
+            })
+          );
+        } else {
+          plays = [];
+        }
 
         return {
           id: t._id,
@@ -140,6 +145,7 @@ export async function fetchLobbyData(
             game: t.game_type === "chess" ? Game.CHESS : Game.TICTACTOE,
             joined: t.joined,
             players: t.players,
+            started: t.has_started,
             maxPlayers: t.max_players,
             date: new Date(t.date_created),
           };
@@ -159,6 +165,26 @@ export async function fetchLobbyData(
 export async function joinTournament(token: string, id: string) {
   try {
     const { data } = await Axios.get("api/tournament/register", {
+      params: {
+        jwt: token,
+        id: id,
+      },
+    });
+
+    if (data.status !== 200) {
+      throw new RefreshTokenError(
+        data.message || `Unknown Error: ${data.status}`
+      );
+    }
+  } catch (e) {
+    if (e instanceof RefreshTokenError) throw e;
+    throw new ConnectionError(e.message);
+  }
+}
+
+export async function startTournament(token: string, id: string) {
+  try {
+    const { data } = await Axios.get("api/tournament/start", {
       params: {
         jwt: token,
         id: id,

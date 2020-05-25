@@ -11,6 +11,7 @@ import {
   loadingFailed,
   CANCEL_LOADING,
   stopLoading,
+  START_TOURNAMENT,
 } from "../actions";
 import { selectUser } from "../selectors";
 import {
@@ -29,6 +30,7 @@ import {
   joinQuickGame,
   joinTournament,
   fetchScores,
+  startTournament,
 } from "./api/lobby";
 import { callApi, sleep } from "./utils";
 import { RefreshTokenError } from "./api/errors";
@@ -111,7 +113,12 @@ export default function* lobby(token: string) {
   const fetchHandler = yield fork(periodicFetch, token);
 
   while (1) {
-    const act = yield take([JOIN_GAME, JOIN_TOURNAMENT, JOIN_QUICK_PLAY]);
+    const act = yield take([
+      JOIN_GAME,
+      START_TOURNAMENT,
+      JOIN_TOURNAMENT,
+      JOIN_QUICK_PLAY,
+    ]);
     let id;
 
     switch (act.type) {
@@ -119,6 +126,10 @@ export default function* lobby(token: string) {
         // Exit to join game
         yield cancel(fetchHandler);
         return { screen: ScreenState.GAME, id: act.id };
+      case START_TOURNAMENT:
+        yield cancel(fetchHandler);
+        yield call(startTournament, token, act.id);
+        return { screen: ScreenState.LOBBY };
       case JOIN_TOURNAMENT:
         yield cancel(fetchHandler);
         yield call(joinTournament, token, act.id);
