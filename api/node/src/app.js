@@ -199,10 +199,13 @@ app.get('/tournament/create', async (req, res) => {
 
       try {
         max_players = parseInt(max_players);
+        
       } catch(e) {
         throw new errors.InvalidArgumentException('Wrong max players');
       }
       
+      if(!max_players) throw new errors.InvalidArgumentException('Wrong max players');
+
       let mx = globals.MAX_TOURNAMENT_PLAYERS;
       let mn = globals.MIN_TOURNAMENT_PLAYERS;
       if(max_players < mn || max_players > mx) 
