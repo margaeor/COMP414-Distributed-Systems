@@ -28,7 +28,7 @@ export async function fetchScores(
       );
     }
 
-    const plays: FinishedPracticePlay[] = data.past_games
+    const plays: FinishedPracticePlay[] = data.data.past_games
       .filter((g: Record<string, Object>) => !g.tournament_id)
       .map((p: Record<string, Object>) => {
         const isPlayer1 = p.player1 === username;
@@ -51,7 +51,7 @@ export async function fetchScores(
         };
       });
 
-    const tournaments: FinishedTournament[] = data.user_tournaments.map(
+    const tournaments: FinishedTournament[] = data.data.user_tournaments.map(
       (t: Record<string, any>): FinishedTournament => {
         const plays = t.rounds.games.map(
           (p: Record<string, Object>): FinishedTournamentPlay => ({
@@ -88,6 +88,7 @@ export async function fetchScores(
     return pastGames;
   } catch (e) {
     if (e instanceof RefreshTokenError) throw e;
+    console.log(e);
     throw new ConnectionError(e.message);
   }
 }
@@ -112,7 +113,7 @@ export async function fetchLobbyData(
       );
     }
 
-    const plays: (Play | TournamentPlay)[] = data.past_games
+    const plays: (Play | TournamentPlay)[] = data.data.past_games
       .filter((g: Record<string, Object>) => !g.tournament_id)
       .map((p: Record<string, Object>) => {
         const isPlayer1 = p.player1 === username;
@@ -126,7 +127,7 @@ export async function fetchLobbyData(
         };
       });
 
-    const tournaments: Tournament[] = data.active_tournaments
+    const tournaments: Tournament[] = data.data.active_tournaments
       .filter((t: Record<string, any>) => !t.has_started)
       .map(
         (t: Record<string, any>): Tournament => {
@@ -149,10 +150,70 @@ export async function fetchLobbyData(
   }
 }
 
-export async function joinTournament(token: string, id: string) {}
+export async function joinTournament(token: string, id: string) {
+  try {
+    const { data } = await Axios.get("api/tournament/register", {
+      params: {
+        jwt: token,
+        id: id,
+      },
+    });
 
-export async function joinQuickGame(token: string, game: Game) {}
+    if (data.status !== 200) {
+      throw new RefreshTokenError(
+        data.message || `Unknown Error: ${data.status}`
+      );
+    }
+  } catch (e) {
+    if (e instanceof RefreshTokenError) throw e;
+    throw new ConnectionError(e.message);
+  }
+}
 
-export async function checkQuickGame(token: string) {}
+export async function joinQuickGame(token: string, game: Game) {
+  try {
+    const { data } = await Axios.get("api/practice/join_queue", {
+      params: {
+        jwt: token,
+        game_type: game === Game.CHESS ? "chess" : "tic-tac-toe",
+      },
+    });
 
-export async function joinPlay(token: string, id: string) {}
+    if (data.status !== 200) {
+      throw new RefreshTokenError(
+        data.message || `Unknown Error: ${data.status}`
+      );
+    }
+  } catch (e) {
+    if (e instanceof RefreshTokenError) throw e;
+    throw new ConnectionError(e.message);
+  }
+}
+
+export async function joinPlay(
+  token: string,
+  id: string
+): Promise<{ serverId: string; serverUri: string }> {
+  try {
+    const { data } = await Axios.get("api/join_game", {
+      params: {
+        jwt: token,
+        game_id: id,
+      },
+    });
+
+    if (data.status !== 200) {
+      throw new RefreshTokenError(
+        data.message || `Unknown Error: ${data.status}`
+      );
+    }
+
+    return {
+      serverId: data.data.server_id,
+      serverUri: data.data.server_ip,
+    };
+  } catch (e) {
+    if (e instanceof RefreshTokenError) throw e;
+    throw new ConnectionError(e.message);
+  }
+}

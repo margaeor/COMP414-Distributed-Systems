@@ -39,12 +39,16 @@ function* fetchLobby(token: string, username: string) {
 
 function* periodicFetch(token: string) {
   const { username }: User = yield select(selectUser);
-  const scores: (FinishedTournament | FinishedPracticePlay)[] = yield call(
-    fetchScores,
-    token,
-    username
-  );
-  yield put(updateScores(scores));
+  try {
+    const scores: (FinishedTournament | FinishedPracticePlay)[] = yield call(
+      fetchScores,
+      token,
+      username
+    );
+    yield put(updateScores(scores));
+  } catch (e) {
+    console.log("fetching failed: " + e.toString());
+  }
 
   while (1) {
     try {
