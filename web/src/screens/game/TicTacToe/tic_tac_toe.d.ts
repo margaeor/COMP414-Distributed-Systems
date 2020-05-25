@@ -43,6 +43,10 @@ export default function TicTacToe(
    */
   fgetLastMove: () => number;
   /*
+   * Returns the result like a color
+   */
+  fover: () => "x" | "o" | "-" | false;
+  /*
    * Draw x or o to position with id.
    */
   fmove: (num: number, p: "x" | "o") => false | string;

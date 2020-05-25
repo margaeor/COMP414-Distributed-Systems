@@ -105,7 +105,7 @@ function* handleServer(channel: any) {
   let isOver = false;
   let firstData = true;
 
-  while (!isOver) {
+  while (1) {
     const act = yield take(channel);
 
     if (firstData && act.type === RECEIVE_DATA) {
@@ -129,7 +129,7 @@ function* handleServer(channel: any) {
         isOver = act.event.isOver;
         break;
       case RECEIVE_UPDATED_STATE:
-        if (act.event.event === "OP_DISCONNECTED")
+        if (act.event.event === "OP_DISCONNECTED" && !isOver)
           yield put(
             loadingFailed(
               "You can wait for him to reconnect or exit",

@@ -55,7 +55,34 @@ const TicTacToe = ({
     );
   }
 
-  return <div className="tic-tac-toe">{cells}</div>;
+  const over = tic.fover();
+
+  return (
+    <div className="tic-container">
+      <div className="tic-tac-toe">{cells}</div>
+      <div
+        className="tic-container__overlay"
+        style={{ visibility: over ? "visible" : "hidden" }}
+      >
+        <div className="game-over" style={{ display: over ? "flex" : "none" }}>
+          <span className="game-over__header">Game Over</span>
+          <span
+            className={`game-over__result 
+            ${over === color ? "game-over__result--won" : ""} ${
+              over !== "-" && over !== color ? "game-over__result--lost" : ""
+            }`}
+          >
+            {over === color ? "You Won!" : ""}
+            {over !== "-" && over !== color ? "You Lost!" : ""}
+            {over === "-" ? "Draw" : ""}
+          </span>
+          <button className="game-over__button" onClick={exitGame}>
+            Exit
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default TicTacToe;

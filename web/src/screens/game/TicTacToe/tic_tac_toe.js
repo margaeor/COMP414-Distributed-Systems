@@ -214,6 +214,20 @@ var TicTacToe = function(fen) {
             return makeMove(move);
 
         },
+        fover: () => {
+            switch (hasGameEnded(board)) {
+                case 0:
+                    return false;
+                case 1:
+                    return 'x';
+                case 2:
+                    return 'o';
+                case 3:
+                return '-';
+                default:
+                return false;
+            }
+        },
         getMoves: () => {
             /*
                 Returns the array of moves

@@ -94,3 +94,41 @@
     }
   }
 }
+
+.game-over {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  &__header {
+    font-size: 2rem;
+  }
+
+  &__result {
+    margin-top: 0.3rem;
+    font-size: 4rem;
+
+    &--won {
+      color: $color-accent;
+    }
+
+    &--lost {
+      color: $color-text-error;
+    }
+  }
+
+  &__reason {
+    margin-top: 0.3rem;
+    font-size: 2rem;
+  }
+
+  &__button {
+    @extend %base-button;
+    @include button-accent;
+
+    margin-top: 2rem;
+    padding: 0.5rem 1rem;
+    align-self: stretch;
+    border-radius: 10px;
+  }
+}

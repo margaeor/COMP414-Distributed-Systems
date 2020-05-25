@@ -55,7 +55,7 @@ export default class PlayMaster extends AbstractPlayMaster {
   protected processResults(game: string, data: string): Result {
     let result: Result;
     if (game === "chess") result = processChessResults(data);
-    else if (game === "tictactoe") result = processTicResults(data);
+    else if (game === "tic-tac-toe") result = processTicResults(data);
     else throw new Error(`game ${game} is not implemented`);
 
     if (result !== "ongoing") {
