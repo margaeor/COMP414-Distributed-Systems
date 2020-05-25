@@ -4,6 +4,7 @@ export function TicTacToe(
   /**
    * Returns 1 if player 1 won,
    * 2 if player 2 won and
+   * 3 if there's a draw
    * 0 if nobody has won yet
    */
   hasGameEnded: () => number;
@@ -33,4 +34,12 @@ export function TicTacToe(
    * Returns who's turn it is.
    */
   turn: () => 1 | 2 | 0;
+  /*
+   * Returns the target square with the given id
+   */
+  fgetSquare: (i: number) => "x" | "o" | "-";
+  /*
+   * Draw x or o to position with id.
+   */
+  fmove: (num: number, p: "x" | "o") => false | string;
 };
