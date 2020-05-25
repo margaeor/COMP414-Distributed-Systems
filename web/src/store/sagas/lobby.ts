@@ -69,7 +69,7 @@ function* quickPlay(token: string, game: Game) {
   try {
     yield* callApi("Joining Queue...", call(joinQuickGame, token, game));
   } catch (e) {
-    const inQueue = call(checkQuickPlay, token, game);
+    const inQueue = yield call(checkQuickPlay, token, game);
     if (!inQueue) {
       yield put(
         loadingFailed(e.message, "Error while joining queue", false, true)
