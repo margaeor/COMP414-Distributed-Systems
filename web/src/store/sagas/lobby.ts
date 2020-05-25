@@ -20,7 +20,7 @@ import {
   FinishedTournament,
 } from "../types";
 import {
-  checkQuickGame,
+  checkQuickPlay,
   fetchLobbyData,
   joinQuickGame,
   joinTournament,
@@ -62,14 +62,32 @@ function* periodicFetch(token: string) {
 
 function* quickPlay(token: string, game: Game) {
   yield* callApi("Joining Queue...", call(joinQuickGame, token, game));
-  // for (let i = 0; i < 10; i++) {
-  //   try {
-  //     return yield* callApi("Finding Opponent...", call(checkQuickGame, token));
-  //   } catch (e) {
-  //     console.log("opponent not found...");
-  //   }
-  //   yield* sleep(5000);
-  // }
+
+  // Wait until we join a play
+  let timedOut = true;
+  for (let i = 0; i < 10; i++) {
+    try {
+      const inQueue = yield* callApi(
+        "Finding Opponent...",
+        call(checkQuickPlay, token, game)
+      );
+      if (!inQueue) {
+        timedOut = false;
+        break;
+      }
+    } catch (e) {
+      console.log("misc error: " + e.message);
+    }
+    yield* sleep(5000);
+  }
+  if (timedOut) return null;
+
+  // Get play
+  const data: {
+    tournaments: Tournament[];
+    ongoingPlays: (Play | TournamentPlay)[];
+  } = yield call(fetchLobbyData, token, "irrelevant");
+  return data.ongoingPlays ? data.ongoingPlays[0].id : null;
 }
 
 export default function* lobby(token: string) {
@@ -90,14 +108,13 @@ export default function* lobby(token: string) {
         break;
       case JOIN_QUICK_PLAY:
         yield* quickPlay(token, act.game);
-        break;
-      // yield cancel(fetchHandler);
-      // id = yield* quickPlay(token, act.game);
-      // if (id) {
-      //   return { screen: ScreenState.GAME, id };
-      // } else {
-      //   return { screen: ScreenState.LOBBY };
-      // }
+        yield cancel(fetchHandler);
+        id = yield* quickPlay(token, act.game);
+        if (id) {
+          return { screen: ScreenState.GAME, id };
+        } else {
+          return { screen: ScreenState.LOBBY };
+        }
     }
   }
   return { screen: ScreenState.LOBBY };

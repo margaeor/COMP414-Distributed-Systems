@@ -125,7 +125,10 @@ export async function fetchLobbyData(
           game: p.game_type === "chess" ? Game.CHESS : Game.TICTACTOE,
           started: true,
         };
-      });
+      })
+      .sort((a: Record<string, Object>, b: Record<string, Object>) =>
+        b.date > a.date ? 1 : -1
+      );
 
     const tournaments: Tournament[] = data.data.active_tournaments
       .filter((t: Record<string, any>) => !t.has_started)
@@ -141,6 +144,9 @@ export async function fetchLobbyData(
             date: new Date(t.date_created),
           };
         }
+      )
+      .sort((a: Record<string, Object>, b: Record<string, Object>) =>
+        b.date > a.date ? 1 : -1
       );
 
     return { ongoingPlays: plays, tournaments };
@@ -192,8 +198,13 @@ export async function joinQuickGame(token: string, game: Game) {
 
 export async function joinPlay(
   token: string,
-  id: string
-): Promise<{ serverId: string; serverUri: string }> {
+  id: string,
+  username: string
+): Promise<{
+  play: Play | TournamentPlay;
+  server: { url: string; id: string };
+}> {
+  const isPlayer1 = p.player1 === username;
   try {
     const { data } = await Axios.get("api/join_game", {
       params: {
@@ -208,10 +219,44 @@ export async function joinPlay(
       );
     }
 
+    const p = data.data;
     return {
-      serverId: data.data.server_id,
-      serverUri: data.data.server_ip,
+      play: {
+        id: p._id,
+        name: p.tournament_id && p.tournament_id.name,
+        isPlayer1,
+        opponent: isPlayer1 ? p.player2 : p.player1,
+        game: p.game_type === "chess" ? Game.CHESS : Game.TICTACTOE,
+        started: p.has_started,
+        date: p.date_created,
+      },
+      server: {
+        id: data.data.server_id,
+        url: data.data.server_ip,
+      },
     };
+  } catch (e) {
+    if (e instanceof RefreshTokenError) throw e;
+    throw new ConnectionError(e.message);
+  }
+}
+
+export async function checkQuickPlay(token: string, game: Game) {
+  try {
+    const { data } = await Axios.get("api/practice/join_queue", {
+      params: {
+        jwt: token,
+        game_type: game === Game.CHESS ? "chess" : "tic-tac-toe",
+      },
+    });
+
+    if (data.status !== 200) {
+      throw new RefreshTokenError(
+        data.message || `Unknown Error: ${data.status}`
+      );
+    }
+
+    return data.data;
   } catch (e) {
     if (e instanceof RefreshTokenError) throw e;
     throw new ConnectionError(e.message);
