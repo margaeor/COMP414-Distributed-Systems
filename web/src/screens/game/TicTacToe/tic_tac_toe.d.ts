@@ -1,4 +1,4 @@
-export function TicTacToe(
+export default function TicTacToe(
   fen?: string
 ): {
   /**

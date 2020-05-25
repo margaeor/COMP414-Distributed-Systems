@@ -39,7 +39,7 @@ export async function checkPlay(
   try {
     const req = await axios.get(`${url}/check`, {
       params: { id, token },
-      timeout: 10,
+      timeout: 10000,
     });
     return req.status === 200 && req.data.valid;
   } catch (error) {

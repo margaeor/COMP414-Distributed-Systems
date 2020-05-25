@@ -9,8 +9,15 @@ import {
   selectPlay,
   selectUser,
 } from "../../store/selectors";
-import { isTournamentPlay, Play, State, User } from "../../store/types";
+import {
+  isTournamentPlay,
+  Play,
+  State,
+  User,
+  Game as GameType,
+} from "../../store/types";
 import ChessGame from "./chess";
+import TicTacToe from "./TicTacToe";
 
 interface IProps {
   user: User;
@@ -64,7 +71,8 @@ const Game = ({ user, play, history, sendMessage }: IProps) => {
           </button>
         </div>
       </div>
-      <ChessGame />
+      {play.game === GameType.CHESS && <ChessGame />}
+      {play.game === GameType.TICTACTOE && <TicTacToe />}
     </div>
   );
 };

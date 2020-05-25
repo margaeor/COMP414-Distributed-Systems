@@ -1,0 +1,29 @@
+.tic-tac-toe {
+  width: 600px;
+  height: 600px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-content: space-between;
+
+  margin-left: 15px;
+  overflow: hidden;
+  border-radius: 20px;
+}
+
+.tic-tac-toe .cell {
+  width: 190px;
+  height: 190px;
+  flex-grow: 0;
+  box-sizing: border-box;
+  background-color: $color-primary;
+  border-radius: 5px;
+
+  &[data-cell="x"] {
+    content: "X";
+  }
+
+  &[data-cell="o"] {
+    content: "O";
+  }
+}

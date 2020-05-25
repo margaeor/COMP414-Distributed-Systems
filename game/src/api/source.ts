@@ -67,8 +67,7 @@ export function publishResult(id: string, result: Result): void {
   console.log(`play ${id} finished with status: ${result}`);
 }
 
-export async function restoreProgress(id: string): Promise<string> {
-  var placeholder = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1;";
+export async function restoreProgress(id: string): Promise<string | null> {
   //@TODO remove placeholder
   try {
     let game = await GameState.findById(id).exec();
@@ -76,10 +75,10 @@ export async function restoreProgress(id: string): Promise<string> {
     if (game) {
       console.log("RETURNING " + game.position);
       return game.position;
-    } else return placeholder;
+    } else return null;
   } catch (e) {
     console.log(e);
-    return placeholder;
+    return null;
   }
 }
 

@@ -5,17 +5,12 @@ import { selectGameData, selectPlay } from "../../../store/selectors";
 import { State } from "../../../store/types";
 
 const mapStateToProps = (state: State) => {
-  const dataString = selectGameData(state);
+  const board = selectGameData(state);
   const play = selectPlay(state);
-  const data = dataString.split(";");
-
-  const board = data[0];
-  const move = data[1];
-  const color: "w" | "b" = play.isPlayer1 ? "w" : "b";
+  const color: "x" | "o" = play.isPlayer1 ? "x" : "o";
 
   return {
     board,
-    move,
     color,
   };
 };
@@ -26,4 +21,4 @@ const mapDispatchToProps = { makeMove, exitGame };
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(React.lazy(() => import("./ValidatedChessboard")));
+)(React.lazy(() => import("./TicTacToe")));
