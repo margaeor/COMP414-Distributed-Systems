@@ -10,6 +10,7 @@ function createErrorResponse(message,status_code=500) {
 
 function convertExceptionToResponse(e) {
     if(e.hasOwnProperty('response')) return e.response;
+    else if(e.hasOwnProperty('message')) return createErrorResponse(e.message,400);
     else return createErrorResponse(e,500);
 }
 
