@@ -153,13 +153,25 @@ app.get('/join_game', async (req, res) => {
     let username = authenticateUser(jwt);
     if(game_id && mongoose.Types.ObjectId.isValid(game_id)) {
     
-      let game = await Game.findById(game_id).exec();
+      let game = await Game.findById(game_id)
+      .populate({
+        path: 'tournament_id',
+        select: {
+          'name': 1,
+          'date_created': 1,
+          'game_type':1,
+          'has_started': 1,
+          'has_ended':1,
+        }}).lean().exec();
 
       if(username !== game.player1 && username !== game.player2) throw new errors.AnauthorizedException('Access is denied');
       let active_game = await transactions.runTransactionWithRetry(resetActiveGameState, mongoose, game);
       
       if(active_game) {
-        res.json(errors.createSuccessResponse('',active_game));
+        game['server_id'] = active_game.server_id;
+        game['server_ip'] = active_game.server_ip;
+        
+        res.json(errors.createSuccessResponse('',game));
       } else throw new errors.InvalidOperationException('Inactive game');
     }  
     else throw new errors.InvalidArgumentException('Wrong parameters');
