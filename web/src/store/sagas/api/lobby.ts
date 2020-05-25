@@ -87,8 +87,8 @@ export async function fetchScores(
       }
     );
 
-    const pastGames: (FinishedTournament | FinishedPracticePlay)[] = [];
-    pastGames.concat(tournaments, plays);
+    let pastGames: (FinishedTournament | FinishedPracticePlay)[] = [];
+    pastGames = pastGames.concat(tournaments, plays);
     pastGames.sort((a, b) => (b.date > a.date ? 1 : -1));
     return pastGames;
   } catch (e) {
