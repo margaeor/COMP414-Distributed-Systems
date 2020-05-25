@@ -183,7 +183,7 @@ export default function* game(token: string, id: string) {
 
     console.log("exiting game...");
   } finally {
-    channel.close();
-    socket.close();
+    if (socket) socket.close();
+    if (channel) channel.close();
   }
 }
