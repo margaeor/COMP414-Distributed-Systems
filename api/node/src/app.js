@@ -582,7 +582,6 @@ app.get('/me/lobby', async function(req, res) {
         },
       }).lean().exec();
 
-      
       active_tournaments = active_tournaments.map(x => x['_id']);
       active_tournaments = active_tournaments.filter(x => 
         !x['has_ended'] && 

@@ -139,7 +139,7 @@ export async function fetchLobbyData(
       );
 
     const tournaments: Tournament[] = data.data.active_tournaments
-      .filter((t: Record<string, any>) => !t.has_started)
+      //.filter((t: Record<string, any>) => !t.has_started)
       .map(
         (t: Record<string, any>): Tournament => {
           return {
