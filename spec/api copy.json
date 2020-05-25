@@ -251,3 +251,10 @@ OR
         "__v": 0
     }
 }
+
+/me/in_queue?jwt=geomar13&game_type=chess
+{
+    "status": 200,
+    "message": "",
+    "data": true|false
+}

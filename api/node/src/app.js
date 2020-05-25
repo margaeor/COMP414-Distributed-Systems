@@ -389,6 +389,32 @@ app.get('/user/stats', async function(req, res) {
 
 });
 
+app.get('/me/in_queue', async function(req, res) {
+  
+  let game_type = req.query.game_type;
+  let jwt = req.query.jwt;
+  try {
+
+    let username = authenticateUser(jwt);
+
+    if(game_type && username) {
+
+      // If user doesn't exist, create it
+      let lobby = await Lobby.findOne({game_type: game_type}).read('secondaryPreferred').exec();
+      
+      if(lobby) {
+        let queue = lobby.queue;
+        res.json(errors.createSuccessResponse('',queue.indexOf(username) != -1));
+      } else throw new errors.InvalidOperationException('Lobby not found');
+
+    } else throw new errors.InvalidArgumentException('Wrong parameters');
+  } catch(e){
+    logger.log(e);
+    return res.json(errors.convertExceptionToResponse(e));
+  }
+
+});
+
 // @TODO make this less costly
 app.get('/me/match_history', async function(req, res) {
   
