@@ -37,11 +37,14 @@ export async function checkPlay(
   id: string
 ): Promise<boolean> {
   try {
-    const req = await axios.get(`${url}/check`, { params: { id, token } });
+    const req = await axios.get(`${url}/check`, {
+      params: { id, token },
+      timeout: 10,
+    });
     return req.status === 200 && req.data.valid;
   } catch (error) {
     console.log(error);
-    if (!error.response) {
+    if (error.status !== 200) {
       throw new ConnectionError("Server did not respond");
     } else {
       return false;
@@ -53,6 +56,7 @@ export async function setupSocket(token: string, url: string, id: string) {
   const socket = io.connect({
     path: `${url}/socket.io`,
     transportOptions: {
+      pingInterval: 10000,
       polling: {
         extraHeaders: {
           [TOKEN_COOKIE]: token,

@@ -31,7 +31,8 @@ export async function createTournament(
       throw new WrongParametersError(data.message);
     }
   } catch (e) {
-    if (e instanceof RefreshTokenError) throw e;
+    if (e instanceof RefreshTokenError || e instanceof WrongParametersError)
+      throw e;
     throw new ConnectionError(e.message);
   }
 }

@@ -28,9 +28,11 @@ import {
   RECEIVE_MESSAGE,
   RECEIVE_READY,
   RECEIVE_UPDATED_STATE,
+  DISCONNECTED,
 } from "./api/game/receiverContract";
 import { joinPlay } from "./api/lobby";
 import { callApi, failLoadingAndExit, sleep } from "./utils";
+import { UserCancelledError } from "./api/errors";
 
 function* connectToServer(token: string, id: string) {
   let socket: SocketIOClient.Socket | null = null;
@@ -88,9 +90,10 @@ function* connectToServer(token: string, id: string) {
     yield* failLoadingAndExit("Connection Closed");
     return null;
   } catch (e) {
-    yield* failLoadingAndExit("Connection failed: " + e.message);
     if (channel) channel.close();
     if (socket) socket.disconnect();
+    if (!(e instanceof UserCancelledError))
+      yield* failLoadingAndExit("Connection failed: " + e.message);
     return null;
   }
 }
@@ -133,6 +136,8 @@ function* handleServer(channel: any) {
           yield put(stopLoading());
         }
         break;
+      case DISCONNECTED:
+        return DISCONNECTED;
     }
   }
 }
@@ -168,22 +173,32 @@ function* handlePlayer(socket: SocketIOClient.Socket) {
   }
 }
 
-export default function* game(token: string, id: string) {
+function* game(token: string, id: string) {
   const res = yield* connectToServer(token, id);
-  if (!res) return;
+  if (!res) return false;
   const { socket, channel } = res;
 
   try {
     yield put(stopLoading());
 
-    yield race({
+    const res = yield race({
       player: call(handlePlayer, socket),
       server: call(handleServer, channel),
     });
 
-    console.log("exiting game...");
+    if (res.server && res.server === DISCONNECTED) {
+      yield put(
+        startLoading("Lost Connection, waiting before reconnecting...")
+      );
+      yield* sleep(10000);
+      return true;
+    }
   } finally {
     if (socket) socket.close();
     if (channel) channel.close();
   }
+}
+
+export default function* gameLoop(token: string, id: string) {
+  while (yield* game(token, id));
 }
