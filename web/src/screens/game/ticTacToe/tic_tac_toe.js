@@ -62,9 +62,8 @@ var TicTacToe = function(fen) {
     */
     function isWinning(my_board,player) {
         
-        var b = my_board.split('').map((x) => x-'0');
-        var c = player - '0';
-
+        var b = my_board.split('').map((x) => 1*(player === x));
+        var c = 1;
         if((b[0] & b[1] & b[2]) == c || (b[3] & b[4] & b[5]) == c || (b[6] & b[7] & b[8]) == c ) return true;
         
         if((b[0] & b[3] & b[6]) == c || (b[1] & b[4] & b[7]) == c || (b[2] & b[5] & b[8]) == c ) return true;
@@ -76,13 +75,15 @@ var TicTacToe = function(fen) {
 
     /*
         Returns 1 if player 1 won, 
-                2 if player 2 won and 
+                2 if player 2 won,
+                3 if there was a draw,
                 0 if nobody has won yet
     */
     function hasGameEnded(my_board) {
 
         if (isWinning(my_board,PLAYER_1)) return 1;
         else if(isWinning(my_board,PLAYER_2)) return 2;
+        else if(count(PLAYER_1,my_board) + count(PLAYER_2,my_board) == board.length) return 3;
         else return 0;
     }
 
@@ -179,6 +180,32 @@ var TicTacToe = function(fen) {
            if(moves.length == 0) return false;
            return moves[moves.length - 1];
         },
+        fgetSquare: (num) => {
+            /*
+                Returns the target square with the given id
+            */
+            if(!Number.isInteger(num) || num<0 || num>8) return false;
+
+            let sq = board[num];
+            if(sq === PLAYER_1) return 'x';
+            else if(sq === PLAYER_2) return 'o';
+            else return '-';
+        },
+        fmove: (num, p) => {
+            /*
+                Move pawn to position with id.
+            */
+            if(p !== 'o' && p !== 'x') return false;
+            let turn = getPlayerTurn(board);
+            if( turn === 0) return false;
+            if( turn === 1 && p ==='o' || turn === 2 && p ==='x') return false;
+            if(!Number.isInteger(num) || num<0 || num>8) return false;
+
+            let move = String(Math.floor(num/3))+String(num % 3);
+
+            return makeMove(move);
+
+        },
         getMoves: () => {
             /*
                 Returns the array of moves
@@ -242,6 +269,7 @@ function test1() {
 
 function test2() {
     let t = new TicTacToe('011120002');
+    assert(t.fgetSquare(0) === '-' && t.fgetSquare(1) === 'x' && t.fgetSquare(4) === 'o');
     assert(t.fen() === "011120002");
     assert(t.getMoveNumber() === 3);
     assert(t.hasGameEnded() === 0);
@@ -255,8 +283,17 @@ function test2() {
     assert(t.turn() === 1);
 }
 
+function test3() {
+    let t = new TicTacToe('112221121');
+    assert(t.fen() === "112221121");
+    console.log('ENDED', t.hasGameEnded());
+    assert(t.hasGameEnded() === 3);
+    assert(t.turn() === 2);
+}
+
 //test1();
-//test2();
+test2();
+//test3();
 
 if (typeof exports !== 'undefined') exports.TicTacToe = TicTacToe
 /* export Chess object for any RequireJS compatible environment */
