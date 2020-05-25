@@ -180,6 +180,32 @@ var TicTacToe = function(fen) {
            if(moves.length == 0) return false;
            return moves[moves.length - 1];
         },
+        fgetSquare: (num) => {
+            /*
+                Returns the target square with the given id
+            */
+            if(!Number.isInteger(num) || num<0 || num>8) return false;
+
+            let sq = board[num];
+            if(sq === PLAYER_1) return 'x';
+            else if(sq === PLAYER_2) return 'o';
+            else return '-';
+        },
+        fmove: (num, p) => {
+            /*
+                Move pawn to position with id.
+            */
+            if(p !== 'o' && p !== 'x') return false;
+            let turn = getPlayerTurn(board);
+            if( turn === 0) return false;
+            if( turn === 1 && p ==='o' || turn === 2 && p ==='x') return false;
+            if(!Number.isInteger(num) || num<0 || num>8) return false;
+
+            let move = String(Math.floor(num/3))+String(num % 3);
+
+            return makeMove(move);
+
+        },
         getMoves: () => {
             /*
                 Returns the array of moves
@@ -243,6 +269,7 @@ function test1() {
 
 function test2() {
     let t = new TicTacToe('011120002');
+    assert(t.fgetSquare(0) === '-' && t.fgetSquare(1) === 'x' && t.fgetSquare(4) === 'o');
     assert(t.fen() === "011120002");
     assert(t.getMoveNumber() === 3);
     assert(t.hasGameEnded() === 0);
@@ -265,7 +292,7 @@ function test3() {
 }
 
 //test1();
-//test2();
+test2();
 //test3();
 
 if (typeof exports !== 'undefined') exports.TicTacToe = TicTacToe
