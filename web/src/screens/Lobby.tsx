@@ -142,9 +142,11 @@ const TournamentJoin = ({
       <button
         className={"list-node__button"}
         onClick={() => join(t.id)}
-        disabled={t.joined}
+        disabled={t.joined || t.players === t.maxPlayers}
       >
-        {t.joined ? "Already Joined" : "Join"}
+        {!t.joined && t.players < t.maxPlayers && "Join"}
+        {t.joined && "Already Joined"}
+        {t.players === t.maxPlayers && !t.joined && "Full"}
       </button>
       {isOfficial && (
         <button
