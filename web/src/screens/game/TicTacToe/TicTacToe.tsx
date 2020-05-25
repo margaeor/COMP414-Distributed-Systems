@@ -45,10 +45,10 @@ const TicTacToe = ({
       >
         {mark === "x" && <Icon path={mdiAlphaX} className="cell__icon" />}
         {mark === "o" && <Icon path={mdiAlphaO} className="cell__icon" />}
-        {mark === "-" && color === "x" && (
+        {mark === "-" && color === "x" && tic.turn() === 1 && (
           <Icon path={mdiAlphaX} className="cell__icon cell__icon--preview" />
         )}
-        {mark === "-" && color === "o" && (
+        {mark === "-" && color === "o" && tic.turn() === 2 && (
           <Icon path={mdiAlphaO} className="cell__icon cell__icon--preview" />
         )}
       </div>
