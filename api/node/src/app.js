@@ -605,7 +605,7 @@ app.get('/me/lobby', async function(req, res) {
         res.json(errors.createSuccessResponse('',data));
       } else res.json(errors.createSuccessResponse('',{
         "active_games":[],
-        "active_tournaments":[]
+        "active_tournaments":(active_tournaments ? active_tournaments : [])
       }));
       //else throw new errors.InvalidOperationException('User not found');
 
