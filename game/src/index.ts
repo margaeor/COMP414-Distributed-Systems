@@ -97,7 +97,7 @@ registerToZookeeper(ip.address()).then((server_id: any) => {
         isOver,
       });
 
-      if (isOver) publishResult(playId, result);
+      if (isOver) await publishResult(server_id, playId, result);
     });
     socket.on(MESSAGE, (e: MessageEvent) =>
       io.to(playId).emit(MESSAGE, { message: e.message })

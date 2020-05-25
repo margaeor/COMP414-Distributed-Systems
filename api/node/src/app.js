@@ -84,7 +84,7 @@ app.get('/playmaster/results', async (req, res) => {
 
   try {
 
-    if(!(await zookeeper.validateServerClaim(id,ip))) throw new errors.AnauthorizedException('Access is denied');
+    //if(!(await zookeeper.validateServerClaim(id,ip))) throw new errors.AnauthorizedException('Access is denied');
 
     if(score && game_id && mongoose.Types.ObjectId.isValid(game_id)) {
     

@@ -32,7 +32,7 @@ async function validateServerClaim(server_id,server_ip) {
     let node = '/playmasters/'+server_id;
 
     let value = (await getValuePromise(node)).toString('utf8');
-
+    console.log(value);
     let last_ip_digits = value.substr(1);
 
     if(!last_ip_digits || last_ip_digits.length==0) return false;
