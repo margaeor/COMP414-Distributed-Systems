@@ -1,4 +1,9 @@
-import { mdiSwordCross } from "@mdi/js";
+import {
+  mdiAlphaOCircle,
+  mdiAlphaXCircle,
+  mdiChessPawn,
+  mdiSwordCross,
+} from "@mdi/js";
 import Icon from "@mdi/react";
 import React, { useState } from "react";
 import { connect } from "react-redux";
@@ -10,11 +15,11 @@ import {
   selectUser,
 } from "../../store/selectors";
 import {
+  Game as GameType,
   isTournamentPlay,
   Play,
   State,
   User,
-  Game as GameType,
 } from "../../store/types";
 import ChessGame from "./chess";
 import TicTacToe from "./TicTacToe";
@@ -38,6 +43,15 @@ const Game = ({ user, play, history, sendMessage }: IProps) => {
   // Dynamic import (code splitting)
   // const ValidatedChessboard = React.lazy(() => import("./ValidatedChessboard"));
 
+  let icon;
+  if (play.game === GameType.CHESS) {
+    icon = mdiChessPawn;
+  } else if (play.game === GameType.TICTACTOE) {
+    icon = play.isPlayer1 ? mdiAlphaXCircle : mdiAlphaOCircle;
+  } else {
+    icon = mdiSwordCross;
+  }
+
   return (
     <div className="game">
       <div className="chat">
@@ -49,7 +63,7 @@ const Game = ({ user, play, history, sendMessage }: IProps) => {
             <span className="play-info__players__you">
               {user.username} (You)
             </span>
-            <Icon path={mdiSwordCross} className="play-info__players__vs" />
+            <Icon path={icon} className="play-info__players__vs" />
             <span className="play-info__players__opponent">
               {play.opponent}
             </span>
