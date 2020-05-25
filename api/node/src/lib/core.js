@@ -320,18 +320,24 @@ async function atomicEndGame(session, game_id, score) {
     if(game.tournament_id) {
       let tournament = await atomicEndTournamentGame(session,game,score);
       let user1 = await User.findByIdAndUpdate(game.player1,
-        {"$addToSet": {past_games: game._id}},{new:true,upsert:true})
+        {
+          "$addToSet": {past_games: game._id},
+          "$pull":{active_games: game._id}
+      },{new:true,upsert:true})
         .session(session);
       let user2 = await User.findByIdAndUpdate(game.player2,
-          {"$addToSet": {past_games: game._id}},{new:true,upsert:true})
+          {"$addToSet": {past_games: game._id},
+          "$pull":{active_games: game._id}},{new:true,upsert:true})
           .session(session);
     } else {
       // If the game is a normal game, update stats
       let user1 = await User.findByIdAndUpdate(game.player1,
-          {"$addToSet": {past_games: game._id}},{new:true,upsert:true})
+          {"$addToSet": {past_games: game._id},
+          "$pull":{active_games: game._id}},{new:true,upsert:true})
           .session(session);
       let user2 = await User.findByIdAndUpdate(game.player2,
-          {"$addToSet": {past_games: game._id}},{new:true,upsert:true})
+          {"$addToSet": {past_games: game._id},
+          "$pull":{active_games: game._id}},{new:true,upsert:true})
           .session(session);
       if(game && user1 && user2) {
         await ActiveGame.findByIdAndDelete(game._id).session(session);

@@ -6,7 +6,7 @@ const JWT_PUBLIC_KEY = process.env.JWT_PUBLIC_KEY;
 
 
 
-function authenticateUser(token, privillege_level='player') {
+function authenticateUser(token, privillege_level='') {
     
     // Disable tokens on debug
     if(globals.DEBUG) return token;
@@ -29,7 +29,7 @@ function authenticateUser(token, privillege_level='player') {
 
     // if(p_level(decoded.data.role) == -1) throw new errors.AnauthorizedException("Malformed token");
 
-    if(decoded.data.roles.indexOf(privillege_level) == -1) 
+    if(privillege_level && decoded.data.roles.indexOf(privillege_level) == -1) 
         throw new errors.AnauthorizedException("Not enough privilleges");
 
     return decoded.data.username;
