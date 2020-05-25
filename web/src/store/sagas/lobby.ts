@@ -120,8 +120,9 @@ export default function* lobby(token: string) {
         yield cancel(fetchHandler);
         return { screen: ScreenState.GAME, id: act.id };
       case JOIN_TOURNAMENT:
+        yield cancel(fetchHandler);
         yield call(joinTournament, token, act.id);
-        break;
+        return { screen: ScreenState.LOBBY };
       case JOIN_QUICK_PLAY:
         yield cancel(fetchHandler);
         id = yield* quickPlay(token, act.game);
