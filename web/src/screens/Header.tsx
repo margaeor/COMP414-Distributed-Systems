@@ -35,17 +35,17 @@ const Header = ({
             Home
           </button>
         </li>
-        <li className="nav__item">
-          <button
-            className="nav__item__button"
-            onClick={goLeaderboard}
-            disabled={!authorized}
-          >
+        {/* <li className="nav__item">
+          <button className="nav__item__button" onClick={goLeaderboard}>
             Leaderboards
           </button>
-        </li>
+        </li> */}
         <li className="nav__item">
-          <button className="nav__item__button" onClick={goAdmin}>
+          <button
+            disabled={!authorized}
+            className="nav__item__button"
+            onClick={goAdmin}
+          >
             Admin
           </button>
         </li>
