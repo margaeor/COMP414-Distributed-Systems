@@ -55,8 +55,15 @@ export default class PlayMaster extends AbstractPlayMaster {
 
   protected processResults(game: string, data: string): Result {
 
-    if (game === "chess") return cProcessChessResults(data);
-    else if(game === "tictactoe") return tProcessChessResults(data);
+    let result: Result;
+    if (game === "chess") result = cProcessChessResults(data);
+    else if(game === "tictactoe") result = tProcessChessResults(data);
     else throw new Error(`game ${game} is not implemented`);
+
+    if(result !== "ongoing") {
+      let score = (result == "won") ? 1 : ((result == "draw")? 0 : -1);
+    }
+    
+    return result;
   }
 }

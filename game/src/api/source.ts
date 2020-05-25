@@ -63,8 +63,26 @@ export async function retrievePlay(
   }
 }
 
-export function publishResult(id: string, result: Result): void {
+export async function publishResult(server_id:string, id: string, result: Result): Promise<any> {
   console.log(`play ${id} finished with status: ${result}`);
+
+  try {
+    let score = (result == "won") ? 1 : ((result == "draw")? 0 : -1);
+    let data = await asyncGetRequest(
+      "api", 
+      "/playmaster/results?id=" + server_id + "&game_id=" + id+'&score='+score,
+      3000
+    );
+    //console.log(data);
+    //console.log("/playmaster/results?id=" + server_id + "&game_id=" + id+'&score='+score);
+    if (data.status == 200 && data.data) {
+      return true;
+    } return false;
+  } catch (e) {
+    console.log(e);
+    return false;
+  }
+
 }
 
 export async function restoreProgress(id: string): Promise<string> {

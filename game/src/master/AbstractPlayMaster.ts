@@ -52,7 +52,7 @@ export default abstract class AbstractPlayMaster {
         user2: isOpponent2 ? sockId : null,
         progress: progress ? progress : this.startingPosition(play.game),
       };
-      this.sessions[playId] = session;
+      this.sessions[playId] = session;this.processResults(session.play.game, session.progress);
     } else {
       // Add user to session
       session = this.sessions[playId];
