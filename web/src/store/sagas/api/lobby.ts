@@ -45,7 +45,7 @@ export async function fetchScores(
           id: p._id,
           isPlayer1,
           opponent: isPlayer1 ? p.player2 : p.player1,
-          game: Game.CHESS,
+          game: p.game_type === "chess" ? Game.CHESS : Game.TICTACTOE,
           started: true,
           result,
         };
