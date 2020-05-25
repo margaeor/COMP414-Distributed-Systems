@@ -40,12 +40,14 @@ function* connectToServer(token: string, id: string) {
     const { username }: User = yield select(selectUser);
     const {
       play,
-      server: { url },
+      server: { url: serverName },
     } = yield* callApi(
       "Loading Play...",
       call(joinPlay, token, id, username),
       true
     );
+
+    const url = `games/${serverName}`;
 
     // Save and continue
     yield put(setPlay(play));

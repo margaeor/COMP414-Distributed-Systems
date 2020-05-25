@@ -181,6 +181,7 @@ services:
       MONGODB_REPLICA_SET_MEMBERS: '${MONGODB_REPLICA_SET_MEMBERS}'
       NODE_ENV: 'development'
       PORT: '${GAME_PORT}'
+      SERVER_NAME: 'g1'
     networks:
       - backend
     depends_on:
