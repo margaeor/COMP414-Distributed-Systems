@@ -103,9 +103,15 @@ function* handleServer(channel: any) {
   yield put(updateHistory(""));
   let history = "";
   let isOver = false;
+  let firstData = true;
 
   while (!isOver) {
     const act = yield take(channel);
+
+    if (firstData && act.type === RECEIVE_DATA) {
+      yield put(stopLoading());
+      firstData = false;
+    }
 
     switch (act.type) {
       case RECEIVE_MESSAGE:
@@ -179,8 +185,6 @@ function* game(token: string, id: string) {
   const { socket, channel } = res;
 
   try {
-    yield put(stopLoading());
-
     const res = yield race({
       player: call(handlePlayer, socket),
       server: call(handleServer, channel),
@@ -188,7 +192,12 @@ function* game(token: string, id: string) {
 
     if (res.server && res.server === DISCONNECTED) {
       yield put(
-        startLoading("Lost Connection, waiting before reconnecting...")
+        loadingFailed(
+          "Waiting before reconnecting...",
+          "Lost Connection",
+          false,
+          false
+        )
       );
       yield* sleep(10000);
       return true;
