@@ -19,6 +19,7 @@ export interface Play {
 
 export interface TournamentPlay extends Play {
   name: string;
+  round: number;
 }
 
 export interface PlayState {

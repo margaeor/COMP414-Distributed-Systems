@@ -135,8 +135,12 @@ export async function fetchLobbyData(
             started: true,
             date: new Date(p.date_created),
           };
-          if(p.tournament_id && p.tournament_id.hasOwnProperty('name'))
+          if(p.tournament_id && p.tournament_id.hasOwnProperty('name')) {
             result['name'] = p.tournament_id.name;
+          }
+          if(p.round_id && p.round_id.hasOwnProperty('round_number')) {
+            result['round'] = p.round_id.round_number;
+          } 
 
           return result;
         }

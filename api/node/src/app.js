@@ -555,10 +555,11 @@ app.get('/me/lobby', async function(req, res) {
           'game_type': 1
         },
         populate: {
-          path: 'tournament_id',
+          path: 'tournament_id round_id',
           select: {
             'name': 1,
-            'date_created': 1
+            'date_created': 1,
+            'round_number': 1
           }
         }
       }).
