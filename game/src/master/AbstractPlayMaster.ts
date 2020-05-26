@@ -3,16 +3,22 @@ import { Play, PlaySession, Result } from "../api/types";
 export default abstract class AbstractPlayMaster {
   socketMap: Record<string, PlaySession> = {};
   sessions: Record<string, PlaySession> = {};
-  server_id : string;
+  server_id: string;
 
-  constructor(server_id: string){
+  constructor(server_id: string) {
     this.server_id = server_id;
   }
 
   protected abstract checkToken(token: string): string | null;
-  protected abstract async retrievePlay(server_id: string, id: string): Promise<Play>;
-  protected abstract async restoreProgress(id: string): Promise<string>;
-  protected abstract async backupProgress(id: string, progress: string): Promise<any>;
+  protected abstract async retrievePlay(
+    server_id: string,
+    id: string
+  ): Promise<Play>;
+  protected abstract async restoreProgress(id: string): Promise<string | null>;
+  protected abstract async backupProgress(
+    id: string,
+    progress: string
+  ): Promise<any>;
   protected abstract startingPosition(game: string): string;
   protected abstract processMove(
     game: string,
@@ -39,7 +45,7 @@ export default abstract class AbstractPlayMaster {
     // Check user in play
     const isOpponent1 = play.opponent1 === user;
     const isOpponent2 = play.opponent2 === user;
-    console.log(play,user);
+    console.log(play, user);
     if (!isOpponent1 && !isOpponent2) throw new Error("Player not in play");
 
     let session;
@@ -52,7 +58,7 @@ export default abstract class AbstractPlayMaster {
         user2: isOpponent2 ? sockId : null,
         progress: progress ? progress : this.startingPosition(play.game),
       };
-      this.sessions[playId] = session;
+      this.sessions[playId] = session;this.processResults(session.play.game, session.progress);
     } else {
       // Add user to session
       session = this.sessions[playId];

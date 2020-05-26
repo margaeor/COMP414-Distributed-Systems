@@ -8,21 +8,33 @@
 }
 
 .chat {
+  width: 270px;
   align-self: stretch;
   display: flex;
   flex-direction: column;
   justify-content: stretch;
   margin-right: $top-margin;
 
-  &__history {
+  &__history-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+    flex-grow: 1;
+
     margin-top: 4px;
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
-    resize: none;
-    flex-grow: 1;
 
     @include input;
     @include colored-input;
+  }
+
+  &__history {
+    flex-shrink: 0;
+    margin: 0;
+    white-space: pre-line;
+    text-overflow: ellipsis;
+    overflow: hidden;
   }
 
   &__form {
@@ -33,6 +45,7 @@
 
     &__input {
       @include text-input;
+      flex: 1;
       border-bottom-left-radius: 5px;
     }
 
@@ -79,5 +92,43 @@
       height: 2rem;
       margin: -1rem 0;
     }
+  }
+}
+
+.game-over {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  &__header {
+    font-size: 2rem;
+  }
+
+  &__result {
+    margin-top: 0.3rem;
+    font-size: 4rem;
+
+    &--won {
+      color: $color-accent;
+    }
+
+    &--lost {
+      color: $color-text-error;
+    }
+  }
+
+  &__reason {
+    margin-top: 0.3rem;
+    font-size: 2rem;
+  }
+
+  &__button {
+    @extend %base-button;
+    @include button-accent;
+
+    margin-top: 2rem;
+    padding: 0.5rem 1rem;
+    align-self: stretch;
+    border-radius: 10px;
   }
 }

@@ -21,7 +21,7 @@ const Administration = ({
 }: IProps) => {
   return (
     <div className="administration">
-      {error !== "" && <span className="error">{error}</span>}
+      {/* {error !== "" && <span className="error">{error}</span>} */}
       <Promotion isAdmin={user.admin} submitChange={changePrivileges} />
       <Tournament
         isOfficer={user.officer}

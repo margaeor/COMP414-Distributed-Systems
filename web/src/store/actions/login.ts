@@ -19,6 +19,7 @@ export interface LoginSignUpAction {
   type: typeof SIGN_UP;
   username: string;
   password: string;
+  email: string;
   answer: string;
 }
 
@@ -49,12 +50,14 @@ export function loginForgot(
 export function loginSignUp(
   username: string,
   password: string,
+  email: string,
   answer: string
 ): LoginSignUpAction {
   return {
     type: SIGN_UP,
     username,
     password,
+    email,
     answer,
   };
 }

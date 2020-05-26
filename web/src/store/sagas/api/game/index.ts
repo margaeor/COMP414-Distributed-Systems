@@ -31,32 +31,20 @@ import {
 } from "./receiverContract";
 import { ConnectionErrorEvent } from "./contract";
 
-export async function retrievePlay(
-  token: string,
-  id: string
-): Promise<{ play: Play | TournamentPlay; url: string }> {
-  // TODO: Implement this call
-  await sleep(200);
-  return {
-    play: PLAY_LIST.map((p) => ({
-      ...p,
-      isPlayer1: p.opponent !== token,
-    })).find((p) => p.id) as Play,
-    url: process.env.GAME_URL as string,
-  };
-}
-
 export async function checkPlay(
   token: string,
   url: string,
   id: string
 ): Promise<boolean> {
   try {
-    const req = await axios.get(`${url}/check`, { params: { id, token } });
+    const req = await axios.get(`${url}/check`, {
+      params: { id, token },
+      timeout: 10000,
+    });
     return req.status === 200 && req.data.valid;
   } catch (error) {
     console.log(error);
-    if (!error.response) {
+    if (error.status !== 200) {
       throw new ConnectionError("Server did not respond");
     } else {
       return false;
@@ -68,6 +56,7 @@ export async function setupSocket(token: string, url: string, id: string) {
   const socket = io.connect({
     path: `${url}/socket.io`,
     transportOptions: {
+      pingInterval: 10000,
       polling: {
         extraHeaders: {
           [TOKEN_COOKIE]: token,

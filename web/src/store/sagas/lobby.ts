@@ -1,25 +1,65 @@
-import { call, fork, put, cancel, take } from "redux-saga/effects";
-import { updateLobby, changeScreen, startLoading } from "../actions";
-import { LobbyState, ScreenState, LoaderStep, Game } from "../types";
+import { call, cancel, fork, put, select, take } from "redux-saga/effects";
 import {
+  changeScreen,
+  JOIN_GAME,
+  JOIN_QUICK_PLAY,
+  JOIN_TOURNAMENT,
+  updateOngoingPlays,
+  updateTournaments,
+  updateScores,
+  startLoading,
+  loadingFailed,
+  CANCEL_LOADING,
+  stopLoading,
+  START_TOURNAMENT,
+} from "../actions";
+import { selectUser } from "../selectors";
+import {
+  Game,
+  Play,
+  ScreenState,
+  Tournament,
+  TournamentPlay,
+  User,
+  FinishedPracticePlay,
+  FinishedTournament,
+} from "../types";
+import {
+  checkQuickPlay,
   fetchLobbyData,
-  joinPlay,
-  joinTournament,
   joinQuickGame,
-  checkQuickGame,
+  joinTournament,
+  fetchScores,
+  startTournament,
 } from "./api/lobby";
-import { sleep, callApi } from "./utils";
-import { JOIN_GAME, JOIN_QUICK_PLAY, JOIN_TOURNAMENT } from "../actions";
+import { callApi, sleep } from "./utils";
+import { RefreshTokenError } from "./api/errors";
 
-function* fetchLobby(token: string) {
-  const data: LobbyState = yield call(fetchLobbyData, token);
-  yield put(updateLobby(data));
+function* fetchLobby(token: string, username: string) {
+  const data: {
+    tournaments: Tournament[];
+    ongoingPlays: (Play | TournamentPlay)[];
+  } = yield call(fetchLobbyData, token, username);
+  yield put(updateOngoingPlays(data.ongoingPlays));
+  yield put(updateTournaments(data.tournaments));
 }
 
 function* periodicFetch(token: string) {
+  const { username }: User = yield select(selectUser);
+  try {
+    const scores: (FinishedTournament | FinishedPracticePlay)[] = yield call(
+      fetchScores,
+      token,
+      username
+    );
+    yield put(updateScores(scores));
+  } catch (e) {
+    console.log("fetching failed: " + e.toString());
+  }
+
   while (1) {
     try {
-      yield* fetchLobby(token);
+      yield* fetchLobby(token, username);
     } catch (e) {
       console.log("fetching failed: " + e.toString());
     }
@@ -28,15 +68,44 @@ function* periodicFetch(token: string) {
 }
 
 function* quickPlay(token: string, game: Game) {
-  yield* callApi("Joining Queue...", call(joinQuickGame, token, game));
+  try {
+    yield* callApi("Joining Queue...", call(joinQuickGame, token, game));
+  } catch (e) {
+    const inQueue = yield call(checkQuickPlay, token, game);
+    if (!inQueue) {
+      yield put(
+        loadingFailed(e.message, "Error while joining queue", false, true)
+      );
+      yield take(CANCEL_LOADING);
+      return null;
+    }
+  }
+
+  // Wait until we join a play
+  yield put(startLoading("Waiting to join game..."));
+  let timedOut = true;
   for (let i = 0; i < 10; i++) {
     try {
-      return yield* callApi("Finding Opponent...", call(checkQuickGame, token));
+      const inQueue = yield call(checkQuickPlay, token, game);
+      if (!inQueue) {
+        timedOut = false;
+        break;
+      }
     } catch (e) {
-      console.log("opponent not found...");
+      console.log("misc error: " + e.message);
+      if (e instanceof RefreshTokenError) throw e;
     }
     yield* sleep(5000);
   }
+  if (timedOut) return null;
+  yield put(stopLoading());
+
+  // Get play
+  const data: {
+    tournaments: Tournament[];
+    ongoingPlays: (Play | TournamentPlay)[];
+  } = yield call(fetchLobbyData, token, "irrelevant");
+  return data.ongoingPlays ? data.ongoingPlays[0].id : null;
 }
 
 export default function* lobby(token: string) {
@@ -44,7 +113,12 @@ export default function* lobby(token: string) {
   const fetchHandler = yield fork(periodicFetch, token);
 
   while (1) {
-    const act = yield take([JOIN_GAME, JOIN_TOURNAMENT, JOIN_QUICK_PLAY]);
+    const act = yield take([
+      JOIN_GAME,
+      START_TOURNAMENT,
+      JOIN_TOURNAMENT,
+      JOIN_QUICK_PLAY,
+    ]);
     let id;
 
     switch (act.type) {
@@ -52,10 +126,14 @@ export default function* lobby(token: string) {
         // Exit to join game
         yield cancel(fetchHandler);
         return { screen: ScreenState.GAME, id: act.id };
+      case START_TOURNAMENT:
+        yield cancel(fetchHandler);
+        yield call(startTournament, token, act.id);
+        return { screen: ScreenState.LOBBY };
       case JOIN_TOURNAMENT:
+        yield cancel(fetchHandler);
         yield call(joinTournament, token, act.id);
-        yield* fetchLobby(token);
-        break;
+        return { screen: ScreenState.LOBBY };
       case JOIN_QUICK_PLAY:
         yield cancel(fetchHandler);
         id = yield* quickPlay(token, act.game);

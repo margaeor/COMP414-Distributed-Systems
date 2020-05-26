@@ -59,13 +59,19 @@ function* login() {
         case SIGN_UP:
           yield* callApi(
             "Creating account...",
-            call(signUp, action.username, action.password, action.answer)
+            call(
+              signUp,
+              action.username,
+              action.password,
+              action.email,
+              action.answer
+            )
           );
           break;
       }
       return;
     } catch (e) {
-      updateError(e.toString());
+      updateError(e.message);
     }
   }
 }
@@ -90,7 +96,6 @@ export function* getAccessToken() {
       } else {
         throw e;
       }
-      console.error(e.toString());
     }
   }
 }

@@ -46,6 +46,17 @@
     white-space: nowrap;
   }
 
+  &__error {
+    @include input;
+    @include colored-input;
+    background-color: darken($color: $color-text-error, $amount: 5);
+    margin-top: $top-margin;
+    text-align: center;
+    // font-size: 1.1em;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
   &__check {
     @include input;
     @include colored-input;
@@ -64,11 +75,13 @@
     flex-direction: row;
     justify-content: stretch;
 
-    button {
+    button,
+    input {
       flex-grow: 1;
     }
 
-    button:first-child {
+    button:first-child,
+    input:first-child {
       margin-right: $top-margin;
     }
   }

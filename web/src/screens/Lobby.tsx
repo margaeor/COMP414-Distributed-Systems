@@ -11,7 +11,12 @@ import {
 import Icon from "@mdi/react";
 import React, { useMemo } from "react";
 import { connect } from "react-redux";
-import { joinGame, joinQuickPlay, joinTournament } from "../store/actions";
+import {
+  joinGame,
+  joinQuickPlay,
+  joinTournament,
+  startTournament,
+} from "../store/actions";
 import {
   selectOngoingPlays,
   selectScores,
@@ -39,6 +44,7 @@ interface IProps {
   tournaments: Tournament[];
   scores: (FinishedTournament | FinishedPracticePlay)[];
   joinGame: typeof joinGame;
+  startTournament: typeof startTournament;
   joinTournament: typeof joinTournament;
   joinQuickPlay: typeof joinQuickPlay;
 }
@@ -109,10 +115,14 @@ const Score = ({ sr }: { sr: FinishedTournament | FinishedPracticePlay }) => {
 
 const TournamentJoin = ({
   t,
+  isOfficial,
   join,
+  start,
 }: {
   t: Tournament;
+  isOfficial: boolean;
   join: typeof joinTournament;
+  start: typeof startTournament;
 }) => {
   return (
     <li className="list-node">
@@ -132,10 +142,23 @@ const TournamentJoin = ({
       <button
         className={"list-node__button"}
         onClick={() => join(t.id)}
-        disabled={t.joined}
+        disabled={t.joined || t.players === t.maxPlayers}
       >
-        {t.joined ? "Already Joined" : "Join"}
+        {!t.joined && t.players < t.maxPlayers && "Join"}
+        {t.joined && "Already Joined"}
+        {t.players === t.maxPlayers && !t.joined && "Full"}
       </button>
+      {isOfficial && (
+        <button
+          className={"list-node__button"}
+          onClick={() => start(t.id)}
+          disabled={t.started || t.players < 4}
+        >
+          {!t.started && t.players >= 4 && "Start"}
+          {t.started && "Started"}
+          {t.players < 4 && "Not enough players"}
+        </button>
+      )}
     </li>
   );
 };
@@ -147,6 +170,8 @@ const PlayJoin = ({
   p: Play | TournamentPlay;
   join: typeof joinGame;
 }) => {
+  console.log(p);
+  console.log(isTournamentPlay(p));
   return (
     <li className="list-node">
       <span className="list-node__name">
@@ -216,7 +241,13 @@ const Lobby: React.FunctionComponent<IProps> = (props) => {
           <span className="player-info__col__label">Tournaments</span>
           <ul className="player-info__col__list">
             {props.tournaments.map((t) => (
-              <TournamentJoin key={t.id} t={t} join={props.joinTournament} />
+              <TournamentJoin
+                key={t.id}
+                t={t}
+                isOfficial={props.user.officer}
+                join={props.joinTournament}
+                start={props.startTournament}
+              />
             ))}
           </ul>
         </div>
@@ -244,6 +275,7 @@ const mapStateToProps = (state: State) => {
 
 const mapDispatchToProps = {
   joinGame,
+  startTournament,
   joinTournament,
   joinQuickPlay,
 };

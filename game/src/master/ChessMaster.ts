@@ -19,10 +19,11 @@ export function processChessMove(
 ): string | null {
   const chess = deStringify(data);
   //@TODO figure out why those conditions don't work
-  //if (chess.turn() === "w" && user !== 1) {console.log('error1');return null;} 
+  //if (chess.turn() === "w" && user !== 1) {console.log('error1');return null;}
   //if (chess.turn() === "b" && user !== 2) {console.log('error2s');return null;}
+  const currFen = chess.fen();
   const newMove = chess.move(move);
-  return newMove ? chess.fen() : null;
+  return newMove ? `${currFen};${newMove.san}` : null;
 }
 
 export function processChessResults(data: string): Result {

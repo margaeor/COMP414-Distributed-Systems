@@ -44,7 +44,7 @@ app.get('/playmaster/getinfo', async (req, res) => {
 
   try {
 
-    if(!(await zookeeper.validateServerClaim(id,ip))) throw new errors.AnauthorizedException('Access is denied');
+    // if(!(await zookeeper.validateServerClaim(id,ip))) throw new errors.AnauthorizedException('Access is denied');
 
     if(game_id && mongoose.Types.ObjectId.isValid(game_id)) {
     
@@ -84,7 +84,7 @@ app.get('/playmaster/results', async (req, res) => {
 
   try {
 
-    if(!(await zookeeper.validateServerClaim(id,ip))) throw new errors.AnauthorizedException('Access is denied');
+    //if(!(await zookeeper.validateServerClaim(id,ip))) throw new errors.AnauthorizedException('Access is denied');
 
     if(score && game_id && mongoose.Types.ObjectId.isValid(game_id)) {
     
@@ -144,7 +144,7 @@ app.get('/practice/join_queue', async (req, res) => {
 
 
 // Join existing practice game
-app.get('/practice/join_game', async (req, res) => {
+app.get('/join_game', async (req, res) => {
   
   let game_id = req.query.game_id;
   let jwt = req.query.jwt;
@@ -153,13 +153,25 @@ app.get('/practice/join_game', async (req, res) => {
     let username = authenticateUser(jwt);
     if(game_id && mongoose.Types.ObjectId.isValid(game_id)) {
     
-      let game = await Game.findById(game_id).exec();
+      let game = await Game.findById(game_id)
+      .populate({
+        path: 'tournament_id',
+        select: {
+          'name': 1,
+          'date_created': 1,
+          'game_type':1,
+          'has_started': 1,
+          'has_ended':1,
+        }}).lean().exec();
 
       if(username !== game.player1 && username !== game.player2) throw new errors.AnauthorizedException('Access is denied');
       let active_game = await transactions.runTransactionWithRetry(resetActiveGameState, mongoose, game);
       
       if(active_game) {
-        res.json(errors.createSuccessResponse('',active_game));
+        game['server_id'] = active_game.server_id;
+        game['server_ip'] = active_game.server_ip;
+        
+        res.json(errors.createSuccessResponse('',game));
       } else throw new errors.InvalidOperationException('Inactive game');
     }  
     else throw new errors.InvalidArgumentException('Wrong parameters');
@@ -187,10 +199,13 @@ app.get('/tournament/create', async (req, res) => {
 
       try {
         max_players = parseInt(max_players);
+        
       } catch(e) {
         throw new errors.InvalidArgumentException('Wrong max players');
       }
       
+      if(!max_players) throw new errors.InvalidArgumentException('Wrong max players');
+
       let mx = globals.MAX_TOURNAMENT_PLAYERS;
       let mn = globals.MIN_TOURNAMENT_PLAYERS;
       if(max_players < mn || max_players > mx) 
@@ -389,6 +404,32 @@ app.get('/user/stats', async function(req, res) {
 
 });
 
+app.get('/me/in_queue', async function(req, res) {
+  
+  let game_type = req.query.game_type;
+  let jwt = req.query.jwt;
+  try {
+
+    let username = authenticateUser(jwt);
+
+    if(game_type && username) {
+
+      // If user doesn't exist, create it
+      let lobby = await Lobby.findOne({game_type: game_type}).read('secondaryPreferred').exec();
+      
+      if(lobby) {
+        let queue = lobby.queue;
+        res.json(errors.createSuccessResponse('',queue.indexOf(username) != -1));
+      } else throw new errors.InvalidOperationException('Lobby not found');
+
+    } else throw new errors.InvalidArgumentException('Wrong parameters');
+  } catch(e){
+    logger.log(e);
+    return res.json(errors.convertExceptionToResponse(e));
+  }
+
+});
+
 // @TODO make this less costly
 app.get('/me/match_history', async function(req, res) {
   
@@ -412,7 +453,8 @@ app.get('/me/match_history', async function(req, res) {
           'date_created': 1,
           'score' : 1,
           'player1': 1,
-          'player2': 1
+          'player2': 1,
+          'game_type': 1
         },
         options: { sort: '-date_created' },
         populate: {
@@ -439,7 +481,10 @@ app.get('/me/match_history', async function(req, res) {
           'game_type':1,
           'has_started': 1,
           'has_ended':1,
-          'rounds':1
+          'rounds':1,
+          'participants':1,
+          'leaderboard':1,
+          'max_players':1
         },
         populate: {
           path: 'rounds',
@@ -470,7 +515,11 @@ app.get('/me/match_history', async function(req, res) {
           user_tournaments : user_tournaments['tournaments']
         };
         res.json(errors.createSuccessResponse('',data));
-      } else throw new errors.InvalidOperationException('User not found');
+      } else res.json(errors.createSuccessResponse('',{
+        "past_games":[],
+        "user_tournaments":[]
+      }));
+      //throw new errors.InvalidOperationException('User not found');
 
     } else throw new errors.InvalidArgumentException('Wrong parameters');
   } catch(e){
@@ -528,17 +577,24 @@ app.get('/me/lobby', async function(req, res) {
           'date_created': 1,
           'has_started':1,
           'has_ended':1,
-          'participants':1
+          'participants':1,
+          'game_type':1,
+          'max_players':1
         },
       }).lean().exec();
 
-      
       active_tournaments = active_tournaments.map(x => x['_id']);
       active_tournaments = active_tournaments.filter(x => 
         !x['has_ended'] && 
         (!x['has_started'] || x['participants'].indexOf(username) != -1
       ));
-      active_tournaments = active_tournaments.map(x => {delete x.participants; return x});
+      active_tournaments = active_tournaments.map(x => {
+        let l = x;
+        l['joined'] = (x['participants'].indexOf(username) != -1);
+        l['players'] = x['participants'].length;
+        delete l.participants; 
+        return l;
+      });
       
       if(user) {
         let active_games = user['active_games'];
@@ -547,7 +603,11 @@ app.get('/me/lobby', async function(req, res) {
           active_tournaments: active_tournaments
         };
         res.json(errors.createSuccessResponse('',data));
-      } else throw new errors.InvalidOperationException('User not found');
+      } else res.json(errors.createSuccessResponse('',{
+        "active_games":[],
+        "active_tournaments":(active_tournaments ? active_tournaments : [])
+      }));
+      //else throw new errors.InvalidOperationException('User not found');
 
     } else throw new errors.InvalidArgumentException('Wrong parameters');
   } catch(e){
@@ -594,7 +654,8 @@ app.get('/me/active_games', async function(req, res) {
 
       if(user) {
         res.json(errors.createSuccessResponse('',user['active_games']));
-      } else throw new errors.InvalidOperationException('User not found');
+      } else res.json(errors.createSuccessResponse('',[]));
+      //else throw new errors.InvalidOperationException('User not found');
 
     } else throw new errors.InvalidArgumentException('Wrong parameters');
   } catch(e){

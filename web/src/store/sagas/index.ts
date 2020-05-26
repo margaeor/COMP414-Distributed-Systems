@@ -8,6 +8,7 @@ import game from "./game";
 import lobby from "./lobby";
 import { getAccessToken, logout } from "./login";
 import { decodeUrl, navHandler, updateUrlHandler, urlListener } from "./urls";
+import { sleep } from "./utils";
 
 function* mainSaga(token: string, screen: ScreenState, id?: string) {
   switch (screen) {
@@ -64,6 +65,8 @@ export default function* rootSaga(dispatch: Dispatch) {
       }
     } catch (e) {
       if (e instanceof AccessTokenError) {
+        // Prevent overwhelming the system with requests in case of error
+        sleep(1000);
         token = yield* getAccessToken();
       }
     }

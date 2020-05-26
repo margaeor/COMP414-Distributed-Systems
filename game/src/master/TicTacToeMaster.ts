@@ -9,26 +9,24 @@ function deStringify(data: string) {
   return tic_tac_toe;
 }
 
-export function startingChessPosition() {
+export function startingTicPosition() {
   return TicTacToe().fen();
 }
 
-export function processChessMove(
+export function processTicMove(
   user: number,
   data: string,
   move: string
 ): string | null {
   const tic_tac_toe = deStringify(data);
-  //@TODO figure out why those conditions don't work
-  //if (chess.turn() === "w" && user !== 1) {console.log('error1');return null;} 
-  //if (chess.turn() === "b" && user !== 2) {console.log('error2s');return null;}
+  const currFen = tic_tac_toe.fen();
   const newMove = tic_tac_toe.move(move);
-  return newMove ? tic_tac_toe.fen() : null;
+  return newMove ? `${currFen};${newMove}` : null;
 }
 
-export function processChessResults(data: string): Result {
+export function processTicResults(data: string): Result {
   const tic_tac_toe = deStringify(data);
-  
+
   var is_over = tic_tac_toe.hasGameEnded();
   if (is_over == 0) return "ongoing";
   return is_over == 1 ? "won" : "lost";

@@ -13,12 +13,12 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 
-INSERT INTO `users` VALUES ('1','geomar','$2y$10$6toyIJ/DOpgHoKBRFA2Nt.uvSg1NQK3pW7s4EGOTXw6SuxAFEY9M6','lucio83@example.com','Jane',NOW()),
+INSERT INTO `users` VALUES ('1','geomar','$2y$10$6toyIJ/DOpgHoKBRFA2Nt.uvSg1NQK3pW7s4EGOTXw6SuxAFEY9M6','geomar@example.com','Jane',NOW()),
 ('2','geomar2','$2y$10$6toyIJ/DOpgHoKBRFA2Nt.uvSg1NQK3pW7s4EGOTXw6SuxAFEY9M6','buckridge.marietta@example.net','Jane',NOW()),
 ('3','geomar3','$2y$10$6toyIJ/DOpgHoKBRFA2Nt.uvSg1NQK3pW7s4EGOTXw6SuxAFEY9M6','johnson.alfredo@example.net','Jane',NOW()),
-('4','janae.lemke','c4b4ed9040283a1483e5566e560fc430ab9dc674fe723104a1','hannah06@example.com','Jane',NOW()),
-('5','destiney78','da8ca716006445a8edd179ca279694d881b284bf8a405485ce','fahey.crystal@example.com','Jane',NOW()),
-('6','sschultz','474c9fada6bd78ad17de85914c0a0c5c32c837a856539a29e2','metz.stefan@example.org','Jane',NOW()),
+('4','antheas','$2y$10$6toyIJ/DOpgHoKBRFA2Nt.uvSg1NQK3pW7s4EGOTXw6SuxAFEY9M6','hannah06@example.com','Jane',NOW()),
+('5','antheas2','$2y$10$6toyIJ/DOpgHoKBRFA2Nt.uvSg1NQK3pW7s4EGOTXw6SuxAFEY9M6','fahey.crystal@example.com','Jane',NOW()),
+('6','antheas3','$2y$10$6toyIJ/DOpgHoKBRFA2Nt.uvSg1NQK3pW7s4EGOTXw6SuxAFEY9M6','metz.stefan@example.org','Jane',NOW()),
 ('7','bechtelar.jovan','d67da77637f4693f292717e7492018d62d4b541767c95ddf4a','gaylord.lavern@example.org','Jane',NOW()),
 ('8','oberge','7079d842d52f0ac73c09818dd6dc7c3822097fc44b22821bec','mcclure.astrid@example.com','Jane',NOW()),
 ('9','nicolas.jerald','7189600b32e82314dcd3df798206fafb4e7a00a053dbb67020','owolff@example.net','Jane',NOW()),

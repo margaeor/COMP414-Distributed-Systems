@@ -31,6 +31,11 @@
       &:hover {
         color: $color-text-light;
       }
+
+      &:disabled:hover,
+      &:disabled {
+        color: darken($color: $color-accent, $amount: 30);
+      }
     }
   }
 }

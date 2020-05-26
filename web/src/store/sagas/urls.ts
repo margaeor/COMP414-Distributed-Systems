@@ -64,7 +64,8 @@ export function decodeUrl(
     case "/game":
       search = location.search;
       if (search.length < 4) return { screen: ScreenState.LOBBY };
-      id = search.substr(3);
+      id = search.substr(4);
+      console.log(id);
       return { screen: ScreenState.GAME, id };
     case "/administration":
       return { screen: ScreenState.ADMINISTRATION };

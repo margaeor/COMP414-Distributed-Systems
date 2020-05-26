@@ -10,13 +10,24 @@ export interface Tournament {
   id: string;
   name: string;
   game: Game;
+  started?: boolean;
   joined: boolean;
   players: number;
   maxPlayers: number;
+  date: Date;
+}
+
+export interface FinishedTournamentPlay {
+  id: string;
+  player1: string;
+  player2: string;
+  result: ResultType;
+  date: Date;
 }
 
 export interface FinishedTournament extends Tournament {
   ranking: number;
+  plays: FinishedTournamentPlay[];
 }
 
 export interface FinishedPracticePlay extends Play {

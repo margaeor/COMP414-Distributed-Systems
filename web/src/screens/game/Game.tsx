@@ -1,4 +1,9 @@
-import { mdiSwordCross } from "@mdi/js";
+import {
+  mdiAlphaOCircle,
+  mdiAlphaXCircle,
+  mdiChessPawn,
+  mdiSwordCross,
+} from "@mdi/js";
 import Icon from "@mdi/react";
 import React, { useState } from "react";
 import { connect } from "react-redux";
@@ -9,8 +14,15 @@ import {
   selectPlay,
   selectUser,
 } from "../../store/selectors";
-import { isTournamentPlay, Play, State, User } from "../../store/types";
+import {
+  Game as GameType,
+  isTournamentPlay,
+  Play,
+  State,
+  User,
+} from "../../store/types";
 import ChessGame from "./chess";
+import TicTacToe from "./TicTacToe";
 
 interface IProps {
   user: User;
@@ -31,6 +43,15 @@ const Game = ({ user, play, history, sendMessage }: IProps) => {
   // Dynamic import (code splitting)
   // const ValidatedChessboard = React.lazy(() => import("./ValidatedChessboard"));
 
+  let icon;
+  if (play.game === GameType.CHESS) {
+    icon = mdiChessPawn;
+  } else if (play.game === GameType.TICTACTOE) {
+    icon = play.isPlayer1 ? mdiAlphaXCircle : mdiAlphaOCircle;
+  } else {
+    icon = mdiSwordCross;
+  }
+
   return (
     <div className="game">
       <div className="chat">
@@ -42,13 +63,15 @@ const Game = ({ user, play, history, sendMessage }: IProps) => {
             <span className="play-info__players__you">
               {user.username} (You)
             </span>
-            <Icon path={mdiSwordCross} className="play-info__players__vs" />
+            <Icon path={icon} className="play-info__players__vs" />
             <span className="play-info__players__opponent">
               {play.opponent}
             </span>
           </div>
         </div>
-        <textarea className="chat__history" readOnly value={history} />
+        <div className="chat__history-container">
+          <p className="chat__history">{history}</p>
+        </div>
         <div className="chat__form">
           <input
             className="chat__form__input"
@@ -62,7 +85,8 @@ const Game = ({ user, play, history, sendMessage }: IProps) => {
           </button>
         </div>
       </div>
-      <ChessGame />
+      {play.game === GameType.CHESS && <ChessGame />}
+      {play.game === GameType.TICTACTOE && <TicTacToe />}
     </div>
   );
 };

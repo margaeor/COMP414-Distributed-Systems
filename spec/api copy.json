@@ -1,0 +1,260 @@
+/tournament/create?name=NiceTournament&game_type=chess&max_players=5&jwt=#
+{
+    "status": 200,
+    "message": "Tournament created",
+    "data": {
+    "max_players": 5,
+    "has_started": false,
+    "has_ended": false,
+    "rounds": [],
+    "participants": [],
+    "_id": "5ecac0b30b2fbc0033743809",
+    "name": "NiceTournament",
+    "game_type": "chess",
+    "date_created": "2020-05-24T18:45:07.338Z",
+    "leaderboard": [],
+    "__v": 0
+    }
+}
+
+/tournament/register?id=5ecac0b30b2fbc0033743809&jwt=#
+{
+    "status": 200,
+    "message": "Registered tournament",
+    "data": []
+}
+
+/tournament/start?id=5ecac0b30b2fbc0033743809&jwt=#
+{
+    "status": 200,
+    "message": "Tournament started",
+    "data": []
+}
+
+/playmaster/results?id=p0000000002&game_id=5ecac1c10b2fbc003374380b&score=-1
+{
+    "status": 200,
+    "message": "Scores updated successfully",
+    "data": []
+}
+
+/practice/join_queue?jwt=antheas&game_type=chess
+{
+    "status": 200,
+    "message": "Game created",
+    "data": {
+    "server_id": "id0000000000",
+    "server_ip": "g7",
+    "_id": "5ecac2f80b2fbc003374380d",
+    "__v": 0
+    }
+} 
+OR
+{
+    "status": 200,
+    "message": "User added to queue",
+    "data": []
+}
+
+
+/me/lobby?jwt=#
+{
+    "status":200,
+    "message":"",
+    "data":{
+       "active_games":[
+          {
+             "has_ended":false,
+             "tournament_id":null,
+             "_id":"5ecac2f80b2fbc003374380d",
+             "player1":"antheas",
+             "player2":"geomar",
+             "game_type":"chess",
+             "date_created":"2020-05-24T18:54:48.265Z"
+          }
+       ],
+       "active_tournaments":[
+            {
+                "_id": "5ecafa0cc6f19b15b2b07963",
+                "max_players": 5,
+                "has_started": false,
+                "has_ended": false,
+                "name": "NiceTournament",
+                "game_type": "chess",
+                "date_created": "2020-05-24T22:49:48.308Z",
+                "joined": false,
+                "players": 0
+            },
+            {
+                "_id": "5ecafa16c6f19b15b2b07964",
+                "max_players": 5,
+                "has_started": false,
+                "has_ended": false,
+                "name": "NiceTournament2",
+                "game_type": "chess",
+                "date_created": "2020-05-24T22:49:58.487Z",
+                "joined": true,
+                "players": 2
+            },
+            {
+                "_id": "5ecafa1ac6f19b15b2b07965",
+                "max_players": 5,
+                "has_started": false,
+                "has_ended": false,
+                "name": "NiceTournament3",
+                "game_type": "chess",
+                "date_created": "2020-05-24T22:50:02.457Z",
+                "joined": true,
+                "players": 3
+            }
+       ]
+    }
+ }
+
+
+
+/me/match_history?jwt=#
+ {
+    "status":200,
+    "message":"",
+    "data":{
+       "past_games":[
+          {
+             "has_ended":true,
+             "tournament_id":null,
+             "score":-1,
+             "_id":"5ecac2f80b2fbc003374380d",
+             "player1":"antheas",
+             "player2":"geomar",
+             "date_created":"2020-05-24T18:54:48.265Z"
+          },
+          {
+             "has_ended":true,
+             "tournament_id":{
+                "_id":"5ecac0b30b2fbc0033743809",
+                "name":"NiceTournament",
+                "date_created":"2020-05-24T18:45:07.338Z"
+             },
+             "score":-1,
+             "_id":"5ecac1c10b2fbc003374380b",
+             "player1":"antheas1",
+             "player2":"geomar",
+             "date_created":"2020-05-24T18:49:37.337Z"
+          }
+       ],
+       "user_tournaments":[
+          {
+             "has_started":true,
+             "has_ended":false,
+             "rounds":[
+                {
+                   "games":[
+                      {
+                         "has_ended":true,
+                         "tournament_id":"5ecac0b30b2fbc0033743809",
+                         "score":-1,
+                         "_id":"5ecac1c10b2fbc003374380b",
+                         "player1":"antheas1",
+                         "player2":"geomar",
+                         "date_created":"2020-05-24T18:49:37.337Z"
+                      },
+                      {
+                         "has_ended":false,
+                         "tournament_id":"5ecac0b30b2fbc0033743809",
+                         "score":null,
+                         "_id":"5ecac1c10b2fbc003374380c",
+                         "player1":"geomar1",
+                         "player2":"antheas",
+                         "date_created":"2020-05-24T18:49:37.393Z"
+                      }
+                   ]
+                }
+             ],
+             "_id":"5ecac0b30b2fbc0033743809",
+             "name":"NiceTournament",
+             "game_type":"chess",
+             "date_created":"2020-05-24T18:45:07.338Z"
+          }
+       ]
+    }
+ }
+
+
+
+ /user/stats?username=geomar&jwt=#
+ {
+    "status": 200,
+    "message": "",
+    "data": {
+        "rating": 1516,
+        "total_games": 1,
+        "total_wins": 1,
+        "total_losses": 0,
+        "total_ties": 0,
+        "_id": "geomar"
+    }
+}
+
+
+/tournament/info?id=#&jwt=#
+{
+    "status":200,
+    "message":"",
+    "data":{
+       "max_players":5,
+       "has_started":true,
+       "has_ended":false,
+       "rounds":[
+          {
+             "games":[
+                {
+                   "score":-1,
+                   "player1":"antheas1",
+                   "player2":"geomar"
+                },
+                {
+                   "score":null,
+                   "player1":"geomar1",
+                   "player2":"antheas"
+                }
+             ],
+             "_id":"5ecac1c10b2fbc003374380a",
+             "date_created":"2020-05-24T18:49:37.334Z"
+          }
+       ],
+       "participants":[
+          "geomar",
+          "antheas",
+          "geomar1",
+          "antheas1"
+       ],
+       "_id":"5ecac0b30b2fbc0033743809",
+       "name":"NiceTournament",
+       "game_type":"chess",
+       "date_created":"2020-05-24T18:45:07.338Z",
+       "leaderboard":[
+ 
+       ],
+       "__v":4
+    }
+ }
+
+
+ /join_game?game_id=#&jwt=#
+ {
+    "status": 200,
+    "message": "",
+    "data": {
+        "server_id": "id0000000002",
+        "server_ip": "g7",
+        "_id": "5ecb0af11756eb1683158559",
+        "__v": 0
+    }
+}
+
+/me/in_queue?jwt=geomar13&game_type=chess
+{
+    "status": 200,
+    "message": "",
+    "data": true|false
+}

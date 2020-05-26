@@ -25,21 +25,31 @@ const Login = ({ loginSignUp, loginSubmit, loginForgot, error }: IProps) => {
   const [email, setEmail] = useState("");
 
   const submit = () => {
+    if (username === "" || password === "") return;
     switch (type) {
       case LoginType.LOGIN:
         loginSubmit(username, password);
         break;
       case LoginType.FORGOT:
+        if (answer === "") break;
         loginForgot(username, password, answer);
         break;
       case LoginType.SIGN_UP:
-        loginSignUp(username, password, answer);
+        if (email === "" || answer === "") break;
+        loginSignUp(username, password, email, answer);
         break;
     }
   };
 
   return (
-    <div className="login form">
+    <form
+      className="login form"
+      onSubmit={(e) => {
+        e.preventDefault();
+        submit();
+        return false;
+      }}
+    >
       <span className="form__header">
         {type == LoginType.LOGIN && "Sign In"}
         {type == LoginType.FORGOT && "Forgot Password"}
@@ -63,18 +73,18 @@ const Login = ({ loginSignUp, loginSubmit, loginForgot, error }: IProps) => {
 
       {type == LoginType.LOGIN ? (
         <div className="form__dual-buttons">
-          <button
+          <input
+            type="button"
             className="form__button"
             onClick={() => setType(LoginType.FORGOT)}
-          >
-            Forgot Password
-          </button>
-          <button
+            value="Forgot Password"
+          />
+          <input
+            type="button"
             className="form__button"
             onClick={() => setType(LoginType.SIGN_UP)}
-          >
-            Sign Up
-          </button>
+            value="Sign Up"
+          />
         </div>
       ) : (
         <>
@@ -98,20 +108,18 @@ const Login = ({ loginSignUp, loginSubmit, loginForgot, error }: IProps) => {
             value={answer}
             onChange={(e) => setAnswer(e.target.value)}
           />
-          <button
+          <input
+            type="button"
             className="form__button"
             onClick={() => setType(LoginType.LOGIN)}
-          >
-            Go Back
-          </button>
+            value="Go Back"
+          />
         </>
       )}
 
-      {error !== "" && <span className="error">{error}</span>}
-      <button className="form__submit" onClick={submit}>
-        Submit
-      </button>
-    </div>
+      {error !== "" && <span className="form__error">{error}</span>}
+      <input className="form__submit" value="Submit" type="submit" />
+    </form>
   );
 };
 

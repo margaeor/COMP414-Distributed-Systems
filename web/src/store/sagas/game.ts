@@ -1,3 +1,4 @@
+import { EventChannel } from "redux-saga";
 import { call, put, race, select, take } from "redux-saga/effects";
 import {
   CANCEL_LOADING,
@@ -12,37 +13,43 @@ import {
   updateHistory,
   updatePlayData,
 } from "../actions";
-import { selectGameData } from "../selectors";
-import { PlayStep, ScreenState } from "../types";
+import { selectGameData, selectUser } from "../selectors";
+import { PlayStep, ScreenState, User } from "../types";
 import {
   checkPlay,
   emitExit,
   emitMessage,
   emitMove,
-  retrievePlay,
   setupSocket,
   setupSocketChannel,
 } from "./api/game";
 import {
-  READY,
   RECEIVE_DATA,
   RECEIVE_MESSAGE,
-  RECEIVE_UPDATED_STATE,
   RECEIVE_READY,
+  RECEIVE_UPDATED_STATE,
+  DISCONNECTED,
 } from "./api/game/receiverContract";
-import { callApi, failLoadingAndExit } from "./utils";
-import { EventChannel } from "redux-saga";
+import { joinPlay } from "./api/lobby";
+import { callApi, failLoadingAndExit, sleep } from "./utils";
+import { UserCancelledError } from "./api/errors";
 
 function* connectToServer(token: string, id: string) {
   let socket: SocketIOClient.Socket | null = null;
   let channel = null;
   try {
     // Retrieve Play and ip
-    const { play, url } = yield* callApi(
+    const { username }: User = yield select(selectUser);
+    const {
+      play,
+      server: { url: serverName },
+    } = yield* callApi(
       "Loading Play...",
-      call(retrievePlay, token, id),
+      call(joinPlay, token, id, username),
       true
     );
+
+    const url = `/games/${serverName}`;
 
     // Save and continue
     yield put(setPlay(play));
@@ -75,16 +82,19 @@ function* connectToServer(token: string, id: string) {
     yield put(startLoading("Waiting for Opponent..."));
     const act = yield take(channel);
     console.log(act);
-    if (act.type === RECEIVE_READY) return { socket, channel };
+    if (act.type === RECEIVE_READY) {
+      // emitMessage(socket, `${username} connected`);
+      return { socket, channel };
+    }
 
     yield* failLoadingAndExit("Connection Closed");
     return null;
   } catch (e) {
-    yield* failLoadingAndExit("Connection failed: " + e.message);
-    return null;
-  } finally {
     if (channel) channel.close();
     if (socket) socket.disconnect();
+    if (!(e instanceof UserCancelledError))
+      yield* failLoadingAndExit("Connection failed: " + e.message);
+    return null;
   }
 }
 
@@ -93,12 +103,19 @@ function* handleServer(channel: any) {
   yield put(updateHistory(""));
   let history = "";
   let isOver = false;
+  let firstData = true;
 
-  while (!isOver) {
+  while (1) {
     const act = yield take(channel);
+
+    if (firstData && act.type === RECEIVE_DATA) {
+      yield put(stopLoading());
+      firstData = false;
+    }
 
     switch (act.type) {
       case RECEIVE_MESSAGE:
+        console.log(act);
         history = history + "\n" + act.event.message;
         yield put(updateHistory(history));
         break;
@@ -112,7 +129,7 @@ function* handleServer(channel: any) {
         isOver = act.event.isOver;
         break;
       case RECEIVE_UPDATED_STATE:
-        if (act.event.event === "OP_DISCONNECTED")
+        if (act.event.event === "OP_DISCONNECTED" && !isOver)
           yield put(
             loadingFailed(
               "You can wait for him to reconnect or exit",
@@ -125,6 +142,8 @@ function* handleServer(channel: any) {
           yield put(stopLoading());
         }
         break;
+      case DISCONNECTED:
+        return DISCONNECTED;
     }
   }
 }
@@ -132,6 +151,7 @@ function* handleServer(channel: any) {
 function* handlePlayer(socket: SocketIOClient.Socket) {
   let isOver = false;
   let data;
+  const { username: user }: User = yield select(selectUser);
 
   while (!isOver) {
     const act = yield take([
@@ -147,7 +167,7 @@ function* handlePlayer(socket: SocketIOClient.Socket) {
         emitMove(socket, data, act.move);
         break;
       case SEND_MESSAGE:
-        emitMessage(socket, act.message);
+        emitMessage(socket, `${user}: ${act.message}`);
         break;
       case EXIT_GAME:
         emitExit(socket);
@@ -159,22 +179,28 @@ function* handlePlayer(socket: SocketIOClient.Socket) {
   }
 }
 
-export default function* game(token: string, id: string) {
+function* game(token: string, id: string) {
   const res = yield* connectToServer(token, id);
-  if (!res) return;
+  if (!res) return false;
   const { socket, channel } = res;
 
   try {
-    yield put(stopLoading());
-
-    yield race({
+    const res = yield race({
       player: call(handlePlayer, socket),
       server: call(handleServer, channel),
     });
 
-    console.log("exiting game...");
+    if (res.server && res.server === DISCONNECTED) {
+      yield put(startLoading("Lost Connection, waiting to reconnect..."));
+      yield* sleep(5000);
+      return true;
+    }
   } finally {
-    channel.close();
-    socket.close();
+    if (socket) socket.close();
+    if (channel) channel.close();
   }
+}
+
+export default function* gameLoop(token: string, id: string) {
+  while (yield* game(token, id));
 }

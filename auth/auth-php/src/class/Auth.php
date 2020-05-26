@@ -43,7 +43,7 @@ class Auth {
         if($this->db->insertUser($username, $hash, $email, $secret) != -1) {
             $user = $this->db->fetchUser($username);
             if($user && $this->db->setRoles($user,array('player')) != -1)
-            return True;
+            return $this->createJWTToken($user);
         } else {
             throw new Exception("Error inserting user");
         }

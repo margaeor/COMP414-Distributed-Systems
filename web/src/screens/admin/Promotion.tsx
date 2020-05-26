@@ -13,7 +13,7 @@ const Promotion = ({
   const [admin, setAdmin] = useState(false);
 
   return (
-    <div className="promotion form">
+    <form className="promotion form">
       <span className="form__header">Change User Privileges</span>
       <input
         className="form__input form__input--first"
@@ -39,7 +39,7 @@ const Promotion = ({
           checked={officer}
           onChange={(e) => setOfficer(e.target.checked)}
         />
-        <label htmlFor="officer">Officer</label>
+        <label htmlFor="officer">Official</label>
       </div>
       <div className="form__glue"></div>
       <button
@@ -49,7 +49,7 @@ const Promotion = ({
       >
         {isAdmin ? "Change Privileges" : "Not an Admin"}
       </button>
-    </div>
+    </form>
   );
 };
 
