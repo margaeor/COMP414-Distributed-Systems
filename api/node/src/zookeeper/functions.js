@@ -65,7 +65,6 @@ async function getBestServer() {
     try {
 
       children = await getChildrenPromise('/load_balance');
-      
       if(children.length <= 0 ) throw "Cannot list servers";
 
       children = children.map((x) => x.split('_'));

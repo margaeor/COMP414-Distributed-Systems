@@ -1,5 +1,6 @@
 const client = require("./connect");
 const zookeeper = require("node-zookeeper-client");
+const os = require('os');
 
 const getChildrenPromise = (...args) => {
   return new Promise((resolve, reject) => {
@@ -50,6 +51,34 @@ async function nodeExists(node) {
   }
 }
 
+function getLastIpSegment() {
+
+  let networkInterfaces = os.networkInterfaces( );
+
+  if(networkInterfaces) {
+    //networkInterfaces.filter((x :any) => x)
+    let prefix = process.env.PLAY_SUBNET_PREFIX;//'192.170.0.';
+    var play_ips = Object.keys(networkInterfaces).map((key) => {
+      return networkInterfaces[key][0].address;
+    })
+    .filter(x => {
+      return x.indexOf(prefix) !== -1;
+    });
+    if(play_ips && play_ips.length > 0) {
+      let play_ip = play_ips[0];
+      let matches = /\.([0-9]+)$/.exec(play_ip);
+      if(matches && matches.length == 2) return matches[1];
+      else return false;
+    } else return false;
+  } else return false;
+}
+
+function getNameForZookeeper() {
+  let segment = getLastIpSegment()
+  if(segment !== false) return 'g'+segment;
+  throw new Error('Cannot determine last IP segment');
+}
+
 async function changeLoadBalancingCounter(id, offset) {
   try {
     if (!id) return false;
@@ -63,7 +92,6 @@ async function changeLoadBalancingCounter(id, offset) {
     }
 
     let children = await getChildrenPromise("/load_balance");
-
     children = children.map((x) => x.split("_"));
     children = children.map((x) => [x[0], parseInt(x[1])]);
 
@@ -110,13 +138,12 @@ function getNameFromIp(ip) {
  * Register the server to the zookeeper using
  * an ephemeral node under /playmasters and an
  * ephemeral node under /load_balancing
- * @param {String} ip
  */
-async function registerToZookeeper(ip) {
+async function registerToZookeeper() {
   try {
     let node = "/playmasters/id";
     // FIXME: Hardcoding server name...
-    let value = process.env.SERVER_NAME;
+    let value = getNameForZookeeper();
 
     if (!(await nodeExists("/playmasters"))) {
       console.log("Creating playmasters node");
@@ -207,6 +234,7 @@ async function registerToZookeeper(ip) {
 module.exports = {
   changeLoadBalancingCounter: changeLoadBalancingCounter,
   registerToZookeeper: registerToZookeeper,
+  getNameForZookeeper: getNameForZookeeper
 };
 // module.exports = {
 //     client: client,

@@ -21,6 +21,7 @@ services:
     #  - ./auth/auth-php/src/:/var/www/html/
     networks:
       - backend
+      - play_network
     container_name: auth
   
   phpmyadmin:
@@ -177,11 +178,12 @@ services:
       MONGODB_DATABASE: '${MONGODB_PLAYMASTER_DB}'
       MONGODB_REPLICA_SET_NAME: '${MONGODB_REPLICA_SET_NAME}'
       MONGODB_REPLICA_SET_MEMBERS: '${MONGODB_REPLICA_SET_MEMBERS}'
+      PLAY_SUBNET_PREFIX: '192.170.0.' 
       NODE_ENV: 'development'
       PORT: '${GAME_PORT}'
-      SERVER_NAME: 'g1'
     networks:
       - backend
+      - play_network
     depends_on:
       - zookeeper
     volumes:
@@ -203,11 +205,12 @@ services:
       MONGODB_DATABASE: '${MONGODB_PLAYMASTER_DB}'
       MONGODB_REPLICA_SET_NAME: '${MONGODB_REPLICA_SET_NAME}'
       MONGODB_REPLICA_SET_MEMBERS: '${MONGODB_REPLICA_SET_MEMBERS}'
+      PLAY_SUBNET_PREFIX: '192.170.0.' 
       NODE_ENV: 'development'
       PORT: '${GAME_PORT}'
-      SERVER_NAME: 'g2'
     networks:
       - backend
+      - play_network
     depends_on:
       - zookeeper
     volumes:
@@ -232,6 +235,7 @@ services:
       - "phpmyadmin"
     networks:
       - backend
+      - play_network
     container_name: web
 
   web-builder:
@@ -261,5 +265,10 @@ secrets:
 networks:
   frontend:
   backend:
+  play_network:
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.170.0.0/16
 #volumes:
 #  data:

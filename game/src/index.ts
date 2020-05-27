@@ -10,6 +10,7 @@ import connection from "./mongo/connect.js";
 import {
   registerToZookeeper,
   changeLoadBalancingCounter,
+  getNameForZookeeper
 } from "./zookeeper/functions";
 import {
   CONNECTION_ERROR,
@@ -33,13 +34,20 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
 
-//var server_id: String;
+//io.set('transports', ["websocket", "polling"]);
+
+// app.use(function (req, res, next) {
+//   console.log(req.url,req.query)
+//   next()
+// })
+
+console.log('LAST IP SEGMENT: ',getNameForZookeeper());
 
 connection.then(() => {
   console.log("Successfully connected to mongo");
 });
 // Register to zookeeper
-registerToZookeeper(ip.address()).then((server_id: any) => {
+registerToZookeeper().then((server_id: any) => {
   const master = new PlayMaster(server_id);
 
   app.use(cors());
