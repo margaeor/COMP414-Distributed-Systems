@@ -89,7 +89,8 @@ app.get('/playmaster/results', async (req, res) => {
     if(score && game_id && mongoose.Types.ObjectId.isValid(game_id)) {
     
 
-      await transactions.runTransactionWithRetry(atomicEndGame, mongoose, game_id, score);
+      //await transactions.runTransactionWithRetry(atomicEndGame, mongoose, game_id, score);
+      await atomicEndGame(null,game_id, score);
 
       res.json(errors.createSuccessResponse('Scores updated successfully'));
 
@@ -123,7 +124,8 @@ app.get('/practice/join_queue', async (req, res) => {
           throw new errors.InvalidOperationException('User already in queue');
         } else {
           createUserIfNotExists(opponent);
-          let result = await transactions.runTransactionWithRetry(createGame, mongoose, username, opponent, game_type);
+          //let result = await transactions.runTransactionWithRetry(createGame, mongoose, username, opponent, game_type);
+          let result = await createGame(null,username,opponent,game_type);
           if(result && result.length == 2 && result[1]) {
             let active_game = result[1];
             res.json(errors.createSuccessResponse('Game created',active_game));
@@ -165,8 +167,8 @@ app.get('/join_game', async (req, res) => {
         }}).lean().exec();
 
       if(username !== game.player1 && username !== game.player2) throw new errors.AnauthorizedException('Access is denied');
-      let active_game = await transactions.runTransactionWithRetry(resetActiveGameState, mongoose, game);
-      
+      //let active_game = await transactions.runTransactionWithRetry(resetActiveGameState, mongoose, game);
+      let active_game = await resetActiveGameState(null,game);
       if(active_game) {
         game['server_id'] = active_game.server_id;
         game['server_ip'] = active_game.server_ip;
