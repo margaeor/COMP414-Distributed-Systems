@@ -126,7 +126,7 @@ export async function fetchLobbyData(
       .map(
         (p: Record<string, any>): Play => {
           const isPlayer1 = p.player1 === username;
-          console.log(p);
+          //console.log(p);
           let result:any = {
             id: p._id,
             isPlayer1,

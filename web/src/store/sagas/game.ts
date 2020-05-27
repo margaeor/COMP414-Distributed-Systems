@@ -50,7 +50,7 @@ function* connectToServer(token: string, id: string) {
     );
 
     const url = `/games/${serverName}`;
-
+    console.log(url);
     // Save and continue
     yield put(setPlay(play));
     yield put(changeScreen(ScreenState.GAME));
