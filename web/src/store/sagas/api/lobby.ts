@@ -74,7 +74,7 @@ export async function fetchScores(
         }
         let first_users = t.leaderboard.map((x : any) => x.username);
         let position = first_users.indexOf(username);
-        position = position == -1 ? 5 : position;
+        position = position == -1 ? 5 : (position+1);
 
         return {
           id: t._id,
