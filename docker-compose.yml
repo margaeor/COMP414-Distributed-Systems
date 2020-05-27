@@ -18,18 +18,19 @@ services:
       AUTH_ISSUER: "${AUTH_ISSUER}"
       AUTH_PUBLIC: "${AUTH_PUBLIC}"
       AUTH_PRIVATE: "${AUTH_PRIVATE}"
+    links:
+      - auth-db
     #volumes:
     #  - ./auth/auth-php/src/:/var/www/html/
     networks:
       - backend
-      - play_network
     container_name: auth
   
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest  
     secrets:
       - mysql_root_password
-    depends_on:
+    links:
       - auth-db
     networks:
       - frontend
@@ -188,7 +189,7 @@ services:
     networks:
       - backend
       - play_network
-    depends_on:
+    links:
       - zookeeper
     volumes:
       - ./game:/home/node/app/
@@ -233,7 +234,6 @@ services:
       - "80:80"
     links:
       - "game"
-      #- "game2"
       - "auth"
       - "api"
       - "phpmyadmin"
@@ -272,9 +272,10 @@ networks:
     ipam:
       driver: default
   play_network:
-    ipam:
-      driver: default
-      config:
-        - subnet: 192.170.0.0/16
+    external: true
+    #ipam:
+    #  driver: default
+    #  config:
+    #    - subnet: 192.170.0.0/16
 #volumes:
 #  data:
