@@ -2,6 +2,7 @@ version: '3.2'
 services:
   # Authentication
   auth:
+    image: 'localhost:5000/auth'
     build: 
       context: './auth/auth-php/'
       dockerfile: Dockerfile.prod
@@ -43,6 +44,7 @@ services:
 
   # Authentication database
   auth-db:
+    image: 'localhost:5000/authdb'
     build:
       context: './auth/auth-db/'
       dockerfile: Dockerfile.dev
@@ -181,6 +183,8 @@ services:
       PLAY_SUBNET_PREFIX: '192.170.0.' 
       NODE_ENV: 'development'
       PORT: '${GAME_PORT}'
+    deploy:
+      replicas: 2
     networks:
       - backend
       - play_network
@@ -193,32 +197,32 @@ services:
     container_name: game
     command: bash -c "npm i && npm run dev"
   
-  game2:
-    # build:
-    #   context: './game/'
-    #   dockerfile: Dockerfile.dev
-    image: node:12
-    working_dir: /home/node/app/
-    environment:
-      JWT_PUBLIC_KEY: "${AUTH_PUBLIC}"
-      MONGODB_USER: '${MONGODB_PLAYMASTER_USER}'
-      MONGODB_DATABASE: '${MONGODB_PLAYMASTER_DB}'
-      MONGODB_REPLICA_SET_NAME: '${MONGODB_REPLICA_SET_NAME}'
-      MONGODB_REPLICA_SET_MEMBERS: '${MONGODB_REPLICA_SET_MEMBERS}'
-      PLAY_SUBNET_PREFIX: '192.170.0.' 
-      NODE_ENV: 'development'
-      PORT: '${GAME_PORT}'
-    networks:
-      - backend
-      - play_network
-    depends_on:
-      - zookeeper
-    volumes:
-      - ./game:/home/node/app/
-    secrets:
-      - mongodb_playmaster_password
-    container_name: game2
-    command: bash -c "npm run dev"
+  # game2:
+  #   # build:
+  #   #   context: './game/'
+  #   #   dockerfile: Dockerfile.dev
+  #   image: node:12
+  #   working_dir: /home/node/app/
+  #   environment:
+  #     JWT_PUBLIC_KEY: "${AUTH_PUBLIC}"
+  #     MONGODB_USER: '${MONGODB_PLAYMASTER_USER}'
+  #     MONGODB_DATABASE: '${MONGODB_PLAYMASTER_DB}'
+  #     MONGODB_REPLICA_SET_NAME: '${MONGODB_REPLICA_SET_NAME}'
+  #     MONGODB_REPLICA_SET_MEMBERS: '${MONGODB_REPLICA_SET_MEMBERS}'
+  #     PLAY_SUBNET_PREFIX: '192.170.0.' 
+  #     NODE_ENV: 'development'
+  #     PORT: '${GAME_PORT}'
+  #   networks:
+  #     - backend
+  #     - play_network
+  #   depends_on:
+  #     - zookeeper
+  #   volumes:
+  #     - ./game:/home/node/app/
+  #   secrets:
+  #     - mongodb_playmaster_password
+  #   container_name: game2
+  #   command: bash -c "npm run dev"
   
   web:
     image: nginx
@@ -229,7 +233,7 @@ services:
       - "80:80"
     links:
       - "game"
-      - "game2"
+      #- "game2"
       - "auth"
       - "api"
       - "phpmyadmin"
@@ -265,6 +269,8 @@ secrets:
 networks:
   frontend:
   backend:
+    ipam:
+      driver: default
   play_network:
     ipam:
       driver: default
