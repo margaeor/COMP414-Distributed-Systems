@@ -272,10 +272,9 @@ networks:
     ipam:
       driver: default
   play_network:
-    external: true
-    #ipam:
-    #  driver: default
-    #  config:
-    #    - subnet: 192.170.0.0/16
+    ipam:
+     driver: default
+     config:
+       - subnet: 192.170.0.0/16
 #volumes:
 #  data:

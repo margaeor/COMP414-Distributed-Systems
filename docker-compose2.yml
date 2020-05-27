@@ -1,0 +1,229 @@
+networks:
+  backend:
+    ipam:
+      driver: default
+  frontend: {}
+  play_network:
+    ipam:
+      config:
+      - subnet: 192.170.0.0/16
+      driver: default
+secrets:
+  mongodb_api_password:
+    file: /home/geox/Documents/TUC/Distributed/project/secrets/mongodb_api_password
+  mongodb_config:
+    file: /home/geox/Documents/TUC/Distributed/project/secrets/mongodb_config
+  mongodb_playmaster_password:
+    file: /home/geox/Documents/TUC/Distributed/project/secrets/mongodb_playmaster_password
+  mysql_password:
+    file: /home/geox/Documents/TUC/Distributed/project/secrets/mysql_password
+  mysql_root_password:
+    file: /home/geox/Documents/TUC/Distributed/project/secrets/mysql_root_password
+services:
+  api:
+    command: bash -c "npm i && npm run dev"
+    container_name: api
+    depends_on:
+    - mongodb-primary
+    - zookeeper
+    environment:
+      JWT_PUBLIC_KEY: LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlHZk1BMEdDU3FHU0liM0RRRUJBUVVBQTRHTkFEQ0JpUUtCZ1FEVHlTNFAyTGJncDlKc1ZZY0RrTUdrNWwvZQo0cFdXbnVCZEsxVi9oR0RvMU5waWlpZFRXVXVuekNES09DSXRXNnRIZmFsSGZLdUYrTnRHckhDTVpicEdrS09rCldyYjlNc3lydkpsa1NWRU1pZVI0SEd0QnFqYW1kNjB0SXRLU1E3ZXlySitpSXNsNE9oemFsdXpmc2JuNDJPeXIKUzQwMnhKdU1ZdUpwM2ExK1V3SURBUUFCCi0tLS0tRU5EIFBVQkxJQyBLRVktLS0tLQ==
+      MONGODB_DATABASE: gamemaster_db
+      MONGODB_REPLICA_SET_MEMBERS: mongodb-primary,mongodb-secondary
+      MONGODB_REPLICA_SET_NAME: replicat
+      MONGODB_USER: gamemaster
+      PLAYMASTER_IP_PREFIX: 172.21.0.
+    image: node:12
+    networks:
+      backend: null
+    ports:
+    - published: 3001
+      target: 3000
+    restart: always
+    secrets:
+    - source: mongodb_api_password
+    volumes:
+    - /home/geox/Documents/TUC/Distributed/project/api/node:/home/node/app:rw
+    working_dir: /home/node/app/
+  auth:
+    build:
+      context: /home/geox/Documents/TUC/Distributed/project/auth/auth-php
+      dockerfile: Dockerfile.prod
+    container_name: auth
+    environment:
+      AUTH_ISSUER: auth
+      AUTH_PRIVATE: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlDWFFJQkFBS0JnUURUeVM0UDJMYmdwOUpzVlljRGtNR2s1bC9lNHBXV251QmRLMVYvaEdEbzFOcGlpaWRUCldVdW56Q0RLT0NJdFc2dEhmYWxIZkt1RitOdEdySENNWmJwR2tLT2tXcmI5TXN5cnZKbGtTVkVNaWVSNEhHdEIKcWphbWQ2MHRJdEtTUTdleXJKK2lJc2w0T2h6YWx1emZzYm40Mk95clM0MDJ4SnVNWXVKcDNhMStVd0lEQVFBQgpBb0dBR1JFdDE0aFNGUU1vSDlSN3Q0dFJzRC9vUnd4UW9sUkp3QjFaOEU3dDNZRWNIQis0Q2VCKzJPeUxVUVFWCjM0S0RJbUlZUURMY1ptNFBIaTFZNFBWRmQ4OXRYYXMvQkhMMjhkV1NZSklCL0gzT09laU5IQk9QSjZKeCtnNnYKWkFETVZtakdybElQMnhocnVEalZpNlRlTFdsRlpMUVF6d2dsbG9pTWMrb1NQT2tDUVFEN05pUmhwQkpuVmM0TQo1U0RuV0V3NElYbzBWcUIrSUxIMUtIK3V6em5RS2pVbHJQNUNwYTd2a1JxUlVOZm52MzNNNVdMeDhjbkpsU3ovCkVFUFpkbVR2QWtFQTE5S21NOXlTZXhjaDZ4b0JUSkZXamF1aXNmUzZmdnJ6NVYrWlpocXdROEVBRk1HZzJRblgKVjFMdWdRdmNKV2F2dkxKdkpWQjVVeS9lQkF4WmU2VmszUUpCQUtIYWkyeEJtdjNyUWR2N0VNMGRqZFlvYzZVZgpIejdFY0FRbHVNWjNpNmM4V292UXZ1MVA5THN6d1d0WkxCS0x4VkRyaG1tZVFFWGFFR2l5SVJVT2ZBOENRQjBQCjM1T1NPeU5hSFJZa2ZWSkxLK1dOM0Myc2I4U1RsRzRwcm1WaWFLUG5CRlRITWhxbnlaaVhzVWd0U2FxN3BpUjUKdnArK3MyZXhSV3MwSW9TVTQvMENRUUNWY1dhQTBuT0UzZkpTall2eitIM2xuZnArRlZLREtsUXpjZjhVaVFNTApNNHA1S0xnTEd6dzEyTVJTZC9KVlFQSk5JVlIwQW1ta1I4czc2Nkp1Y2pEcwotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQ==
+      AUTH_PUBLIC: LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlHZk1BMEdDU3FHU0liM0RRRUJBUVVBQTRHTkFEQ0JpUUtCZ1FEVHlTNFAyTGJncDlKc1ZZY0RrTUdrNWwvZQo0cFdXbnVCZEsxVi9oR0RvMU5waWlpZFRXVXVuekNES09DSXRXNnRIZmFsSGZLdUYrTnRHckhDTVpicEdrS09rCldyYjlNc3lydkpsa1NWRU1pZVI0SEd0QnFqYW1kNjB0SXRLU1E3ZXlySitpSXNsNE9oemFsdXpmc2JuNDJPeXIKUzQwMnhKdU1ZdUpwM2ExK1V3SURBUUFCCi0tLS0tRU5EIFBVQkxJQyBLRVktLS0tLQ==
+      DB_HOST: auth-db
+      DB_NAME: dbtest
+      DB_PASSWORD_FILE: /run/secrets/mysql_password
+      DB_USERNAME: otherUser
+    image: localhost:5000/auth
+    links:
+    - auth-db
+    networks:
+      backend: null
+      play_network: null
+    ports:
+    - published: 8080
+      target: 80
+    secrets:
+    - source: mysql_password
+  auth-db:
+    build:
+      args:
+        MYSQL_VERSION: '5.7'
+      context: /home/geox/Documents/TUC/Distributed/project/auth/auth-db
+      dockerfile: Dockerfile.dev
+    container_name: auth-db
+    environment:
+      MYSQL_DATABASE: dbtest
+      MYSQL_INITDB_SKIP_TZINFO: "yes"
+      MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
+      MYSQL_USER: otherUser
+    image: localhost:5000/authdb
+    networks:
+      backend: null
+    ports:
+    - published: 3306
+      target: 3306
+    restart: always
+    secrets:
+    - source: mysql_root_password
+    - source: mysql_password
+    volumes:
+    - /home/geox/Documents/TUC/Distributed/project/auth/auth-db/db_init:/docker-entrypoint-initdb.d:rw
+  game:
+    command: bash -c "npm i && npm run dev"
+    container_name: game
+    deploy:
+      replicas: 2
+    environment:
+      JWT_PUBLIC_KEY: LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlHZk1BMEdDU3FHU0liM0RRRUJBUVVBQTRHTkFEQ0JpUUtCZ1FEVHlTNFAyTGJncDlKc1ZZY0RrTUdrNWwvZQo0cFdXbnVCZEsxVi9oR0RvMU5waWlpZFRXVXVuekNES09DSXRXNnRIZmFsSGZLdUYrTnRHckhDTVpicEdrS09rCldyYjlNc3lydkpsa1NWRU1pZVI0SEd0QnFqYW1kNjB0SXRLU1E3ZXlySitpSXNsNE9oemFsdXpmc2JuNDJPeXIKUzQwMnhKdU1ZdUpwM2ExK1V3SURBUUFCCi0tLS0tRU5EIFBVQkxJQyBLRVktLS0tLQ==
+      MONGODB_DATABASE: playmaster_db
+      MONGODB_REPLICA_SET_MEMBERS: mongodb-primary,mongodb-secondary
+      MONGODB_REPLICA_SET_NAME: replicat
+      MONGODB_USER: playmaster
+      NODE_ENV: development
+      PLAY_SUBNET_PREFIX: 192.170.0.
+      PORT: '3000'
+    image: node:12
+    links:
+    - zookeeper
+    networks:
+      backend: null
+      play_network: null
+    secrets:
+    - source: mongodb_playmaster_password
+    volumes:
+    - /home/geox/Documents/TUC/Distributed/project/game:/home/node/app:rw
+    working_dir: /home/node/app/
+  mongodb-arbiter:
+    container_name: mongodb-arbiter
+    depends_on:
+    - mongodb-primary
+    environment:
+      MONGODB_ADVERTISED_HOSTNAME: mongodb-arbiter
+      MONGODB_PRIMARY_HOST: mongodb-primary
+      MONGODB_PRIMARY_ROOT_PASSWORD: password123
+      MONGODB_REPLICA_SET_KEY: replicasetkey123
+      MONGODB_REPLICA_SET_MODE: arbiter
+      MONGODB_REPLICA_SET_NAME: replicat
+    image: bitnami/mongodb:latest
+    networks:
+      backend: null
+  mongodb-primary:
+    container_name: mongodb-primary
+    environment:
+      MONGODB_ADVERTISED_HOSTNAME: mongodb-primary
+      MONGODB_API_DB: gamemaster_db
+      MONGODB_API_USER: gamemaster
+      MONGODB_PLAYMASTER_DB: playmaster_db
+      MONGODB_PLAYMASTER_USER: playmaster
+      MONGODB_REPLICA_SET_KEY: replicasetkey123
+      MONGODB_REPLICA_SET_MODE: primary
+      MONGODB_REPLICA_SET_NAME: replicat
+      MONGODB_ROOT_PASSWORD: password123
+    image: bitnami/mongodb:latest
+    networks:
+      backend: null
+    ports:
+    - published: 27017
+      target: 27017
+    restart: always
+    secrets:
+    - source: mongodb_config
+    volumes:
+    - /home/geox/Documents/TUC/Distributed/project/api/mongo/init:/docker-entrypoint-initdb.d:rw
+  mongodb-secondary:
+    container_name: mongodb-secondary
+    depends_on:
+    - mongodb-primary
+    environment:
+      MONGODB_ADVERTISED_HOSTNAME: mongodb-secondary
+      MONGODB_PRIMARY_HOST: mongodb-primary
+      MONGODB_PRIMARY_ROOT_PASSWORD: password123
+      MONGODB_REPLICA_SET_KEY: replicasetkey123
+      MONGODB_REPLICA_SET_MODE: secondary
+      MONGODB_REPLICA_SET_NAME: replicat
+    image: bitnami/mongodb:latest
+    networks:
+      backend: null
+  phpmyadmin:
+    container_name: phpmyadmin
+    environment:
+      PMA_HOST: auth-db
+      PMA_PASSWORD_FILE: /run/secrets/mysql_root_password
+      PMA_USER: root
+    image: phpmyadmin/phpmyadmin:latest
+    links:
+    - auth-db
+    networks:
+      backend: null
+      frontend: null
+    ports:
+    - published: 8081
+      target: 80
+    secrets:
+    - source: mysql_root_password
+  web:
+    container_name: web
+    image: nginx
+    links:
+    - game
+    - auth
+    - api
+    - phpmyadmin
+    networks:
+      backend: null
+      play_network: null
+    ports:
+    - published: 80
+      target: 80
+    volumes:
+    - /home/geox/Documents/TUC/Distributed/project/web/dist:/usr/share/nginx/html:rw
+    - /home/geox/Documents/TUC/Distributed/project/web/nginx.conf:/etc/nginx/nginx.conf:rw
+  web-builder:
+    command: bash -c "npm i; npm run watch"
+    container_name: web-builder
+    environment:
+      NODE_ENV: development
+    image: node:12
+    networks:
+      backend: null
+    volumes:
+    - /home/geox/Documents/TUC/Distributed/project/web:/home/node/app:rw
+    working_dir: /home/node/app
+  zookeeper:
+    container_name: zookeeper
+    environment:
+      ALLOW_ANONYMOUS_LOGIN: "yes"
+    image: bitnami/zookeeper:latest
+    networks:
+      backend: null
+    volumes:
+    - /home/geox/Documents/TUC/Distributed/project/zookeeper/config/zoo.cfg:/opt/bitnami/zookeeper/conf/zoo.cfg:rw
+    - /home/geox/Documents/TUC/Distributed/project/zookeeper/scripts:/opt/zoo/scripts:rw
+version: '3.2'
+
