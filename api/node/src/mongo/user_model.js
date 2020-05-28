@@ -42,6 +42,6 @@ var user = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'tournament'
   }]
-});
+},{autoCreate: true});
 
 module.exports = mongoose.model('user', user);     

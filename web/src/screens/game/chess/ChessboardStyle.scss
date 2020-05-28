@@ -14,4 +14,6 @@
   activeSquare: rgba($color-accent, 0.4);
   possibleSquare: rgba($color-accent, 0.9);
   activeSquarePossible: rgba($color-accent, 0.6);
+
+  boardSize: $game-size / 1px;
 }

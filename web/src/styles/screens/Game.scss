@@ -8,6 +8,7 @@
 }
 
 .chat {
+  height: $game-size;
   width: 270px;
   align-self: stretch;
   display: flex;
@@ -20,6 +21,7 @@
     flex-direction: column;
     justify-content: end;
     flex-grow: 1;
+    overflow: hidden;
 
     margin-top: 4px;
     border-top-left-radius: 5px;
@@ -58,12 +60,12 @@
 }
 
 .play-info {
+  min-height: fit-content;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   background-color: $color-primary;
   border-radius: 5px;
-  overflow: hidden;
 
   &__title {
     padding: 0.2rem 0.5rem;

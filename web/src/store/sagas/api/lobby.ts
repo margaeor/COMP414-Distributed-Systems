@@ -9,7 +9,7 @@ import {
   Tournament,
   TournamentPlay,
 } from "../../types";
-import { ConnectionError, RefreshTokenError } from "./errors";
+import { ConnectionError, AccessTokenError } from "./errors";
 
 export async function fetchScores(
   token: string,
@@ -23,7 +23,7 @@ export async function fetchScores(
     });
 
     if (data.status !== 200) {
-      throw new RefreshTokenError(
+      throw new AccessTokenError(
         data.message || `Unknown Error: ${data.status}`
       );
     }
@@ -72,9 +72,9 @@ export async function fetchScores(
         } else {
           plays = [];
         }
-        let first_users = t.leaderboard.map((x : any) => x.username);
+        let first_users = t.leaderboard.map((x: any) => x.username);
         let position = first_users.indexOf(username);
-        position = position == -1 ? 5 : position;
+        position = position == -1 ? 5 : position + 1;
 
         return {
           id: t._id,
@@ -89,13 +89,13 @@ export async function fetchScores(
         };
       }
     );
-    
+
     let pastGames: (FinishedTournament | FinishedPracticePlay)[] = [];
     pastGames = pastGames.concat(tournaments, plays);
     pastGames.sort((a, b) => (b.date > a.date ? 1 : -1));
     return pastGames;
   } catch (e) {
-    if (e instanceof RefreshTokenError) throw e;
+    if (e instanceof AccessTokenError) throw e;
     console.log(e);
     throw new ConnectionError(e.message);
   }
@@ -116,7 +116,7 @@ export async function fetchLobbyData(
     });
 
     if (data.status !== 200) {
-      throw new RefreshTokenError(
+      throw new AccessTokenError(
         data.message || `Unknown Error: ${data.status}`
       );
     }
@@ -127,7 +127,7 @@ export async function fetchLobbyData(
         (p: Record<string, any>): Play => {
           const isPlayer1 = p.player1 === username;
           //console.log(p);
-          let result:any = {
+          let result: any = {
             id: p._id,
             isPlayer1,
             opponent: isPlayer1 ? p.player2 : p.player1,
@@ -135,12 +135,12 @@ export async function fetchLobbyData(
             started: true,
             date: new Date(p.date_created),
           };
-          if(p.tournament_id && p.tournament_id.hasOwnProperty('name')) {
-            result['name'] = p.tournament_id.name;
+          if (p.tournament_id && p.tournament_id.hasOwnProperty("name")) {
+            result["name"] = p.tournament_id.name;
           }
-          if(p.round_id && p.round_id.hasOwnProperty('round_number')) {
-            result['round'] = p.round_id.round_number;
-          } 
+          if (p.round_id && p.round_id.hasOwnProperty("round_number")) {
+            result["round"] = p.round_id.round_number;
+          }
 
           return result;
         }
@@ -171,7 +171,7 @@ export async function fetchLobbyData(
 
     return { ongoingPlays: plays, tournaments };
   } catch (e) {
-    if (e instanceof RefreshTokenError) throw e;
+    if (e instanceof AccessTokenError) throw e;
     throw new ConnectionError(e.message);
   }
 }
@@ -186,12 +186,12 @@ export async function joinTournament(token: string, id: string) {
     });
 
     if (data.status !== 200) {
-      throw new RefreshTokenError(
+      throw new AccessTokenError(
         data.message || `Unknown Error: ${data.status}`
       );
     }
   } catch (e) {
-    if (e instanceof RefreshTokenError) throw e;
+    if (e instanceof AccessTokenError) throw e;
     throw new ConnectionError(e.message);
   }
 }
@@ -206,12 +206,12 @@ export async function startTournament(token: string, id: string) {
     });
 
     if (data.status !== 200) {
-      throw new RefreshTokenError(
+      throw new AccessTokenError(
         data.message || `Unknown Error: ${data.status}`
       );
     }
   } catch (e) {
-    if (e instanceof RefreshTokenError) throw e;
+    if (e instanceof AccessTokenError) throw e;
     throw new ConnectionError(e.message);
   }
 }
@@ -225,13 +225,13 @@ export async function joinQuickGame(token: string, game: Game) {
       },
     });
 
-    if (data.status !== 200) {
-      throw new RefreshTokenError(
+    if (data.status !== 200 && data.status !== 400) {
+      throw new AccessTokenError(
         data.message || `Unknown Error: ${data.status}`
       );
     }
   } catch (e) {
-    if (e instanceof RefreshTokenError) throw e;
+    if (e instanceof AccessTokenError) throw e;
     throw new ConnectionError(e.message);
   }
 }
@@ -253,19 +253,19 @@ export async function joinPlay(
     });
 
     if (data.status !== 200) {
-      throw new RefreshTokenError(
+      throw new AccessTokenError(
         data.message || `Unknown Error: ${data.status}`
       );
     }
 
     const p = data.data;
-    const isPlayer1 = p.player1 === username;
+    const isPlayer1 = p.player1._id === username;
     return {
       play: {
         id: p._id,
         name: p.tournament_id && p.tournament_id.name,
         isPlayer1,
-        opponent: isPlayer1 ? p.player2 : p.player1,
+        opponent: isPlayer1 ? p.player2._id : p.player1._id,
         game: p.game_type === "chess" ? Game.CHESS : Game.TICTACTOE,
         started: p.has_started,
         date: p.date_created,
@@ -276,7 +276,7 @@ export async function joinPlay(
       },
     };
   } catch (e) {
-    if (e instanceof RefreshTokenError) throw e;
+    if (e instanceof AccessTokenError) throw e;
     throw new ConnectionError(e.message);
   }
 }
@@ -291,14 +291,14 @@ export async function checkQuickPlay(token: string, game: Game) {
     });
 
     if (data.status !== 200) {
-      throw new RefreshTokenError(
+      throw new AccessTokenError(
         data.message || `Unknown Error: ${data.status}`
       );
     }
 
     return data.data;
   } catch (e) {
-    if (e instanceof RefreshTokenError) throw e;
+    if (e instanceof AccessTokenError) throw e;
     throw new ConnectionError(e.message);
   }
 }

@@ -157,16 +157,17 @@ app.get('/join_game', async (req, res) => {
     
       let game = await Game.findById(game_id)
       .populate({
-        path: 'tournament_id',
+        path: 'tournament_id player1 player2',
         select: {
           'name': 1,
           'date_created': 1,
           'game_type':1,
           'has_started': 1,
           'has_ended':1,
+          'rating':1
         }}).lean().exec();
 
-      if(username !== game.player1 && username !== game.player2) throw new errors.AnauthorizedException('Access is denied');
+      if(username !== game.player1._id && username !== game.player2._id) throw new errors.AnauthorizedException('Access is denied');
       //let active_game = await transactions.runTransactionWithRetry(resetActiveGameState, mongoose, game);
       let active_game = await resetActiveGameState(null,game);
       if(active_game) {
