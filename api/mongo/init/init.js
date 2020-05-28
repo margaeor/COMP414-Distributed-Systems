@@ -3,20 +3,33 @@
 let data = JSON.parse(cat('/run/secrets/mongodb_config'))
 let databases = data['databases'];
 
+let db2;
 for (let dbname in databases) {
 
-    db = db.getSiblingDB(dbname);
+    while(true)
+    {
+      try{
+        db2 = db.getSiblingDB(dbname);
+        
+        break;
+      } catch(e) {
+        print(e);
+      }
+      print('Retrying to get database');
+    }
 
     for (let user of databases[dbname]["users"]) {
 
       while(true)
       {
         try{
-          db.createUser(user);
+          db2.createUser(user);
+          
           break;
         } catch(e) {
-
+          print(e);
         }
+        print('Retrying create user');
       }
       
     }
