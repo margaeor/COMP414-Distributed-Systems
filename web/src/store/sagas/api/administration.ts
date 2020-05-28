@@ -1,8 +1,7 @@
-import { sleep } from "./utils";
-import { Game } from "../../types";
 import Axios from "axios";
+import { Game } from "../../types";
 import {
-  RefreshTokenError,
+  AccessTokenError,
   ConnectionError,
   WrongParametersError,
 } from "./errors";
@@ -24,14 +23,14 @@ export async function createTournament(
     });
 
     if (data.status === 401) {
-      throw new RefreshTokenError(
+      throw new AccessTokenError(
         data.message || `Unknown Error: ${data.status}`
       );
     } else if (data.status !== 200) {
       throw new WrongParametersError(data.message);
     }
   } catch (e) {
-    if (e instanceof RefreshTokenError || e instanceof WrongParametersError)
+    if (e instanceof AccessTokenError || e instanceof WrongParametersError)
       throw e;
     throw new ConnectionError(e.message);
   }
@@ -56,14 +55,14 @@ export async function changePrivileges(
     });
 
     if (data.status === 401) {
-      throw new RefreshTokenError(
+      throw new AccessTokenError(
         data.message || `Unknown Error: ${data.status}`
       );
     } else if (data.status !== 200) {
       throw new WrongParametersError(data.error);
     }
   } catch (e) {
-    if (e instanceof RefreshTokenError || e instanceof WrongParametersError)
+    if (e instanceof AccessTokenError || e instanceof WrongParametersError)
       throw e;
     throw new ConnectionError(e.message);
   }

@@ -1,39 +1,39 @@
-import { call, cancel, fork, put, select, take } from "redux-saga/effects";
+import { call, fork, put, race, select, take } from "redux-saga/effects";
 import {
+  CANCEL_LOADING,
   changeScreen,
   JOIN_GAME,
   JOIN_QUICK_PLAY,
   JOIN_TOURNAMENT,
-  updateOngoingPlays,
-  updateTournaments,
-  updateScores,
-  startLoading,
   loadingFailed,
-  CANCEL_LOADING,
-  stopLoading,
+  startLoading,
   START_TOURNAMENT,
+  stopLoading,
+  updateOngoingPlays,
+  updateScores,
+  updateTournaments,
 } from "../actions";
 import { selectUser } from "../selectors";
 import {
+  FinishedPracticePlay,
+  FinishedTournament,
   Game,
   Play,
   ScreenState,
   Tournament,
   TournamentPlay,
   User,
-  FinishedPracticePlay,
-  FinishedTournament,
 } from "../types";
+import { AccessTokenError } from "./api/errors";
 import {
   checkQuickPlay,
   fetchLobbyData,
+  fetchScores,
   joinQuickGame,
   joinTournament,
-  fetchScores,
   startTournament,
 } from "./api/lobby";
 import { callApi, sleep } from "./utils";
-import { RefreshTokenError } from "./api/errors";
 
 function* fetchLobby(token: string, username: string) {
   const data: {
@@ -61,6 +61,7 @@ function* periodicFetch(token: string) {
     try {
       yield* fetchLobby(token, username);
     } catch (e) {
+      if (e instanceof AccessTokenError) return e;
       console.log("fetching failed: " + e.toString());
     }
     yield* sleep(5000);
@@ -93,7 +94,7 @@ function* quickPlay(token: string, game: Game) {
       }
     } catch (e) {
       console.log("misc error: " + e.message);
-      if (e instanceof RefreshTokenError) throw e;
+      if (e instanceof AccessTokenError) throw e;
     }
     yield* sleep(5000);
   }
@@ -108,7 +109,7 @@ function* quickPlay(token: string, game: Game) {
   return data.ongoingPlays ? data.ongoingPlays[0].id : null;
 }
 
-export default function* lobby(token: string) {
+function* lobbyHandler(token: string) {
   yield put(changeScreen(ScreenState.LOBBY));
   const fetchHandler = yield fork(periodicFetch, token);
 
@@ -124,18 +125,14 @@ export default function* lobby(token: string) {
     switch (act.type) {
       case JOIN_GAME:
         // Exit to join game
-        yield cancel(fetchHandler);
         return { screen: ScreenState.GAME, id: act.id };
       case START_TOURNAMENT:
-        yield cancel(fetchHandler);
         yield call(startTournament, token, act.id);
         return { screen: ScreenState.LOBBY };
       case JOIN_TOURNAMENT:
-        yield cancel(fetchHandler);
         yield call(joinTournament, token, act.id);
         return { screen: ScreenState.LOBBY };
       case JOIN_QUICK_PLAY:
-        yield cancel(fetchHandler);
         id = yield* quickPlay(token, act.game);
         if (id) {
           return { screen: ScreenState.GAME, id };
@@ -144,5 +141,16 @@ export default function* lobby(token: string) {
         }
     }
   }
+  return { screen: ScreenState.LOBBY };
+}
+
+export default function* lobby(token: string) {
+  const res = yield race({
+    fetch: call(periodicFetch, token),
+    lobby: call(lobbyHandler, token),
+  });
+
+  if (res.lobby) return res.lobby;
+  if (res.fetch) throw res.fetch;
   return { screen: ScreenState.LOBBY };
 }
