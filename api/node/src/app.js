@@ -490,6 +490,7 @@ app.get('/me/match_history', async function(req, res) {
           'leaderboard':1,
           'max_players':1
         },
+        match: { 'has_ended': {$eq: true}},
         populate: {
           path: 'rounds',
           select: {
@@ -506,7 +507,7 @@ app.get('/me/match_history', async function(req, res) {
               'player1': 1,
               'player2': 1
             }
-          }
+          },
         },
         options: { sort: '-date_created' }
       }).
