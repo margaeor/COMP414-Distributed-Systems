@@ -80,15 +80,22 @@ function* connectToServer(token: string, id: string) {
     channel = (yield call(setupSocketChannel, socket)) as EventChannel<any>;
 
     yield put(startLoading("Waiting for Opponent..."));
-    const act = yield take(channel);
-    console.log(act);
+    let act;
+
+    do {
+      act = yield take(channel);
+      console.log(act);
+    } while(act.type !== RECEIVE_READY && act.type !== DISCONNECTED)
+
+    
     if (act.type === RECEIVE_READY) {
       // emitMessage(socket, `${username} connected`);
       return { socket, channel };
+    } else {
+      yield* failLoadingAndExit("Connection Closed");
+      return null;
     }
 
-    yield* failLoadingAndExit("Connection Closed");
-    return null;
   } catch (e) {
     if (channel) channel.close();
     if (socket) socket.disconnect();
