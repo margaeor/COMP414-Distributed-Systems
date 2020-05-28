@@ -29,5 +29,6 @@ export function processTicResults(data: string): Result {
 
   var is_over = tic_tac_toe.hasGameEnded();
   if (is_over == 0) return "ongoing";
-  return is_over == 1 ? "won" : "lost";
+  else if(is_over == 1) return "won";
+  else return is_over == 2 ? "lost" : "draw";
 }

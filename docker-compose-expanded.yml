@@ -29,7 +29,7 @@ services:
     environment:
       JWT_PUBLIC_KEY: LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlHZk1BMEdDU3FHU0liM0RRRUJBUVVBQTRHTkFEQ0JpUUtCZ1FEVHlTNFAyTGJncDlKc1ZZY0RrTUdrNWwvZQo0cFdXbnVCZEsxVi9oR0RvMU5waWlpZFRXVXVuekNES09DSXRXNnRIZmFsSGZLdUYrTnRHckhDTVpicEdrS09rCldyYjlNc3lydkpsa1NWRU1pZVI0SEd0QnFqYW1kNjB0SXRLU1E3ZXlySitpSXNsNE9oemFsdXpmc2JuNDJPeXIKUzQwMnhKdU1ZdUpwM2ExK1V3SURBUUFCCi0tLS0tRU5EIFBVQkxJQyBLRVktLS0tLQ==
       MONGODB_DATABASE: gamemaster_db
-      MONGODB_REPLICA_SET_MEMBERS: mongodb-primary,mongodb-secondary
+      MONGODB_REPLICA_SET_MEMBERS: comp411_mongodb-primary,comp411_mongodb-secondary
       MONGODB_REPLICA_SET_NAME: replicat
       MONGODB_USER: gamemaster
       PLAYMASTER_IP_PREFIX: 172.21.0.
@@ -101,7 +101,7 @@ services:
     environment:
       JWT_PUBLIC_KEY: LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlHZk1BMEdDU3FHU0liM0RRRUJBUVVBQTRHTkFEQ0JpUUtCZ1FEVHlTNFAyTGJncDlKc1ZZY0RrTUdrNWwvZQo0cFdXbnVCZEsxVi9oR0RvMU5waWlpZFRXVXVuekNES09DSXRXNnRIZmFsSGZLdUYrTnRHckhDTVpicEdrS09rCldyYjlNc3lydkpsa1NWRU1pZVI0SEd0QnFqYW1kNjB0SXRLU1E3ZXlySitpSXNsNE9oemFsdXpmc2JuNDJPeXIKUzQwMnhKdU1ZdUpwM2ExK1V3SURBUUFCCi0tLS0tRU5EIFBVQkxJQyBLRVktLS0tLQ==
       MONGODB_DATABASE: playmaster_db
-      MONGODB_REPLICA_SET_MEMBERS: mongodb-primary,mongodb-secondary
+      MONGODB_REPLICA_SET_MEMBERS: comp411_mongodb-primary,comp411_mongodb-secondary
       MONGODB_REPLICA_SET_NAME: replicat
       MONGODB_USER: playmaster
       NODE_ENV: development
@@ -123,8 +123,8 @@ services:
     depends_on:
     - mongodb-primary
     environment:
-      MONGODB_ADVERTISED_HOSTNAME: mongodb-arbiter
       MONGODB_PRIMARY_HOST: mongodb-primary
+      MONGODB_PRIMARY_PORT_NUMBER: '27017'
       MONGODB_PRIMARY_ROOT_PASSWORD: password123
       MONGODB_REPLICA_SET_KEY: replicasetkey123
       MONGODB_REPLICA_SET_MODE: arbiter
@@ -160,8 +160,8 @@ services:
     depends_on:
     - mongodb-primary
     environment:
-      MONGODB_ADVERTISED_HOSTNAME: mongodb-secondary
       MONGODB_PRIMARY_HOST: mongodb-primary
+      MONGODB_PRIMARY_PORT_NUMBER: '27017'
       MONGODB_PRIMARY_ROOT_PASSWORD: password123
       MONGODB_REPLICA_SET_KEY: replicasetkey123
       MONGODB_REPLICA_SET_MODE: secondary
@@ -202,7 +202,7 @@ services:
       target: 80
     volumes:
     - /home/geox/Documents/TUC/Distributed/project/web/dist:/usr/share/nginx/html:rw
-    - /home/geox/Documents/TUC/Distributed/project/web/nginx.conf:/etc/nginx/nginx.conf:rw
+    - /home/geox/Documents/TUC/Distributed/project/web/nginx_conf/swarm/nginx.conf:/etc/nginx/nginx.conf:rw
   web-builder:
     command: bash -c "npm i; npm run watch"
     container_name: web-builder
