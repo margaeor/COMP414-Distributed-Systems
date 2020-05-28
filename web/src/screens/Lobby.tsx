@@ -5,8 +5,8 @@ import {
   mdiChessKnight,
   mdiChessPawn,
   mdiChessRook,
-  mdiPound,
   mdiGamepadSquare,
+  mdiPound,
 } from "@mdi/js";
 import Icon from "@mdi/react";
 import React, { useMemo } from "react";
@@ -27,15 +27,15 @@ import {
   FinishedPracticePlay,
   FinishedTournament,
   Game,
+  isPlay,
   isTournament,
+  isTournamentPlay,
   Play,
   ResultType,
   State,
   Tournament,
-  User,
-  isPlay,
   TournamentPlay,
-  isTournamentPlay,
+  User,
 } from "../store/types";
 
 interface IProps {
@@ -174,7 +174,12 @@ const PlayJoin = ({
   return (
     <li className="list-node">
       <span className="list-node__name">
-        {p.started ? "Resume" : "Play"} with {p.opponent}
+        {p.started
+          ? "Resume"
+          : isTournamentPlay(p)
+          ? "Tournament Round"
+          : "Practice"}{" "}
+        with {p.opponent}
       </span>
       <span className="list-node__tertiary">
         {p.game == Game.CHESS && (
@@ -185,8 +190,13 @@ const PlayJoin = ({
         )}
         {p.game == Game.CHESS ? " Chess" : ""}
         {p.game == Game.TICTACTOE ? " Tic Tac Toe" : ""}
-        {isTournamentPlay(p) ? `, ${p.name}` : ""}
+        {` at ${p.date.getHours()}:${p.date.getMinutes()} ${p.date.getDay()}/${p.date.getMonth()}`}
       </span>
+      {isTournamentPlay(p) && (
+        <span className="list-node__tertiary">
+          {`Round ${p.round}, ${p.name}`}
+        </span>
+      )}
       <button className={"list-node__button"} onClick={() => join(p.id)}>
         {p.started ? "Continue" : "Join"}
       </button>

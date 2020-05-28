@@ -127,20 +127,16 @@ export async function fetchLobbyData(
         (p: Record<string, any>): Play => {
           const isPlayer1 = p.player1 === username;
           //console.log(p);
-          let result: any = {
+          let result: Play | TournamentPlay = {
             id: p._id,
             isPlayer1,
             opponent: isPlayer1 ? p.player2 : p.player1,
             game: p.game_type === "chess" ? Game.CHESS : Game.TICTACTOE,
             started: true,
             date: new Date(p.date_created),
+            name: p.tournament_id && p.tournament_id.name,
+            round: p.round_id && p.round_id.round_number,
           };
-          if (p.tournament_id && p.tournament_id.hasOwnProperty("name")) {
-            result["name"] = p.tournament_id.name;
-          }
-          if (p.round_id && p.round_id.hasOwnProperty("round_number")) {
-            result["round"] = p.round_id.round_number;
-          }
 
           return result;
         }
