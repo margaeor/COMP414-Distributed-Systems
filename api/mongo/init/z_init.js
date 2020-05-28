@@ -27,9 +27,9 @@ for (let dbname in databases) {
           
           break;
         } catch(e) {
-          print(e);
+          //print(e);
         }
-        print('Retrying create user');
+        //print('Retrying create user');
       }
       
     }

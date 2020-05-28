@@ -32,7 +32,6 @@ services:
     depends_on:
       - auth-db
     networks:
-      - frontend
       - backend
     ports:
       - "8081:80"
@@ -264,7 +263,6 @@ secrets:
     file: ./secrets/mongodb_playmaster_password
 
 networks:
-  frontend:
   backend:
   play_network:
     ipam:
