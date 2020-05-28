@@ -19,8 +19,8 @@
 
 .tic-tac-toe {
   flex: 1;
-  width: 480px;
-  height: 480px;
+  width: $game-size;
+  height: $game-size;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
@@ -32,8 +32,8 @@
 }
 
 .tic-tac-toe .cell {
-  width: 150px;
-  height: 150px;
+  width: $game-size / 3 - 10;
+  height: $game-size / 3 - 10;
   flex-grow: 0;
   box-sizing: border-box;
   background-color: $color-primary;

@@ -30,6 +30,8 @@ export const BOARD_STYLE = {
 export const DARK_SQUARE_STYLE = { backgroundColor: colors.darkSquare };
 export const LIGHT_SQUARE_STYLE = { backgroundColor: colors.lightSquare };
 
+export const BOARD_SIZE = colors.boardSize;
+
 export const styleActiveSquares = (
   chess: ChessInstance,
   pieceSquare: Square | ""

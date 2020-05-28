@@ -83,9 +83,11 @@ registerToZookeeper().then((server_id: any) => {
 
     try {
       await master.registerUser(socket.id, userToken, playId);
+      await changeLoadBalancingCounter(server_id,Object.keys(master.sessions).length);
       console.log("Registered");
     } catch (e) {
       disconnectSocketWithError(socket, e.message);
+      console.log(e);
       return;
     }
 
@@ -110,10 +112,16 @@ registerToZookeeper().then((server_id: any) => {
     socket.on(MESSAGE, (e: MessageEvent) =>
       io.to(playId).emit(MESSAGE, { message: e.message })
     );
-    socket.on("disconnect", () => {
+    socket.on("disconnect", async () => {
       console.log("unregistering user...");
       master.unregisterUser(socket.id);
       socket.to(playId).emit(UPDATED_STATE, { event: "OP_DISCONNECTED" });
+      try {
+        
+        await changeLoadBalancingCounter(server_id,Object.keys(master.sessions).length);
+      } catch(e) {
+        console.log(e);
+      }
     });
 
     socket.on(READY, (e: MessageEvent) => {

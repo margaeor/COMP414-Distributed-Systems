@@ -1,0 +1,255 @@
+version: '3.2'
+services:
+  # Authentication
+  auth:
+    image: 'localhost:5000/auth'
+    build: 
+      context: './auth/auth-php/'
+      dockerfile: Dockerfile.prod
+    ports:
+      - "8080:80"
+    secrets:
+      - mysql_password
+    environment: 
+      DB_HOST: "auth-db"
+      DB_NAME: "${MYSQL_NAME}"
+      DB_USERNAME: "${MYSQL_USERNAME}"
+      DB_PASSWORD_FILE: /run/secrets/mysql_password
+      AUTH_ISSUER: "${AUTH_ISSUER}"
+      AUTH_PUBLIC: "${AUTH_PUBLIC}"
+      AUTH_PRIVATE: "${AUTH_PRIVATE}"
+    links:
+      - auth-db
+    #volumes:
+    #  - ./auth/auth-php/src/:/var/www/html/
+    networks:
+      - backend
+    container_name: auth
+  
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest  
+    secrets:
+      - mysql_root_password
+    links:
+      - auth-db
+    networks:
+      - frontend
+      - backend
+    ports:
+      - "8081:80"
+    container_name: phpmyadmin
+    environment:
+      PMA_HOST: auth-db
+      PMA_USER: root
+      PMA_PASSWORD_FILE: /run/secrets/mysql_root_password
+
+  # Authentication database
+  auth-db:
+    image: 'localhost:5000/authdb'
+    build:
+      context: './auth/auth-db/'
+      dockerfile: Dockerfile.dev
+      args:
+        MYSQL_VERSION: ${MYSQL_VERSION}
+    secrets:
+      - mysql_root_password
+      - mysql_password
+    restart: always
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./auth/auth-db/db_init:/docker-entrypoint-initdb.d
+      #- data:/var/lib/mysql
+    networks:
+      - backend
+    environment:
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
+      MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
+      MYSQL_DATABASE: "${MYSQL_NAME}"
+      MYSQL_USER: "${MYSQL_USERNAME}"
+      MYSQL_INITDB_SKIP_TZINFO: "yes"
+    container_name: auth-db
+
+  # API
+  api:
+    container_name: api
+    restart: always
+    image: node:12
+    working_dir: /home/node/app/
+    environment: 
+      JWT_PUBLIC_KEY: "${AUTH_PUBLIC}"
+      MONGODB_USER: '${MONGODB_API_USER}'
+      MONGODB_DATABASE: '${MONGODB_API_DB}'
+      MONGODB_REPLICA_SET_NAME: '${MONGODB_REPLICA_SET_NAME}'
+      MONGODB_REPLICA_SET_MEMBERS: comp411_mongodb-primary,comp411_mongodb-secondary
+      PLAYMASTER_IP_PREFIX: '172.21.0.'
+    volumes:
+        - ./api/node:/home/node/app
+    ports:
+      - "3001:3000"
+    depends_on:
+      - mongodb-primary
+      #- mongodb-secondary
+      - zookeeper
+    networks:
+      - backend
+    secrets:
+      - mongodb_api_password
+    command: bash -c "npm i && npm run dev"
+
+  # Mongodb replica set for api
+  mongodb-primary:
+    image: 'bitnami/mongodb:latest'
+    restart: always
+    environment:
+      MONGODB_ADVERTISED_HOSTNAME: mongodb-primary
+      MONGODB_REPLICA_SET_MODE: primary
+      MONGODB_ROOT_PASSWORD: '${MONGODB_ROOT_PASSWORD}'
+      MONGODB_REPLICA_SET_KEY: '${MONGODB_REPLICA_SET_KEY}'
+      MONGODB_REPLICA_SET_NAME: '${MONGODB_REPLICA_SET_NAME}'
+      MONGODB_API_USER: '${MONGODB_API_USER}'
+      MONGODB_API_DB: '${MONGODB_API_DB}'
+      MONGODB_PLAYMASTER_USER: '${MONGODB_PLAYMASTER_USER}'
+      MONGODB_PLAYMASTER_DB: '${MONGODB_PLAYMASTER_DB}'
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./api/mongo/init:/docker-entrypoint-initdb.d
+    networks:
+      - backend
+    secrets:
+      - mongodb_config
+    container_name: mongodb-primary
+    #volumes:
+    #  - 'mongodb_master_data:/bitnami'
+
+  mongodb-secondary:
+    image: 'bitnami/mongodb:latest'
+    networks:
+      - backend
+    depends_on:
+      - mongodb-primary
+    environment:
+      #MONGODB_ADVERTISED_HOSTNAME: mongodb-secondary
+      MONGODB_REPLICA_SET_MODE: secondary
+      MONGODB_PRIMARY_HOST: mongodb-primary
+      MONGODB_PRIMARY_PORT_NUMBER: '${MONGODB_PRIMARY_PORT_NUMBER}'
+      MONGODB_PRIMARY_ROOT_PASSWORD: '${MONGODB_ROOT_PASSWORD}'
+      MONGODB_REPLICA_SET_KEY: '${MONGODB_REPLICA_SET_KEY}'
+      MONGODB_REPLICA_SET_NAME: '${MONGODB_REPLICA_SET_NAME}'
+    container_name: mongodb-secondary
+
+  mongodb-arbiter:
+    image: 'bitnami/mongodb:latest'
+    networks:
+      - backend
+    depends_on:
+      - mongodb-primary
+    environment:
+      #MONGODB_ADVERTISED_HOSTNAME: mongodb-arbiter
+      MONGODB_REPLICA_SET_MODE: arbiter
+      MONGODB_PRIMARY_HOST: mongodb-primary
+      MONGODB_PRIMARY_PORT_NUMBER: '${MONGODB_PRIMARY_PORT_NUMBER}'
+      MONGODB_PRIMARY_ROOT_PASSWORD: '${MONGODB_ROOT_PASSWORD}'
+      MONGODB_REPLICA_SET_KEY: '${MONGODB_REPLICA_SET_KEY}'
+      MONGODB_REPLICA_SET_NAME: '${MONGODB_REPLICA_SET_NAME}'
+    container_name: mongodb-arbiter
+
+  # Others
+  zookeeper:
+    image: 'bitnami/zookeeper:latest'
+    networks:
+      - backend
+    environment:
+      ALLOW_ANONYMOUS_LOGIN: "yes"
+    volumes:
+      - ./zookeeper/config/zoo.cfg:/opt/bitnami/zookeeper/conf/zoo.cfg
+      - ./zookeeper/scripts:/opt/zoo/scripts
+    container_name: zookeeper
+    #command: /opt/zoo/scripts/init_script.sh
+
+  # Playmaster
+  game:
+    # build:
+    #   context: './game/'
+    #   dockerfile: Dockerfile.dev
+    image: node:12
+    working_dir: /home/node/app/
+    environment:
+      JWT_PUBLIC_KEY: "${AUTH_PUBLIC}"
+      MONGODB_USER: '${MONGODB_PLAYMASTER_USER}'
+      MONGODB_DATABASE: '${MONGODB_PLAYMASTER_DB}'
+      MONGODB_REPLICA_SET_NAME: '${MONGODB_REPLICA_SET_NAME}'
+      MONGODB_REPLICA_SET_MEMBERS: comp411_mongodb-primary,comp411_mongodb-secondary
+      PLAY_SUBNET_PREFIX: '192.170.0.' 
+      NODE_ENV: 'development'
+      PORT: '${GAME_PORT}'
+    deploy:
+      replicas: 2
+    networks:
+      - backend
+      - play_network
+    links:
+      - zookeeper
+    volumes:
+      - ./game:/home/node/app/
+    secrets:
+      - mongodb_playmaster_password
+    container_name: game
+    command: bash -c "npm i && npm run dev"
+  
+
+  
+  web:
+    image: nginx
+    volumes:
+      - ./web/dist:/usr/share/nginx/html
+      - ./web/nginx_conf/swarm/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "80:80"
+    links:
+      - "game"
+      - "auth"
+      - "api"
+      - "phpmyadmin"
+    networks:
+      - backend
+      - play_network
+    container_name: web
+
+  web-builder:
+    image: node:12
+    working_dir: /home/node/app
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./web/:/home/node/app
+    networks:
+      - backend
+    command: bash -c "npm i; npm run watch"
+    container_name: web-builder
+
+secrets:
+  mysql_password:
+    file: ./secrets/mysql_password
+  mysql_root_password:
+    file: ./secrets/mysql_root_password
+  mongodb_api_password:
+    file: ./secrets/mongodb_api_password
+  mongodb_config:
+    file: ./secrets/mongodb_config
+  mongodb_playmaster_password:
+    file: ./secrets/mongodb_playmaster_password
+
+networks:
+  frontend:
+  backend:
+    ipam:
+      driver: default
+  play_network:
+    ipam:
+     driver: default
+     config:
+       - subnet: 192.170.0.0/16
+#volumes:
+#  data:
