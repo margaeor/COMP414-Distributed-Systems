@@ -92,6 +92,16 @@ const Score = ({ sr }: { sr: FinishedTournament | FinishedPracticePlay }) => {
         <Icon path={mdiAccount} className="list-node__icon" />
         {sr.players}/{sr.maxPlayers}
       </span>
+      <div className="tournament-results">
+        {sr.leaderboard.map((p, i) => (
+          <div className="tournament-results__player">
+            <span className="tournament-results__player__num">{i + 1}:</span>
+            <span className="tournament-results__player__user">{p.user}</span>
+            <div className="tournament-results__player__glue" />
+            <span className="tournament-results__player__stats">{`${p.wins}/${p.losses}`}</span>
+          </div>
+        ))}
+      </div>
     </li>
   ) : (
     <li className="list-node">

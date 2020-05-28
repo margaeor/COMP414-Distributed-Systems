@@ -28,6 +28,11 @@ export interface FinishedTournamentPlay {
 export interface FinishedTournament extends Tournament {
   ranking: number;
   plays: FinishedTournamentPlay[];
+  leaderboard: {
+    user: string;
+    wins: number;
+    losses: number;
+  }[];
 }
 
 export interface FinishedPracticePlay extends Play {

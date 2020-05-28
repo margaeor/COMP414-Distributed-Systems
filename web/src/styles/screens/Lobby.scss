@@ -160,3 +160,41 @@ $lobby-width: 800px;
 .plays {
   max-width: 30%;
 }
+
+.tournament-results {
+  margin-top: 2px;
+  margin-bottom: 4px;
+
+  display: flex;
+  flex-direction: column;
+  width: 80%;
+  align-self: center;
+
+  &__player {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    overflow: hidden;
+    justify-content: flex-start;
+
+    &__num {
+      margin-right: 0.5rem;
+      font-weight: bold;
+    }
+
+    &__user {
+      color: $color-accent;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    &__glue {
+      flex: 1;
+    }
+
+    &__stats {
+      font-weight: bold;
+      justify-self: flex-end;
+    }
+  }
+}

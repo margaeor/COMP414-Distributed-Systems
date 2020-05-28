@@ -76,6 +76,12 @@ export async function fetchScores(
         let position = first_users.indexOf(username);
         position = position == -1 ? 5 : position + 1;
 
+        let leaderboard = t.leaderboard.map((p) => ({
+          user: p.username,
+          wins: p.wins,
+          losses: p.losses,
+        }));
+
         return {
           id: t._id,
           name: t.name,
@@ -85,6 +91,7 @@ export async function fetchScores(
           maxPlayers: t.max_players,
           ranking: position,
           plays,
+          leaderboard,
           date: new Date(t.date_created),
         };
       }
