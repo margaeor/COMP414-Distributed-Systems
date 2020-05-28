@@ -418,7 +418,8 @@ app.get('/me/in_queue', async function(req, res) {
     if(game_type && username) {
 
       // If user doesn't exist, create it
-      let lobby = await Lobby.findOne({game_type: game_type}).read('secondaryPreferred').exec();
+      let lobby = await Lobby.findOne({game_type: game_type})//.read('secondaryPreferred')
+      .exec();
       
       if(lobby) {
         let queue = lobby.queue;
