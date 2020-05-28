@@ -115,13 +115,15 @@ export function setupSocketChannel(socket: SocketIOClient.Socket) {
       emitter({ type: RECEIVE_READY });
     });
 
-    socket.emit(READY);
-    console.log("emitted ready...");
-
     return () => {
       socket.disconnect();
     };
   }, buffers.expanding());
+}
+
+export async function emitReady(socket: SocketIOClient.Socket) {
+  socket.emit(READY);
+  console.log("emitted ready...");
 }
 
 export async function emitForfeit(socket: SocketIOClient.Socket) {

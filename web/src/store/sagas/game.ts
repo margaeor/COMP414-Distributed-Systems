@@ -22,6 +22,7 @@ import {
   emitMove,
   setupSocket,
   setupSocketChannel,
+  emitReady,
 } from "./api/game";
 import {
   RECEIVE_DATA,
@@ -82,6 +83,7 @@ function* connectToServer(token: string, id: string) {
     yield put(startLoading("Waiting for Opponent..."));
     let act;
 
+    emitReady(socket);
     do {
       act = yield take(channel);
       console.log(act);
