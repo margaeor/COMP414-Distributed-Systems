@@ -90,7 +90,7 @@ async function changeLoadBalancingCounter(id, offset) {
         zookeeper.CreateMode.PERSISTENT
       );
     }
-
+    console.log('Offset is: ',offset);
     let children = await getChildrenPromise("/load_balance");
     children = children.map((x) => x.split("_"));
     children = children.map((x) => [x[0], parseInt(x[1])]);
@@ -106,7 +106,7 @@ async function changeLoadBalancingCounter(id, offset) {
 
       let node_path =
         "/load_balance/" + current_server[0] + "_" + current_server[1];
-      current_server[1] += offset;
+      current_server[1] = offset;
       await nodeDeletePromise(node_path, -1);
     } else {
       current_server = [id, offset];

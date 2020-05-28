@@ -259,13 +259,13 @@ export async function joinPlay(
     }
 
     const p = data.data;
-    const isPlayer1 = p.player1 === username;
+    const isPlayer1 = p.player1._id === username;
     return {
       play: {
         id: p._id,
         name: p.tournament_id && p.tournament_id.name,
         isPlayer1,
-        opponent: isPlayer1 ? p.player2 : p.player1,
+        opponent: isPlayer1 ? p.player2._id : p.player1._id,
         game: p.game_type === "chess" ? Game.CHESS : Game.TICTACTOE,
         started: p.has_started,
         date: p.date_created,
