@@ -16,6 +16,7 @@ import {
   highlightPossibleMoves,
   LIGHT_SQUARE_STYLE,
   styleActiveSquares,
+  BOARD_SIZE,
 } from "./ChessboardStyle";
 
 interface IProps {
@@ -132,11 +133,12 @@ const ValidatedChessboard = ({
   }
 
   const showOverlay = promotion.has || game.game_over();
+  console.log(BOARD_SIZE);
 
   return (
     <div className="chess">
       <Chessboard
-        width={600}
+        width={BOARD_SIZE}
         transitionDuration={300}
         position={position}
         orientation={color === "w" ? "white" : "black"}

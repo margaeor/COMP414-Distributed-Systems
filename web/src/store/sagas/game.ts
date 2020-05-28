@@ -85,9 +85,8 @@ function* connectToServer(token: string, id: string) {
     do {
       act = yield take(channel);
       console.log(act);
-    } while(act.type !== RECEIVE_READY && act.type !== DISCONNECTED)
+    } while (act.type !== RECEIVE_READY && act.type !== DISCONNECTED);
 
-    
     if (act.type === RECEIVE_READY) {
       // emitMessage(socket, `${username} connected`);
       return { socket, channel };
@@ -95,7 +94,6 @@ function* connectToServer(token: string, id: string) {
       yield* failLoadingAndExit("Connection Closed");
       return null;
     }
-
   } catch (e) {
     if (channel) channel.close();
     if (socket) socket.disconnect();

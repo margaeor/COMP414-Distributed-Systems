@@ -25,6 +25,7 @@ import {
 import { callApi, sleep } from "./utils";
 
 function* login() {
+  yield put(updateError(""));
   while (1) {
     yield put(changeScreen(ScreenState.LOGIN));
     const action:
@@ -71,7 +72,7 @@ function* login() {
       }
       return;
     } catch (e) {
-      updateError(e.message);
+      yield put(updateError(e.message));
     }
   }
 }
