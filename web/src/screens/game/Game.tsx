@@ -61,11 +61,11 @@ const Game = ({ user, play, history, sendMessage }: IProps) => {
           </span>
           <div className="play-info__players">
             <span className="play-info__players__you">
-              {user.username} (You)
+              {`${user.username}${play.elo ? ` (${play.elo.you})` : ""}`}
             </span>
             <Icon path={icon} className="play-info__players__vs" />
             <span className="play-info__players__opponent">
-              {play.opponent}
+              {`${play.opponent}${play.elo ? ` (${play.elo.opponent})` : ""}`}
             </span>
           </div>
         </div>

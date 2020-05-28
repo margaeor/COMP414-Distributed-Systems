@@ -266,6 +266,10 @@ export async function joinPlay(
         name: p.tournament_id && p.tournament_id.name,
         isPlayer1,
         opponent: isPlayer1 ? p.player2._id : p.player1._id,
+        elo: {
+          you: isPlayer1 ? p.player1.rating : p.player1.rating,
+          opponent: isPlayer1 ? p.player2.rating : p.player1.rating,
+        },
         game: p.game_type === "chess" ? Game.CHESS : Game.TICTACTOE,
         started: p.has_started,
         date: p.date_created,
