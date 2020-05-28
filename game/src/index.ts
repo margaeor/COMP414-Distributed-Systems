@@ -10,7 +10,7 @@ import connection from "./mongo/connect.js";
 import {
   registerToZookeeper,
   changeLoadBalancingCounter,
-  getNameForZookeeper
+  getNameForZookeeper,
 } from "./zookeeper/functions";
 import {
   CONNECTION_ERROR,
@@ -25,6 +25,7 @@ import {
   UpdatedStateEvent,
   READY,
   DataEvent,
+  AUTHENTICATED,
 } from "./api/contract";
 import { publishResult } from "./api/source";
 import PlayMaster from "./master/PlayMaster";
@@ -41,7 +42,7 @@ const io = socketIo(server);
 //   next()
 // })
 
-console.log('LAST IP SEGMENT: ',getNameForZookeeper());
+console.log("LAST IP SEGMENT: ", getNameForZookeeper());
 
 connection.then(() => {
   console.log("Successfully connected to mongo");
@@ -70,6 +71,7 @@ registerToZookeeper().then((server_id: any) => {
   };
 
   io.on("connection", async (socket) => {
+    // Check Credentials
     const playId = socket.handshake.headers[ID_COOKIE];
     const userToken = socket.handshake.headers[TOKEN_COOKIE];
 
@@ -81,9 +83,13 @@ registerToZookeeper().then((server_id: any) => {
     }
     console.log(playId);
 
+    // Authenticate
     try {
       await master.registerUser(socket.id, userToken, playId);
-      await changeLoadBalancingCounter(server_id,Object.keys(master.sessions).length);
+      await changeLoadBalancingCounter(
+        server_id,
+        Object.keys(master.sessions).length
+      );
       console.log("Registered");
     } catch (e) {
       disconnectSocketWithError(socket, e.message);
@@ -91,6 +97,7 @@ registerToZookeeper().then((server_id: any) => {
       return;
     }
 
+    // Bind Events
     socket.join(playId);
 
     socket.on(MAKE_MOVE, async (e: MakeMoveEvent) => {
@@ -117,9 +124,11 @@ registerToZookeeper().then((server_id: any) => {
       master.unregisterUser(socket.id);
       socket.to(playId).emit(UPDATED_STATE, { event: "OP_DISCONNECTED" });
       try {
-        
-        await changeLoadBalancingCounter(server_id,Object.keys(master.sessions).length);
-      } catch(e) {
+        await changeLoadBalancingCounter(
+          server_id,
+          Object.keys(master.sessions).length
+        );
+      } catch (e) {
         console.log(e);
       }
     });
@@ -129,7 +138,7 @@ registerToZookeeper().then((server_id: any) => {
         io.to(playId).emit(READY);
         io.to(playId).emit(DATA, {
           data: master.getData(socket.id),
-          isOver: false,
+          isOver: master.getResult(socket.id) !== "ongoing",
         } as DataEvent);
         console.log("ready");
       } else {
@@ -137,6 +146,9 @@ registerToZookeeper().then((server_id: any) => {
       }
       socket.to(playId).emit(UPDATED_STATE, { event: "OP_RECONNECTED" });
     });
+
+    // Tell user authentication was successful
+    socket.emit(AUTHENTICATED);
   });
 
   server.listen(process.env.PORT, () => {

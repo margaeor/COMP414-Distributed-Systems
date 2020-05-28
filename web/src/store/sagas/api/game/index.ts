@@ -29,7 +29,7 @@ import {
   RECEIVE_CONNECTION_ERROR,
   RECEIVE_READY,
 } from "./receiverContract";
-import { ConnectionErrorEvent } from "./contract";
+import { ConnectionErrorEvent, AUTHENTICATED } from "./contract";
 
 export async function checkPlay(
   token: string,
@@ -75,9 +75,9 @@ export async function setupSocket(token: string, url: string, id: string) {
         console.log("connection error");
         reject();
       });
-      socket.on("connect", () => {
+      socket.on(AUTHENTICATED, () => {
         socket.off("connect_error");
-        socket.off("connect");
+        socket.off(AUTHENTICATED);
         resolve();
       });
     });
@@ -114,6 +114,8 @@ export function setupSocketChannel(socket: SocketIOClient.Socket) {
       console.log("ready");
       emitter({ type: RECEIVE_READY });
     });
+
+    emitReady(socket);
 
     return () => {
       socket.disconnect();

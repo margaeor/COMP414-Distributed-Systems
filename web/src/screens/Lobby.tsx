@@ -94,7 +94,7 @@ const Score = ({ sr }: { sr: FinishedTournament | FinishedPracticePlay }) => {
       </span>
       <div className="tournament-results">
         {sr.leaderboard.map((p, i) => (
-          <div className="tournament-results__player">
+          <div className="tournament-results__player" key={p.user}>
             <span className="tournament-results__player__num">{i + 1}:</span>
             <span className="tournament-results__player__user">{p.user}</span>
             <div className="tournament-results__player__glue" />

@@ -1,6 +1,7 @@
 export const TOKEN_COOKIE = "tokencookie";
 export const ID_COOKIE = "idcookie";
 
+export const AUTHENTICATED = "AUTHENTICATED";
 export const READY = "READY";
 export const MAKE_MOVE = "MAKE_MOVE";
 export const MESSAGE = "MESSAGE";
