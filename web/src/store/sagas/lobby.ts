@@ -72,14 +72,11 @@ function* quickPlay(token: string, game: Game) {
   try {
     yield* callApi("Joining Queue...", call(joinQuickGame, token, game));
   } catch (e) {
-    const inQueue = yield call(checkQuickPlay, token, game);
-    if (!inQueue) {
-      yield put(
-        loadingFailed(e.message, "Error while joining queue", false, true)
-      );
-      yield take(CANCEL_LOADING);
-      return null;
-    }
+    yield put(
+      loadingFailed(e.message, "Error while joining queue", false, true)
+    );
+    yield take(CANCEL_LOADING);
+    return null;
   }
 
   // Wait until we join a play
@@ -98,8 +95,8 @@ function* quickPlay(token: string, game: Game) {
     }
     yield* sleep(5000);
   }
-  if (timedOut) return null;
   yield put(stopLoading());
+  if (timedOut) return null;
 
   // Get play
   const data: {
@@ -111,7 +108,6 @@ function* quickPlay(token: string, game: Game) {
 
 function* lobbyHandler(token: string) {
   yield put(changeScreen(ScreenState.LOBBY));
-  const fetchHandler = yield fork(periodicFetch, token);
 
   while (1) {
     const act = yield take([

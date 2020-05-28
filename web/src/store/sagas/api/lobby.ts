@@ -225,7 +225,7 @@ export async function joinQuickGame(token: string, game: Game) {
       },
     });
 
-    if (data.status !== 200) {
+    if (data.status !== 200 && data.status !== 400) {
       throw new AccessTokenError(
         data.message || `Unknown Error: ${data.status}`
       );
