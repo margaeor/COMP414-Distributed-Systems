@@ -53,14 +53,25 @@ export async function fetchScores(
 
     const tournaments: FinishedTournament[] = data.data.user_tournaments.map(
       (t: Record<string, any>): FinishedTournament => {
-        let plays;
-        if (t.rounds.games) {
-          plays = t.rounds.games.map(
+        let plays:any = [];
+        if (t.rounds) {
+          
+          t.rounds.forEach((games:any, i:number) => {
+            games.games.forEach((game:any) => {
+              game.game_type = t.game_type;
+              game.round = i+1;
+              plays.push(game);
+            });
+          });
+          
+          plays = plays.map(
             (p: Record<string, Object>): FinishedTournamentPlay => ({
-              id: p.tournament_id as string,
+              id: p._id as string,
+              game: t.game_type === "chess" ? Game.CHESS : Game.TICTACTOE,
               player1: p.player1 as string,
               player2: p.player2 as string,
-              result:
+              round: p.round as number,
+              result: 
                 p.score === 1
                   ? ResultType.WON
                   : p.score === 0
@@ -81,7 +92,6 @@ export async function fetchScores(
           wins: p.wins,
           losses: p.losses,
         }));
-
         return {
           id: t._id,
           name: t.name,
@@ -270,7 +280,7 @@ export async function joinPlay(
         isPlayer1,
         opponent: isPlayer1 ? p.player2._id : p.player1._id,
         elo: {
-          you: isPlayer1 ? p.player1.rating : p.player1.rating,
+          you: isPlayer1 ? p.player1.rating : p.player2.rating,
           opponent: isPlayer1 ? p.player2.rating : p.player1.rating,
         },
         game: p.game_type === "chess" ? Game.CHESS : Game.TICTACTOE,

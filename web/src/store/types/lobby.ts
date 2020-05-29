@@ -22,6 +22,8 @@ export interface FinishedTournamentPlay {
   player1: string;
   player2: string;
   result: ResultType;
+  round: number;
+  game: Game;
   date: Date;
 }
 

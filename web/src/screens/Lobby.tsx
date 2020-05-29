@@ -75,8 +75,8 @@ const Score = ({ sr }: { sr: FinishedTournament | FinishedPracticePlay }) => {
         return mdiChessPawn;
     }
   };
-
   return isTournament(sr) ? (
+    
     <li className="list-node">
       <span className="list-node__name">{sr.name}</span>
       <span className="list-node__tertiary">
@@ -102,6 +102,25 @@ const Score = ({ sr }: { sr: FinishedTournament | FinishedPracticePlay }) => {
           </div>
         ))}
       </div>
+      <ul className="player-info__col__list" >
+      {sr.plays.map((p:any, i) => {return (
+        <li className="list-node" key={p.id}> 
+          <span className="list-node__name">{p.player1} vs {p.player2}: 
+          </span>
+          <span className="list-node__tertiary">
+            Round {p.round}, Score {
+              p.result == ResultType.WON ? '1' : 
+              p.result == ResultType.LOST ? '0' :
+              '1/2'
+            }-{
+              p.result == ResultType.LOST ? '1' : 
+              p.result == ResultType.WON ? '0' :
+              '1/2'
+            }
+          </span>
+        </li>
+        )})}
+      </ul>
     </li>
   ) : (
     <li className="list-node">
@@ -251,9 +270,9 @@ const Lobby: React.FunctionComponent<IProps> = (props) => {
         <div className="player-info__col scores">
           <span className="player-info__col__label">Scores</span>
           <ul className="player-info__col__list">
-            {props.scores.map((t) => (
+            {props.scores.map((t) => {return (
               <Score sr={t} key={t.id} />
-            ))}
+            )})}
           </ul>
         </div>
         <div className="player-info__col tournaments">
