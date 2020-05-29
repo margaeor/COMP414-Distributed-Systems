@@ -121,7 +121,13 @@ INSERT INTO `roles` (`user_id`, `role`) VALUES
 (1, 'admin'),
 (2, 'player'),
 (2, 'official'),
-(3, 'player');
+(3, 'player'),
+(4, 'player'),
+(4, 'official'),
+(4, 'admin'),
+(5, 'player'),
+(5, 'official'),
+(6, 'player');
 
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;

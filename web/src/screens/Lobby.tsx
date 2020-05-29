@@ -75,7 +75,7 @@ const Score = ({ sr }: { sr: FinishedTournament | FinishedPracticePlay }) => {
         return mdiChessPawn;
     }
   };
-  console.log(sr);
+  
   return isTournament(sr) ? (
     
     <li className="list-node">
