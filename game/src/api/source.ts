@@ -91,7 +91,7 @@ export async function restoreProgress(id: string): Promise<string | null> {
     let game = await GameState.findById(id).exec();
 
     if (game) {
-      console.log("RETURNING " + game.position);
+      //console.log("RETURNING " + game.position);
       return game.position;
     } else return null;
   } catch (e) {
@@ -111,7 +111,7 @@ export async function backupProgress(
       { new: true, upsert: true }
     ).exec();
     if (game) {
-      console.log("Game saved ", game);
+      //console.log("Game saved ", game);
       return true;
     } else return false;
   } catch (e) {
