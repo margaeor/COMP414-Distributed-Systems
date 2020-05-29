@@ -133,7 +133,6 @@ const ValidatedChessboard = ({
   }
 
   const showOverlay = promotion.has || game.game_over();
-  console.log(BOARD_SIZE);
 
   return (
     <div className="chess">
