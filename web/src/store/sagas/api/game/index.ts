@@ -55,6 +55,7 @@ export async function checkPlay(
 export async function setupSocket(token: string, url: string, id: string) {
   const socket = io.connect({
     path: `${url}/socket.io`,
+    autoConnect: false,
     transportOptions: {
       pingInterval: 10000,
       polling: {
@@ -68,18 +69,21 @@ export async function setupSocket(token: string, url: string, id: string) {
   console.log("created socket");
   try {
     await new Promise((resolve, reject) => {
-      socket.on("connect_error", () => {
+      const rej = () => {
         socket.off("connect_error");
         socket.off("connect");
         socket.disconnect();
         console.log("connection error");
         reject();
-      });
+      };
+      socket.on("connect_error", rej);
+      socket.on(CONNECTION_ERROR, rej);
       socket.on(AUTHENTICATED, () => {
         socket.off("connect_error");
         socket.off(AUTHENTICATED);
         resolve();
       });
+      socket.open();
     });
   } catch (e) {
     return undefined;

@@ -75,9 +75,7 @@ const Score = ({ sr }: { sr: FinishedTournament | FinishedPracticePlay }) => {
         return mdiChessPawn;
     }
   };
-  console.log(sr);
   return isTournament(sr) ? (
-    
     <li className="list-node">
       <span className="list-node__name">{sr.name}</span>
       <span className="list-node__tertiary">
@@ -103,24 +101,30 @@ const Score = ({ sr }: { sr: FinishedTournament | FinishedPracticePlay }) => {
           </div>
         ))}
       </div>
-      <ul className="player-info__col__list" >
-      {sr.plays.map((p:any, i) => {return (
-        <li className="list-node" key={p.id}> 
-          <span className="list-node__name">{p.player1} vs {p.player2}: 
-          </span>
-          <span className="list-node__tertiary">
-            Round {p.round}, Score {
-              p.result == ResultType.WON ? '1' : 
-              p.result == ResultType.LOST ? '0' :
-              '1/2'
-            }-{
-              p.result == ResultType.LOST ? '1' : 
-              p.result == ResultType.WON ? '0' :
-              '1/2'
-            }
-          </span>
-        </li>
-        )})}
+      <ul className="player-info__col__list">
+        {sr.plays.map((p: any, i) => {
+          return (
+            <li className="list-node" key={p.id}>
+              <span className="list-node__name">
+                {p.player1} vs {p.player2}:
+              </span>
+              <span className="list-node__tertiary">
+                Round {p.round}, Score{" "}
+                {p.result == ResultType.WON
+                  ? "1"
+                  : p.result == ResultType.LOST
+                  ? "0"
+                  : "1/2"}
+                -
+                {p.result == ResultType.LOST
+                  ? "1"
+                  : p.result == ResultType.WON
+                  ? "0"
+                  : "1/2"}
+              </span>
+            </li>
+          );
+        })}
       </ul>
     </li>
   ) : (
@@ -140,9 +144,13 @@ const Score = ({ sr }: { sr: FinishedTournament | FinishedPracticePlay }) => {
         {sr.game == Game.TICTACTOE ? " Tic Tac Toe " : ""}
       </span>
       <span className="list-node__tertiary">
-      Date: {`${sr.date.getDate()}/${sr.date.getMonth()+1} ${sr.date.getHours()}:${
-          sr.date.getMinutes()<10 ?
-          '0'+sr.date.getMinutes() : sr.date.getMinutes()
+        Date:{" "}
+        {`${sr.date.getDate()}/${
+          sr.date.getMonth() + 1
+        } ${sr.date.getHours()}:${
+          sr.date.getMinutes() < 10
+            ? "0" + sr.date.getMinutes()
+            : sr.date.getMinutes()
         }`}
       </span>
     </li>
@@ -206,7 +214,6 @@ const PlayJoin = ({
   p: Play | TournamentPlay;
   join: typeof joinGame;
 }) => {
-  //console.log(p);
   return (
     <li className="list-node">
       <span className="list-node__name">
@@ -227,9 +234,10 @@ const PlayJoin = ({
         {p.game == Game.CHESS ? " Chess" : ""}
         {p.game == Game.TICTACTOE ? " Tic Tac Toe" : ""}
         {` at ${p.date.getHours()}:${
-          p.date.getMinutes()<10 ?
-          '0'+p.date.getMinutes() : p.date.getMinutes()
-        } ${p.date.getDate()}/${p.date.getMonth()+1}`}
+          p.date.getMinutes() < 10
+            ? "0" + p.date.getMinutes()
+            : p.date.getMinutes()
+        } ${p.date.getDate()}/${p.date.getMonth() + 1}`}
       </span>
       {isTournamentPlay(p) && (
         <span className="list-node__tertiary">
@@ -280,9 +288,9 @@ const Lobby: React.FunctionComponent<IProps> = (props) => {
         <div className="player-info__col scores">
           <span className="player-info__col__label">Scores</span>
           <ul className="player-info__col__list">
-            {props.scores.map((t) => {return (
-              <Score sr={t} key={t.id} />
-            )})}
+            {props.scores.map((t) => {
+              return <Score sr={t} key={t.id} />;
+            })}
           </ul>
         </div>
         <div className="player-info__col tournaments">
