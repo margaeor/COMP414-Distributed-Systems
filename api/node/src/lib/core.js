@@ -443,7 +443,7 @@ async function atomicEndGame(session, game_id, score) {
         
         if(!canUserJoinNewGame(user1) || !canUserJoinNewGame(user2))
         {
-          throw new errors.InvalidOperationException("Maximum number of active games exceeded");
+          throw new errors.NotAcceptableOperationException("Maximum number of active games exceeded");
         }
         console.log(user1,user2,type);
         let game = await Game.create([{

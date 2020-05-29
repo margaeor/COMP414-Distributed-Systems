@@ -31,6 +31,14 @@ class InvalidOperationException extends Error {
     }
 }
 
+class NotAcceptableOperationException extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "NotAcceptableOperationException";
+    this.response = createErrorResponse(message,406);
+  }
+}
+
 class AnauthorizedException extends Error {
     constructor(message) {
       super(message);
@@ -56,5 +64,6 @@ module.exports = {
     InternalErrorException: InternalErrorException,
     InvalidOperationException: InvalidOperationException,
     InvalidArgumentException: InvalidArgumentException,
-    AnauthorizedException: AnauthorizedException
+    AnauthorizedException: AnauthorizedException,
+    NotAcceptableOperationException: NotAcceptableOperationException
 }
