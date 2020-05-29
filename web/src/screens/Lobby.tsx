@@ -75,6 +75,7 @@ const Score = ({ sr }: { sr: FinishedTournament | FinishedPracticePlay }) => {
         return mdiChessPawn;
     }
   };
+  console.log(sr);
   return isTournament(sr) ? (
     
     <li className="list-node">
@@ -137,6 +138,12 @@ const Score = ({ sr }: { sr: FinishedTournament | FinishedPracticePlay }) => {
         {sr.result == ResultType.DRAW ? "Draw" : ""} in
         {sr.game == Game.CHESS ? " Chess " : ""}
         {sr.game == Game.TICTACTOE ? " Tic Tac Toe " : ""}
+      </span>
+      <span className="list-node__tertiary">
+      Date: {`${sr.date.getDate()}/${sr.date.getMonth()+1} ${sr.date.getHours()}:${
+          sr.date.getMinutes()<10 ?
+          '0'+sr.date.getMinutes() : sr.date.getMinutes()
+        }`}
       </span>
     </li>
   );
@@ -219,7 +226,10 @@ const PlayJoin = ({
         )}
         {p.game == Game.CHESS ? " Chess" : ""}
         {p.game == Game.TICTACTOE ? " Tic Tac Toe" : ""}
-        {` at ${p.date.getHours()}:${p.date.getMinutes()} ${p.date.getDate()}/${p.date.getMonth()+1}`}
+        {` at ${p.date.getHours()}:${
+          p.date.getMinutes()<10 ?
+          '0'+p.date.getMinutes() : p.date.getMinutes()
+        } ${p.date.getDate()}/${p.date.getMonth()+1}`}
       </span>
       {isTournamentPlay(p) && (
         <span className="list-node__tertiary">

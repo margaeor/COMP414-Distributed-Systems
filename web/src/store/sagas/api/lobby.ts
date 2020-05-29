@@ -40,13 +40,13 @@ export async function fetchScores(
         } else {
           result = ResultType.LOST;
         }
-
         return {
           id: p._id,
           isPlayer1,
           opponent: isPlayer1 ? p.player2 : p.player1,
           game: p.game_type === "chess" ? Game.CHESS : Game.TICTACTOE,
           started: true,
+          date: new Date(p.date_created as string),
           result,
         };
       });
@@ -63,7 +63,7 @@ export async function fetchScores(
               plays.push(game);
             });
           });
-          
+
           plays = plays.map(
             (p: Record<string, Object>): FinishedTournamentPlay => ({
               id: p._id as string,
