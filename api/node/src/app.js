@@ -415,10 +415,14 @@ app.get('/me/in_queue', async function(req, res) {
 
     let username = authenticateUser(jwt);
 
-    if(game_type && username) {
+    if(game_type && username && globals.GAME_TYPES.includes(game_type)) {
 
-      // If user doesn't exist, create it
-      let lobby = await Lobby.findOne({game_type: game_type})//.read('secondaryPreferred')
+      let query = {'game_type':game_type};
+
+      let options = {upsert: true, new: true, setDefaultsOnInsert: true};
+
+      // If lobby doesn't exist, create it
+      let lobby = await Lobby.findOneAndUpdate(query, query, options)//.read('secondaryPreferred')
       .exec();
       
       if(lobby) {
