@@ -200,7 +200,7 @@ const PlayJoin = ({
         )}
         {p.game == Game.CHESS ? " Chess" : ""}
         {p.game == Game.TICTACTOE ? " Tic Tac Toe" : ""}
-        {` at ${p.date.getHours()}:${p.date.getMinutes()} ${p.date.getDay()}/${p.date.getMonth()}`}
+        {` at ${p.date.getHours()}:${p.date.getMinutes()} ${p.date.getDate()}/${p.date.getMonth()+1}`}
       </span>
       {isTournamentPlay(p) && (
         <span className="list-node__tertiary">
