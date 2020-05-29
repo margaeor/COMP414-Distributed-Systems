@@ -84,11 +84,15 @@ async function changeLoadBalancingCounter(id, offset) {
     if (!id) return false;
     if (!(await nodeExists("/load_balance"))) {
       console.log("Creating load balance node");
-      await nodeCreatePromise(
-        "/load_balance",
-        null,
-        zookeeper.CreateMode.PERSISTENT
-      );
+      try {
+        await nodeCreatePromise(
+          "/load_balance",
+          null,
+          zookeeper.CreateMode.PERSISTENT
+        );
+      } catch(e) {
+
+      }
     }
     console.log('Offset is: ',offset);
     let children = await getChildrenPromise("/load_balance");
@@ -147,11 +151,16 @@ async function registerToZookeeper() {
 
     if (!(await nodeExists("/playmasters"))) {
       console.log("Creating playmasters node");
-      await nodeCreatePromise(
-        "/playmasters",
-        null,
-        zookeeper.CreateMode.PERSISTENT
-      );
+      try {
+        await nodeCreatePromise(
+          "/playmasters",
+          null,
+          zookeeper.CreateMode.PERSISTENT
+        );
+      } catch{
+        
+      }
+
     }
 
     let node_name = await nodeCreatePromise(

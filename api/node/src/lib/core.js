@@ -62,7 +62,7 @@ async function createUserIfNotExists(username) {
   async function atomicPracticePairing(session, username, game_type) {
   
     let other_user = null;
-    if(!(await canUserJoinNewGame(username))) throw new errors.InvalidArgumentException('User cannot join new game');
+    if(!(await canUserJoinNewGame(username))) throw new errors.NotAcceptableOperationException('User cannot join new game');
   
     return Lobby.findOne({ game_type: game_type }).session(session)
     .then( async (lobby) => {
