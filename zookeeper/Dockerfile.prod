@@ -1,0 +1,5 @@
+FROM bitnami/zookeeper:latest
+
+ENV ALLOW_ANONYMOUS_LOGIN yes
+COPY ./config/zoo.cfg /opt/bitnami/zookeeper/conf/zoo.cfg
+COPY ./scripts /opt/zoo/scripts

@@ -1,0 +1,3 @@
+FROM bitnami/mongodb:latest
+
+ADD ./init /docker-entrypoint-initdb.d

@@ -1,4 +1,2 @@
 ARG MYSQL_VERSION=""
 FROM mysql:${MYSQL_VERSION:-latest}
-
-#ADD schema.sql /docker-entrypoint-initdb.d
