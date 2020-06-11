@@ -7,7 +7,7 @@ services:
       context: './auth/auth-php/'
       dockerfile: Dockerfile.prod
     ports:
-      - "8080:80"
+      - "80"
     secrets:
       - mysql_password
     environment: 
@@ -18,9 +18,8 @@ services:
       AUTH_ISSUER: "${AUTH_ISSUER}"
       AUTH_PUBLIC: "${AUTH_PUBLIC}"
       AUTH_PRIVATE: "${AUTH_PRIVATE}"
-    networks:
-      - backend
-      - play_network
+    depends_on: 
+      - auth-db
 
   # Authentication database
   auth-db:
@@ -29,16 +28,14 @@ services:
       dockerfile: Dockerfile.prod
       args:
         MYSQL_VERSION: ${MYSQL_VERSION}
+    ports:
+      - "3306"
     secrets:
       - mysql_root_password
       - mysql_password
     restart: always
-    ports:
-      - "3306:3306"
     volumes:
       - auth-data:/var/lib/mysql
-    networks:
-      - backend
     environment:
       MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
       MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
@@ -49,6 +46,8 @@ services:
   # API
   api:
     restart: always
+    ports:
+      - "3000"
     build:
       context: './api/node/'
       dockerfile: Dockerfile.prod
@@ -63,8 +62,6 @@ services:
       - mongodb-primary
       - mongodb-secondary
       - zookeeper
-    networks:
-      - backend
     secrets:
       - mongodb_api_password
 
@@ -73,6 +70,8 @@ services:
     build:
       context: './api/mongo/'
       dockerfile: Dockerfile.prod
+    ports:
+      - "27017"
     restart: always
     environment:
       MONGODB_ADVERTISED_HOSTNAME: mongodb-primary
@@ -84,10 +83,6 @@ services:
       MONGODB_API_DB: '${MONGODB_API_DB}'
       MONGODB_PLAYMASTER_USER: '${MONGODB_PLAYMASTER_USER}'
       MONGODB_PLAYMASTER_DB: '${MONGODB_PLAYMASTER_DB}'
-    ports:
-      - "27017:27017"
-    networks:
-      - backend
     secrets:
       - mongodb_config
     volumes:
@@ -95,8 +90,8 @@ services:
 
   mongodb-secondary:
     image: 'bitnami/mongodb:latest'
-    networks:
-      - backend
+    ports:
+      - "27017"
     depends_on:
       - mongodb-primary
     environment:
@@ -109,8 +104,8 @@ services:
 
   mongodb-arbiter:
     image: 'bitnami/mongodb:latest'
-    networks:
-      - backend
+    ports:
+      - "27017"
     depends_on:
       - mongodb-primary
     environment:
@@ -126,8 +121,6 @@ services:
     build:
       context: './zookeeper'
       dockerfile: Dockerfile.prod
-    networks:
-      - backend
     environment:
       ALLOW_ANONYMOUS_LOGIN: "yes"
 
@@ -136,6 +129,8 @@ services:
     build:
       context: './game/'
       dockerfile: Dockerfile.prod
+    ports:
+      - "3000"
     environment:
       JWT_PUBLIC_KEY: "${AUTH_PUBLIC}"
       MONGODB_USER: '${MONGODB_PLAYMASTER_USER}'
@@ -145,7 +140,7 @@ services:
       PLAY_SUBNET_PREFIX: '192.170.0.'
       PORT: '${GAME_PORT}'
     networks:
-      - backend
+      - default
       - play_network
     depends_on:
       - zookeeper
@@ -156,6 +151,8 @@ services:
     build:
       context: './game/'
       dockerfile: Dockerfile.prod
+    ports:
+      - "3000"
     environment:
       JWT_PUBLIC_KEY: "${AUTH_PUBLIC}"
       MONGODB_USER: '${MONGODB_PLAYMASTER_USER}'
@@ -164,27 +161,29 @@ services:
       MONGODB_REPLICA_SET_MEMBERS: '${MONGODB_REPLICA_SET_MEMBERS}'
       PLAY_SUBNET_PREFIX: '192.170.0.'
       PORT: '${GAME_PORT}'
+    ports:
+      - "3000"
     networks:
-      - backend
+      - default
       - play_network
     depends_on:
       - zookeeper
     secrets:
       - mongodb_playmaster_password
-  
+
   web:
     build:
       context: './web/'
       dockerfile: Dockerfile.prod
     ports:
       - "80:80"
-    links:
-      - "game"
-      - "game2"
-      - "auth"
-      - "api"
+    depends_on:
+      - auth
+      - api
+      - game
+      - game2
     networks:
-      - backend
+      - default
       - play_network
 
 secrets:
@@ -200,7 +199,7 @@ secrets:
     file: ./secrets/mongodb_playmaster_password
 
 networks:
-  backend:
+  default:
   play_network:
     ipam:
       driver: default
