@@ -41,7 +41,7 @@ services:
   #     PMA_USER: root
   #     PMA_PASSWORD_FILE: /run/secrets/mysql_root_password
 
-  # Authentication database
+  #Authentication database
   auth-db:
     image: '${CONTAINER_REGISTRY}/authdb'
     build:
@@ -97,65 +97,6 @@ services:
     secrets:
       - mongodb_api_password
 
-  # Mongodb replica set for api
-  mongodb-primary:
-    image: '${CONTAINER_REGISTRY}/mongodb-primary'
-    build:
-      context: './api/mongo/'
-      dockerfile: Dockerfile.prod
-    restart: always
-    environment:
-      MONGODB_ADVERTISED_HOSTNAME: mongodb-primary
-      MONGODB_REPLICA_SET_MODE: primary
-      MONGODB_ROOT_PASSWORD: '${MONGODB_ROOT_PASSWORD}'
-      MONGODB_REPLICA_SET_KEY: '${MONGODB_REPLICA_SET_KEY}'
-      MONGODB_REPLICA_SET_NAME: '${MONGODB_REPLICA_SET_NAME}'
-      MONGODB_API_USER: '${MONGODB_API_USER}'
-      MONGODB_API_DB: '${MONGODB_API_DB}'
-      MONGODB_PLAYMASTER_USER: '${MONGODB_PLAYMASTER_USER}'
-      MONGODB_PLAYMASTER_DB: '${MONGODB_PLAYMASTER_DB}'
-    ports:
-      - "27017"
-    networks:
-      - backend
-    secrets:
-      - mongodb_config
-    container_name: mongodb-primary
-    #volumes:
-      #- 'master-data:/bitnami'
-
-  mongodb-secondary:
-    image: 'bitnami/mongodb:latest'
-    networks:
-      - backend
-    depends_on:
-      - mongodb-primary
-    environment:
-      #MONGODB_ADVERTISED_HOSTNAME: mongodb-secondary
-      MONGODB_REPLICA_SET_MODE: secondary
-      MONGODB_PRIMARY_HOST: mongodb-primary
-      MONGODB_PRIMARY_PORT_NUMBER: '${MONGODB_PRIMARY_PORT_NUMBER}'
-      MONGODB_PRIMARY_ROOT_PASSWORD: '${MONGODB_ROOT_PASSWORD}'
-      MONGODB_REPLICA_SET_KEY: '${MONGODB_REPLICA_SET_KEY}'
-      MONGODB_REPLICA_SET_NAME: '${MONGODB_REPLICA_SET_NAME}'
-    container_name: mongodb-secondary
-
-  mongodb-arbiter:
-    image: 'bitnami/mongodb:latest'
-    networks:
-      - backend
-    depends_on:
-      - mongodb-primary
-    environment:
-      #MONGODB_ADVERTISED_HOSTNAME: mongodb-arbiter
-      MONGODB_REPLICA_SET_MODE: arbiter
-      MONGODB_PRIMARY_HOST: mongodb-primary
-      MONGODB_PRIMARY_PORT_NUMBER: '${MONGODB_PRIMARY_PORT_NUMBER}'
-      MONGODB_PRIMARY_ROOT_PASSWORD: '${MONGODB_ROOT_PASSWORD}'
-      MONGODB_REPLICA_SET_KEY: '${MONGODB_REPLICA_SET_KEY}'
-      MONGODB_REPLICA_SET_NAME: '${MONGODB_REPLICA_SET_NAME}'
-    container_name: mongodb-arbiter
-
   # Others
   zookeeper:
     image: '${CONTAINER_REGISTRY}/zookeeper'
@@ -210,6 +151,66 @@ services:
       - backend
       - play_network
     container_name: web
+
+
+  # Mongodb replica set for api
+  mongodb-primary:
+    image: '${CONTAINER_REGISTRY}/mongodb-primary'
+    build:
+      context: './api/mongo/'
+      dockerfile: Dockerfile.prod
+    restart: always
+    environment:
+      MONGODB_ADVERTISED_HOSTNAME: mongodb-primary
+      MONGODB_REPLICA_SET_MODE: primary
+      MONGODB_ROOT_PASSWORD: '${MONGODB_ROOT_PASSWORD}'
+      MONGODB_REPLICA_SET_KEY: '${MONGODB_REPLICA_SET_KEY}'
+      MONGODB_REPLICA_SET_NAME: '${MONGODB_REPLICA_SET_NAME}'
+      MONGODB_API_USER: '${MONGODB_API_USER}'
+      MONGODB_API_DB: '${MONGODB_API_DB}'
+      MONGODB_PLAYMASTER_USER: '${MONGODB_PLAYMASTER_USER}'
+      MONGODB_PLAYMASTER_DB: '${MONGODB_PLAYMASTER_DB}'
+    ports:
+      - "27017"
+    networks:
+      - backend
+    secrets:
+      - mongodb_config
+    container_name: mongodb-primary
+    #volumes:
+      #- 'master-data:/bitnami'
+
+  mongodb-secondary:
+    image: 'bitnami/mongodb:4.2'
+    networks:
+      - backend
+    depends_on:
+      - mongodb-primary
+    environment:
+      #MONGODB_ADVERTISED_HOSTNAME: mongodb-secondary
+      MONGODB_REPLICA_SET_MODE: secondary
+      MONGODB_PRIMARY_HOST: mongodb-primary
+      MONGODB_PRIMARY_PORT_NUMBER: '${MONGODB_PRIMARY_PORT_NUMBER}'
+      MONGODB_PRIMARY_ROOT_PASSWORD: '${MONGODB_ROOT_PASSWORD}'
+      MONGODB_REPLICA_SET_KEY: '${MONGODB_REPLICA_SET_KEY}'
+      MONGODB_REPLICA_SET_NAME: '${MONGODB_REPLICA_SET_NAME}'
+    container_name: mongodb-secondary
+
+  mongodb-arbiter:
+    image: 'bitnami/mongodb:4.2'
+    networks:
+      - backend
+    depends_on:
+      - mongodb-primary
+    environment:
+      #MONGODB_ADVERTISED_HOSTNAME: mongodb-arbiter
+      MONGODB_REPLICA_SET_MODE: arbiter
+      MONGODB_PRIMARY_HOST: mongodb-primary
+      MONGODB_PRIMARY_PORT_NUMBER: '${MONGODB_PRIMARY_PORT_NUMBER}'
+      MONGODB_PRIMARY_ROOT_PASSWORD: '${MONGODB_ROOT_PASSWORD}'
+      MONGODB_REPLICA_SET_KEY: '${MONGODB_REPLICA_SET_KEY}'
+      MONGODB_REPLICA_SET_NAME: '${MONGODB_REPLICA_SET_NAME}'
+    container_name: mongodb-arbiter
 
 secrets:
   mysql_password:

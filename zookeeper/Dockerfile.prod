@@ -1,4 +1,4 @@
-FROM bitnami/zookeeper:latest
+FROM bitnami/zookeeper:3
 
 ENV ALLOW_ANONYMOUS_LOGIN yes
 COPY ./config/zoo.cfg /opt/bitnami/zookeeper/conf/zoo.cfg
