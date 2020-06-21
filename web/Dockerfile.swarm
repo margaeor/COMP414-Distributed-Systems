@@ -1,0 +1,8 @@
+FROM node:12
+WORKDIR /usr/src/app
+COPY . .
+RUN npm ci && npm run release
+
+FROM nginx:latest 
+COPY --from=0 /usr/src/app/dist /usr/share/nginx/html
+COPY ./nginx-swarm.conf /etc/nginx/nginx.conf
