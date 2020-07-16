@@ -14,6 +14,7 @@ csv
 !desc.pdf
 !instructions.pdf
 !presentation.pdf
+!**/presentation.pdf
 *.tar.gz
 
 */matlab/*.dat
