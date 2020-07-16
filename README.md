@@ -6,6 +6,8 @@ course Distributed Systems
 of the ECE department of the Technical University of Crete.
 The detailed system specification can be found [here](./spec/Specification.pdf).
 
+![User Interface](./spec/images/face.png?raw=true "User Interface")
+
 Features:
 - Friendly user interface
 - User authentication and authorization.
@@ -28,7 +30,8 @@ to a new playmaster.
 ## Implementation
 The system was implemented as a Microservice architecture
 as shown in the image below.
-For more information about our approach, 
+For more information about our approach, take a look at our
+project [presentation](./spec/Presentation.pdf)
 ![System Architecture](./spec/images/architecture.png?raw=true "System Architecture")
 
 ## Requirements
