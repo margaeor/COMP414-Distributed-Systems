@@ -31,7 +31,8 @@ to a new playmaster.
 The system was implemented as a Microservice architecture
 as shown in the image below.
 For more information about our approach, take a look at our
-project [presentation](./spec/Presentation.pdf)
+project [presentation](./spec/Presentation.pdf).
+
 ![System Architecture](./spec/images/architecture.png?raw=true "System Architecture")
 
 ## Requirements
